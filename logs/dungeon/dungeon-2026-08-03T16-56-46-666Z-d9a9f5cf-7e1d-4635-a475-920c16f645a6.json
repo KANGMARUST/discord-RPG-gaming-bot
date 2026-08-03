@@ -8,8 +8,8 @@
     "691457164010717244"
   ],
   "startedAt": "2026-08-03T16:56:46.666Z",
-  "endedAt": null,
-  "endReason": null,
+  "endedAt": "2026-08-03T17:08:18.061Z",
+  "endReason": "PARTY_STOP_VOTE_PASSED",
   "highestFloor": 12,
   "players": {
     "788944111096430602": {
@@ -3504,6 +3504,491 @@
       "targetHealthBefore": 165.6,
       "targetHealthAfter": 102.6,
       "lostEquipment": []
+    },
+    {
+      "sequence": 138,
+      "timestamp": "2026-08-03T17:06:25.037Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 5,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "691457164010717244",
+      "healing": 47,
+      "targetHealthBefore": 102.6,
+      "targetHealthAfter": 149.6,
+      "manaBefore": 199,
+      "manaAfter": 189
+    },
+    {
+      "sequence": 139,
+      "timestamp": "2026-08-03T17:06:31.290Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 6,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 55,
+      "critical": false,
+      "monsterHealthBefore": 129,
+      "monsterHealthAfter": 74
+    },
+    {
+      "sequence": 140,
+      "timestamp": "2026-08-03T17:06:37.540Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 7,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 66,
+      "critical": false,
+      "monsterHealthBefore": 74,
+      "monsterHealthAfter": 8
+    },
+    {
+      "sequence": 141,
+      "timestamp": "2026-08-03T17:06:38.932Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 8,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "해골 기사",
+      "action": "녹슨 참격",
+      "targetId": "788944111096430602",
+      "damage": 61,
+      "critical": false,
+      "targetHealthBefore": 163.4,
+      "targetHealthAfter": 102.4,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 142,
+      "timestamp": "2026-08-03T17:06:50.736Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 9,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "788944111096430602",
+      "healing": 47,
+      "targetHealthBefore": 102.4,
+      "targetHealthAfter": 149.4,
+      "manaBefore": 189,
+      "manaAfter": 179
+    },
+    {
+      "sequence": 143,
+      "timestamp": "2026-08-03T17:07:00.777Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 10,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "788944111096430602",
+      "healing": 46,
+      "targetHealthBefore": 149.4,
+      "targetHealthAfter": 195.4,
+      "manaBefore": 150.1,
+      "manaAfter": 140.1
+    },
+    {
+      "sequence": 144,
+      "timestamp": "2026-08-03T17:07:10.964Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 11,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "691457164010717244",
+      "healing": 47,
+      "targetHealthBefore": 149.6,
+      "targetHealthAfter": 196.6,
+      "manaBefore": 179,
+      "manaAfter": 169
+    },
+    {
+      "sequence": 145,
+      "timestamp": "2026-08-03T17:07:18.251Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 12,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 63,
+      "critical": false,
+      "monsterHealthBefore": 8,
+      "monsterHealthAfter": 0
+    },
+    {
+      "sequence": 146,
+      "timestamp": "2026-08-03T17:07:19.664Z",
+      "type": "BATTLE_VICTORY",
+      "floor": 12,
+      "monster": {
+        "level": 12,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "해골 기사",
+        "regionName": "망자의 묘지",
+        "imageFile": "skeleton-knight.png",
+        "maxHealth": 326,
+        "health": 0,
+        "attack": 71,
+        "defense": 18,
+        "magicDefense": 17,
+        "speed": 21,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 135,
+        "skillName": "녹슨 참격"
+      },
+      "turnsTaken": 12,
+      "rewards": [
+        {
+          "userId": "788944111096430602",
+          "gold": 135,
+          "experience": 270,
+          "newLevel": 11,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "691457164010717244",
+          "gold": 135,
+          "experience": 315,
+          "newLevel": 10,
+          "levelsGained": 0,
+          "equipment": {
+            "id": "3bd970e7-b583-49cb-a025-e29298d3a863",
+            "name": "평범한 철검",
+            "itemLevel": 12,
+            "rarity": "고급",
+            "slot": "무기",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "attack",
+                "label": "공격력",
+                "baseValue": 18.8,
+                "value": 18.8
+              },
+              {
+                "stat": "magicAttack",
+                "label": "마법 공격력",
+                "baseValue": 18.8,
+                "value": 18.8
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": null
+        }
+      ],
+      "partyHealthAfter": {
+        "788944111096430602": 195.4,
+        "691457164010717244": 196.6
+      },
+      "partyManaAfter": {
+        "788944111096430602": 169,
+        "691457164010717244": 140.1
+      }
+    },
+    {
+      "sequence": 147,
+      "timestamp": "2026-08-03T17:07:24.137Z",
+      "type": "PARTY_CHOICE",
+      "floor": 12,
+      "userId": "788944111096430602",
+      "action": "continue"
+    },
+    {
+      "sequence": 148,
+      "timestamp": "2026-08-03T17:07:24.640Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 12,
+      "event": "ENEMY",
+      "stairsChance": 0.30000000000000004,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 1
+    },
+    {
+      "sequence": 149,
+      "timestamp": "2026-08-03T17:07:24.644Z",
+      "type": "BATTLE_STARTED",
+      "floor": 12,
+      "encounter": "NORMAL",
+      "monster": {
+        "level": 12,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "해골 기사",
+        "regionName": "망자의 묘지",
+        "imageFile": "skeleton-knight.png",
+        "maxHealth": 326,
+        "health": 326,
+        "attack": 71,
+        "defense": 18,
+        "magicDefense": 17,
+        "speed": 21,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 135,
+        "skillName": "녹슨 참격"
+      },
+      "players": {
+        "788944111096430602": {
+          "stats": {
+            "playerLevel": 11,
+            "health": 236.8,
+            "defense": 35.9,
+            "attack": 70.3,
+            "magicAttack": 59.1,
+            "mana": 199,
+            "speed": 50.8,
+            "criticalChance": 15.1,
+            "criticalDamage": 150
+          },
+          "health": 195.4,
+          "maxHealth": 236.8,
+          "mana": 199
+        },
+        "691457164010717244": {
+          "stats": {
+            "playerLevel": 10,
+            "health": 217.6,
+            "defense": 33.4,
+            "attack": 58.8,
+            "magicAttack": 57.8,
+            "mana": 150.1,
+            "speed": 27.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.7
+          },
+          "health": 196.6,
+          "maxHealth": 217.6,
+          "mana": 150.1
+        }
+      },
+      "initialTurnOrder": [
+        {
+          "key": "PLAYER:788944111096430602",
+          "type": "PLAYER",
+          "userId": "788944111096430602",
+          "speed": 50.8,
+          "nextActionAt": 196.8503937007874
+        },
+        {
+          "key": "PLAYER:691457164010717244",
+          "type": "PLAYER",
+          "userId": "691457164010717244",
+          "speed": 27.4,
+          "nextActionAt": 364.9635036496351
+        },
+        {
+          "key": "ENEMY",
+          "type": "ENEMY",
+          "speed": 21,
+          "nextActionAt": 476.1904761904762
+        }
+      ]
+    },
+    {
+      "sequence": 150,
+      "timestamp": "2026-08-03T17:07:29.580Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 1,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 65,
+      "critical": false,
+      "monsterHealthBefore": 326,
+      "monsterHealthAfter": 261
+    },
+    {
+      "sequence": 151,
+      "timestamp": "2026-08-03T17:07:34.858Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 2,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 53,
+      "critical": false,
+      "monsterHealthBefore": 261,
+      "monsterHealthAfter": 208
+    },
+    {
+      "sequence": 152,
+      "timestamp": "2026-08-03T17:07:41.516Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 3,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 69,
+      "critical": false,
+      "monsterHealthBefore": 208,
+      "monsterHealthAfter": 139
+    },
+    {
+      "sequence": 153,
+      "timestamp": "2026-08-03T17:07:42.972Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 4,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "해골 기사",
+      "action": "녹슨 참격",
+      "targetId": "788944111096430602",
+      "damage": 69,
+      "critical": false,
+      "targetHealthBefore": 195.4,
+      "targetHealthAfter": 126.4,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 154,
+      "timestamp": "2026-08-03T17:07:53.814Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 5,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 67,
+      "critical": false,
+      "monsterHealthBefore": 139,
+      "monsterHealthAfter": 72
+    },
+    {
+      "sequence": 155,
+      "timestamp": "2026-08-03T17:07:59.976Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 6,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 50,
+      "critical": false,
+      "monsterHealthBefore": 72,
+      "monsterHealthAfter": 22
+    },
+    {
+      "sequence": 156,
+      "timestamp": "2026-08-03T17:08:04.520Z",
+      "type": "TURN_ACTION",
+      "floor": 12,
+      "turn": 7,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 67,
+      "critical": false,
+      "monsterHealthBefore": 22,
+      "monsterHealthAfter": 0
+    },
+    {
+      "sequence": 157,
+      "timestamp": "2026-08-03T17:08:05.910Z",
+      "type": "BATTLE_VICTORY",
+      "floor": 12,
+      "monster": {
+        "level": 12,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "해골 기사",
+        "regionName": "망자의 묘지",
+        "imageFile": "skeleton-knight.png",
+        "maxHealth": 326,
+        "health": 0,
+        "attack": 71,
+        "defense": 18,
+        "magicDefense": 17,
+        "speed": 21,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 135,
+        "skillName": "녹슨 참격"
+      },
+      "turnsTaken": 7,
+      "rewards": [
+        {
+          "userId": "788944111096430602",
+          "gold": 135,
+          "experience": 270,
+          "newLevel": 11,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "691457164010717244",
+          "gold": 135,
+          "experience": 315,
+          "newLevel": 11,
+          "levelsGained": 1,
+          "equipment": null,
+          "potion": null
+        }
+      ],
+      "partyHealthAfter": {
+        "788944111096430602": 126.4,
+        "691457164010717244": 204.6
+      },
+      "partyManaAfter": {
+        "788944111096430602": 199,
+        "691457164010717244": 150.1
+      }
+    },
+    {
+      "sequence": 158,
+      "timestamp": "2026-08-03T17:08:18.061Z",
+      "type": "ADVENTURE_ENDED",
+      "reason": "PARTY_STOP_VOTE_PASSED",
+      "floor": 12,
+      "remainingMemberIds": [
+        "788944111096430602",
+        "691457164010717244"
+      ],
+      "healthByUser": {
+        "788944111096430602": 126.4,
+        "691457164010717244": 204.6
+      }
     }
   ]
 }
