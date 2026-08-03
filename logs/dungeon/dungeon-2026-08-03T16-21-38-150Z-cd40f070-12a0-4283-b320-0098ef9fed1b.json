@@ -1,0 +1,5713 @@
+{
+  "logVersion": 1,
+  "adventureId": "cd40f070-12a0-4283-b320-0098ef9fed1b",
+  "guildId": "1533722582526853315",
+  "leaderId": "500285768783101963",
+  "memberIds": [
+    "500285768783101963",
+    "788944111096430602",
+    "923095437752287264",
+    "956902203791118366",
+    "691457164010717244"
+  ],
+  "startedAt": "2026-08-03T16:21:38.150Z",
+  "endedAt": "2026-08-03T16:40:46.180Z",
+  "endReason": "PARTY_STOP_VOTE_PASSED",
+  "highestFloor": 11,
+  "players": {
+    "500285768783101963": {
+      "playerLevel": 7,
+      "experience": 479,
+      "totalStats": {
+        "playerLevel": 7,
+        "health": 168,
+        "defense": 22,
+        "attack": 45.7,
+        "magicAttack": 40,
+        "mana": 121.2,
+        "speed": 21,
+        "criticalChance": 5,
+        "criticalDamage": 150
+      },
+      "equipment": {
+        "머리": {
+          "id": "008d0c50-ca8f-412a-a95b-c3a7cef0202f",
+          "name": "평범한 철 모자",
+          "itemLevel": 3,
+          "rarity": "고급",
+          "slot": "머리",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "mana",
+              "label": "마나",
+              "baseValue": 23.2,
+              "value": 23.2
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "상의": {
+          "id": "849a7a71-7838-4227-b459-3e498947b1ef",
+          "name": "낡은 가죽 상의",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "상의",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "defense",
+              "label": "방어력",
+              "baseValue": 5,
+              "value": 5
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "하의": {
+          "id": "d0f8da85-b5f4-4fcd-bff2-607549cdfce5",
+          "name": "낡은 가죽 하의",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "하의",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "health",
+              "label": "체력",
+              "baseValue": 50,
+              "value": 50
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "신발": {
+          "id": "1ddaf9c7-dee9-4b38-8226-a9f34e578f59",
+          "name": "낡은 가죽 신발",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "신발",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "speed",
+              "label": "속도",
+              "baseValue": 5,
+              "value": 5
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "무기": {
+          "id": "2938d14e-a5b7-4fa5-bcf1-0a7b3e1fc33c",
+          "name": "낡은 철검",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "무기",
+          "enhancement": 1,
+          "mainOptions": [
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "baseValue": 10,
+              "value": 12
+            },
+            {
+              "stat": "magicAttack",
+              "label": "마법 공격력",
+              "baseValue": 10,
+              "value": 12
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "value": 14.3,
+              "operation": "MULTIPLIER"
+            }
+          ],
+          "locked": false
+        }
+      },
+      "equippedSkills": [
+        "basic_heal",
+        null,
+        null
+      ]
+    },
+    "788944111096430602": {
+      "playerLevel": 8,
+      "experience": 328,
+      "totalStats": {
+        "playerLevel": 8,
+        "health": 212.8,
+        "defense": 28.7,
+        "attack": 52.7,
+        "magicAttack": 49.6,
+        "mana": 172.4,
+        "speed": 31,
+        "criticalChance": 5,
+        "criticalDamage": 150
+      },
+      "equipment": {
+        "머리": {
+          "id": "ea44955a-6d54-4e8c-845a-688c53c110ef",
+          "name": "빛나는 모자",
+          "itemLevel": 8,
+          "rarity": "레어",
+          "slot": "머리",
+          "enhancement": 3,
+          "mainOptions": [
+            {
+              "stat": "mana",
+              "label": "마나",
+              "baseValue": 31.2,
+              "value": 49.9
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "magicAttack",
+              "label": "마법 공격력",
+              "value": 5.9,
+              "operation": "MULTIPLIER"
+            },
+            {
+              "stat": "mana",
+              "label": "마나",
+              "value": 10.6,
+              "operation": "MULTIPLIER"
+            },
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "value": 12.5,
+              "operation": "MULTIPLIER"
+            }
+          ],
+          "locked": false
+        },
+        "상의": {
+          "id": "628f8d1f-a533-490b-9ddd-c817126db97d",
+          "name": "낡은 가죽 상의",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "상의",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "defense",
+              "label": "방어력",
+              "baseValue": 5,
+              "value": 5
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "하의": {
+          "id": "3436237b-c85a-44de-b4e6-38bf77daf154",
+          "name": "평범한 철 하의",
+          "itemLevel": 4,
+          "rarity": "고급",
+          "slot": "하의",
+          "enhancement": 2,
+          "mainOptions": [
+            {
+              "stat": "health",
+              "label": "체력",
+              "baseValue": 62,
+              "value": 86.8
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "defense",
+              "label": "방어력",
+              "value": 9.6,
+              "operation": "MULTIPLIER"
+            },
+            {
+              "stat": "speed",
+              "label": "속도",
+              "value": 9,
+              "operation": "FLAT"
+            }
+          ],
+          "locked": false
+        },
+        "신발": {
+          "id": "475c9f7d-dfb3-4a30-acad-2b04c6b63d29",
+          "name": "낡은 가죽 신발",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "신발",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "speed",
+              "label": "속도",
+              "baseValue": 5,
+              "value": 5
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "무기": {
+          "id": "c0c4147f-f8a6-4ce3-949b-59467b5bc80d",
+          "name": "낡은 철검",
+          "itemLevel": 5,
+          "rarity": "일반",
+          "slot": "무기",
+          "enhancement": 1,
+          "mainOptions": [
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "baseValue": 13.2,
+              "value": 15.8
+            },
+            {
+              "stat": "magicAttack",
+              "label": "마법 공격력",
+              "baseValue": 13.2,
+              "value": 15.8
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "defense",
+              "label": "방어력",
+              "value": 9.2,
+              "operation": "MULTIPLIER"
+            }
+          ],
+          "locked": false
+        }
+      },
+      "equippedSkills": [
+        "basic_heal",
+        null,
+        null
+      ]
+    },
+    "923095437752287264": {
+      "playerLevel": 8,
+      "experience": 141,
+      "totalStats": {
+        "playerLevel": 8,
+        "health": 291.1,
+        "defense": 25.6,
+        "attack": 43,
+        "magicAttack": 43,
+        "mana": 141.5,
+        "speed": 22,
+        "criticalChance": 5,
+        "criticalDamage": 150
+      },
+      "equipment": {
+        "머리": {
+          "id": "5aeaf60b-602c-41b6-b4ef-f78a236ca4c5",
+          "name": "빛나는 모자",
+          "itemLevel": 7,
+          "rarity": "레어",
+          "slot": "머리",
+          "enhancement": 1,
+          "mainOptions": [
+            {
+              "stat": "mana",
+              "label": "마나",
+              "baseValue": 29.6,
+              "value": 35.5
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "health",
+              "label": "체력",
+              "value": 6.5,
+              "operation": "MULTIPLIER"
+            }
+          ],
+          "locked": false
+        },
+        "상의": {
+          "id": "be16aac0-20cc-48a9-8d11-03c17aa1d7ca",
+          "name": "낡은 가죽 상의",
+          "itemLevel": 5,
+          "rarity": "일반",
+          "slot": "상의",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "defense",
+              "label": "방어력",
+              "baseValue": 6.6,
+              "value": 6.6
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "하의": {
+          "id": "179679a6-ca4e-416e-b5fd-19d92ade5a90",
+          "name": "빛나는 하의",
+          "itemLevel": 8,
+          "rarity": "레어",
+          "slot": "하의",
+          "enhancement": 1,
+          "mainOptions": [
+            {
+              "stat": "health",
+              "label": "체력",
+              "baseValue": 78,
+              "value": 93.6
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "health",
+              "label": "체력",
+              "value": 8.5,
+              "operation": "MULTIPLIER"
+            }
+          ],
+          "locked": false
+        },
+        "신발": {
+          "id": "5d2bea25-cfd6-4de7-b401-870222b7618c",
+          "name": "낡은 가죽 장화",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "신발",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "speed",
+              "label": "속도",
+              "baseValue": 5,
+              "value": 5
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "무기": {
+          "id": "7d04778a-86b4-4288-bd38-285f2b6ffffc",
+          "name": "낡은 철검",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "무기",
+          "enhancement": 1,
+          "mainOptions": [
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "baseValue": 10,
+              "value": 12
+            },
+            {
+              "stat": "magicAttack",
+              "label": "마법 공격력",
+              "baseValue": 10,
+              "value": 12
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "health",
+              "label": "체력",
+              "value": 14.7,
+              "operation": "MULTIPLIER"
+            }
+          ],
+          "locked": false
+        }
+      },
+      "equippedSkills": [
+        "basic_heal",
+        null,
+        null
+      ]
+    },
+    "956902203791118366": {
+      "playerLevel": 8,
+      "experience": 355,
+      "totalStats": {
+        "playerLevel": 8,
+        "health": 218.8,
+        "defense": 26.6,
+        "attack": 52.7,
+        "magicAttack": 54.6,
+        "mana": 156.1,
+        "speed": 41.4,
+        "criticalChance": 5,
+        "criticalDamage": 168.4
+      },
+      "equipment": {
+        "머리": {
+          "id": "da5074cb-d7de-4248-93a1-a58c1c2e21e9",
+          "name": "빛나는 모자",
+          "itemLevel": 3,
+          "rarity": "레어",
+          "slot": "머리",
+          "enhancement": 2,
+          "mainOptions": [
+            {
+              "stat": "mana",
+              "label": "마나",
+              "baseValue": 23.2,
+              "value": 32.5
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "value": 13.3,
+              "operation": "MULTIPLIER"
+            },
+            {
+              "stat": "magicAttack",
+              "label": "마법 공격력",
+              "value": 11.5,
+              "operation": "MULTIPLIER"
+            }
+          ],
+          "locked": false
+        },
+        "상의": {
+          "id": "292acabb-fea6-4b8a-a285-84beca50226d",
+          "name": "평범한 철 상의",
+          "itemLevel": 2,
+          "rarity": "고급",
+          "slot": "상의",
+          "enhancement": 2,
+          "mainOptions": [
+            {
+              "stat": "defense",
+              "label": "방어력",
+              "baseValue": 5.4,
+              "value": 7.6
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "criticalDamage",
+              "label": "치명타 피해",
+              "value": 18.4,
+              "operation": "PERCENT_POINT"
+            },
+            {
+              "stat": "speed",
+              "label": "속도",
+              "value": 9,
+              "operation": "FLAT"
+            }
+          ],
+          "locked": false
+        },
+        "하의": {
+          "id": "c883546e-03ac-4715-8a63-770d351abe4a",
+          "name": "빛나는 하의",
+          "itemLevel": 3,
+          "rarity": "레어",
+          "slot": "하의",
+          "enhancement": 3,
+          "mainOptions": [
+            {
+              "stat": "health",
+              "label": "체력",
+              "baseValue": 58,
+              "value": 92.8
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "value": 5.7,
+              "operation": "MULTIPLIER"
+            },
+            {
+              "stat": "speed",
+              "label": "속도",
+              "value": 3,
+              "operation": "FLAT"
+            },
+            {
+              "stat": "magicAttack",
+              "label": "마법 공격력",
+              "value": 11.3,
+              "operation": "MULTIPLIER"
+            }
+          ],
+          "locked": false
+        },
+        "신발": {
+          "id": "406f488f-b350-4714-8d53-988b0460e37a",
+          "name": "낡은 가죽 장화",
+          "itemLevel": 6,
+          "rarity": "일반",
+          "slot": "신발",
+          "enhancement": 1,
+          "mainOptions": [
+            {
+              "stat": "speed",
+              "label": "속도",
+              "baseValue": 7,
+              "value": 8.4
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "mana",
+              "label": "마나",
+              "value": 12.7,
+              "operation": "MULTIPLIER"
+            }
+          ],
+          "locked": false
+        },
+        "무기": {
+          "id": "2847d1cc-d811-41ad-a75a-e5b9d230f6ba",
+          "name": "여행자의 철검",
+          "itemLevel": 2,
+          "rarity": "일반",
+          "slot": "무기",
+          "enhancement": 1,
+          "mainOptions": [
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "baseValue": 10.8,
+              "value": 13
+            },
+            {
+              "stat": "magicAttack",
+              "label": "마법 공격력",
+              "baseValue": 10.8,
+              "value": 13
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "speed",
+              "label": "속도",
+              "value": 4,
+              "operation": "FLAT"
+            }
+          ],
+          "locked": false
+        }
+      },
+      "equippedSkills": [
+        "basic_heal",
+        null,
+        null
+      ]
+    },
+    "691457164010717244": {
+      "playerLevel": 6,
+      "experience": 536,
+      "totalStats": {
+        "playerLevel": 6,
+        "health": 185.6,
+        "defense": 20,
+        "attack": 45.5,
+        "magicAttack": 44.7,
+        "mana": 110,
+        "speed": 20.4,
+        "criticalChance": 5,
+        "criticalDamage": 168.7
+      },
+      "equipment": {
+        "머리": {
+          "id": "aaf534cf-4197-443a-891a-0a9d7bd76012",
+          "name": "낡은 가죽 모자",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "머리",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "mana",
+              "label": "마나",
+              "baseValue": 20,
+              "value": 20
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "상의": {
+          "id": "f8938300-59f2-40e6-b5f1-aff9ca9a2fde",
+          "name": "낡은 가죽 상의",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "상의",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "defense",
+              "label": "방어력",
+              "baseValue": 5,
+              "value": 5
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "하의": {
+          "id": "e7e0ca6f-fe0b-4c18-ae6d-a7dd40afb8d0",
+          "name": "평범한 철 하의",
+          "itemLevel": 2,
+          "rarity": "고급",
+          "slot": "하의",
+          "enhancement": 2,
+          "mainOptions": [
+            {
+              "stat": "health",
+              "label": "체력",
+              "baseValue": 54,
+              "value": 75.6
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "value": 11.4,
+              "operation": "MULTIPLIER"
+            },
+            {
+              "stat": "magicAttack",
+              "label": "마법 공격력",
+              "value": 9.5,
+              "operation": "MULTIPLIER"
+            }
+          ],
+          "locked": false
+        },
+        "신발": {
+          "id": "e7760d44-d732-4149-9819-1fea1aa72731",
+          "name": "낡은 가죽 장화",
+          "itemLevel": 2,
+          "rarity": "일반",
+          "slot": "신발",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "speed",
+              "label": "속도",
+              "baseValue": 5.4,
+              "value": 5.4
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "무기": {
+          "id": "e3759aae-7ce1-4226-b0cb-8a8005bab2b9",
+          "name": "낡은 철검",
+          "itemLevel": 5,
+          "rarity": "일반",
+          "slot": "무기",
+          "enhancement": 1,
+          "mainOptions": [
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "baseValue": 13.2,
+              "value": 15.8
+            },
+            {
+              "stat": "magicAttack",
+              "label": "마법 공격력",
+              "baseValue": 13.2,
+              "value": 15.8
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "criticalDamage",
+              "label": "치명타 피해",
+              "value": 18.7,
+              "operation": "PERCENT_POINT"
+            }
+          ],
+          "locked": false
+        }
+      },
+      "equippedSkills": [
+        "basic_heal",
+        null,
+        null
+      ]
+    }
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "timestamp": "2026-08-03T16:21:40.429Z",
+      "type": "ADVENTURE_STARTED",
+      "floor": 1,
+      "partySize": 5
+    },
+    {
+      "sequence": 2,
+      "timestamp": "2026-08-03T16:21:47.059Z",
+      "type": "PARTY_CHOICE",
+      "floor": 1,
+      "userId": "500285768783101963",
+      "action": "checkpoint_yes"
+    },
+    {
+      "sequence": 3,
+      "timestamp": "2026-08-03T16:21:47.438Z",
+      "type": "FLOOR_CHANGED",
+      "floor": 6,
+      "fromFloor": 1,
+      "toFloor": 6,
+      "method": "CHECKPOINT"
+    },
+    {
+      "sequence": 4,
+      "timestamp": "2026-08-03T16:21:47.852Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 6,
+      "event": "ENEMY",
+      "stairsChance": 0.2,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 0
+    },
+    {
+      "sequence": 5,
+      "timestamp": "2026-08-03T16:21:47.859Z",
+      "type": "BATTLE_STARTED",
+      "floor": 6,
+      "encounter": "NORMAL",
+      "monster": {
+        "level": 6,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "포자 야수",
+        "regionName": "균사 동굴",
+        "imageFile": "spore-beast.png",
+        "maxHealth": 384,
+        "health": 384,
+        "attack": 62,
+        "defense": 14,
+        "magicDefense": 12,
+        "speed": 17,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 75,
+        "skillName": "독성 포자"
+      },
+      "players": {
+        "500285768783101963": {
+          "stats": {
+            "playerLevel": 7,
+            "health": 168,
+            "defense": 22,
+            "attack": 45.7,
+            "magicAttack": 40,
+            "mana": 121.2,
+            "speed": 21,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 168,
+          "maxHealth": 168,
+          "mana": 121.2
+        },
+        "788944111096430602": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 212.8,
+            "defense": 28.7,
+            "attack": 52.7,
+            "magicAttack": 49.6,
+            "mana": 172.4,
+            "speed": 31,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 212.8,
+          "maxHealth": 212.8,
+          "mana": 172.4
+        },
+        "923095437752287264": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 291.1,
+            "defense": 25.6,
+            "attack": 43,
+            "magicAttack": 43,
+            "mana": 141.5,
+            "speed": 22,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 291.1,
+          "maxHealth": 291.1,
+          "mana": 141.5
+        },
+        "956902203791118366": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 218.8,
+            "defense": 26.6,
+            "attack": 52.7,
+            "magicAttack": 54.6,
+            "mana": 156.1,
+            "speed": 41.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.4
+          },
+          "health": 218.8,
+          "maxHealth": 218.8,
+          "mana": 156.1
+        },
+        "691457164010717244": {
+          "stats": {
+            "playerLevel": 6,
+            "health": 185.6,
+            "defense": 20,
+            "attack": 45.5,
+            "magicAttack": 44.7,
+            "mana": 110,
+            "speed": 20.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.7
+          },
+          "health": 185.6,
+          "maxHealth": 185.6,
+          "mana": 110
+        }
+      },
+      "initialTurnOrder": [
+        {
+          "key": "PLAYER:500285768783101963",
+          "type": "PLAYER",
+          "userId": "500285768783101963",
+          "speed": 21,
+          "nextActionAt": 476.1904761904762
+        },
+        {
+          "key": "PLAYER:788944111096430602",
+          "type": "PLAYER",
+          "userId": "788944111096430602",
+          "speed": 31,
+          "nextActionAt": 322.5806451612903
+        },
+        {
+          "key": "PLAYER:923095437752287264",
+          "type": "PLAYER",
+          "userId": "923095437752287264",
+          "speed": 22,
+          "nextActionAt": 454.54545454545456
+        },
+        {
+          "key": "PLAYER:956902203791118366",
+          "type": "PLAYER",
+          "userId": "956902203791118366",
+          "speed": 41.4,
+          "nextActionAt": 241.54589371980677
+        },
+        {
+          "key": "PLAYER:691457164010717244",
+          "type": "PLAYER",
+          "userId": "691457164010717244",
+          "speed": 20.4,
+          "nextActionAt": 490.1960784313726
+        },
+        {
+          "key": "ENEMY",
+          "type": "ENEMY",
+          "speed": 17,
+          "nextActionAt": 588.2352941176471
+        }
+      ]
+    },
+    {
+      "sequence": 6,
+      "timestamp": "2026-08-03T16:21:52.973Z",
+      "type": "TURN_ACTION",
+      "floor": 6,
+      "turn": 1,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 52,
+      "critical": false,
+      "monsterHealthBefore": 384,
+      "monsterHealthAfter": 332
+    },
+    {
+      "sequence": 7,
+      "timestamp": "2026-08-03T16:22:14.808Z",
+      "type": "TURN_ACTION",
+      "floor": 6,
+      "turn": 2,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 47,
+      "critical": false,
+      "monsterHealthBefore": 332,
+      "monsterHealthAfter": 285
+    },
+    {
+      "sequence": 8,
+      "timestamp": "2026-08-03T16:22:20.091Z",
+      "type": "TURN_ACTION",
+      "floor": 6,
+      "turn": 3,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 40,
+      "critical": false,
+      "monsterHealthBefore": 285,
+      "monsterHealthAfter": 245
+    },
+    {
+      "sequence": 9,
+      "timestamp": "2026-08-03T16:22:25.310Z",
+      "type": "TURN_ACTION",
+      "floor": 6,
+      "turn": 4,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 41,
+      "critical": false,
+      "monsterHealthBefore": 245,
+      "monsterHealthAfter": 204
+    },
+    {
+      "sequence": 10,
+      "timestamp": "2026-08-03T16:22:30.125Z",
+      "type": "TURN_ACTION",
+      "floor": 6,
+      "turn": 5,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 46,
+      "critical": false,
+      "monsterHealthBefore": 204,
+      "monsterHealthAfter": 158
+    },
+    {
+      "sequence": 11,
+      "timestamp": "2026-08-03T16:22:34.913Z",
+      "type": "TURN_ACTION",
+      "floor": 6,
+      "turn": 6,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 40,
+      "critical": false,
+      "monsterHealthBefore": 158,
+      "monsterHealthAfter": 118
+    },
+    {
+      "sequence": 12,
+      "timestamp": "2026-08-03T16:22:36.354Z",
+      "type": "TURN_ACTION",
+      "floor": 6,
+      "turn": 7,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "포자 야수",
+      "action": "독성 포자",
+      "targetId": "923095437752287264",
+      "damage": 55,
+      "critical": false,
+      "targetHealthBefore": 291.1,
+      "targetHealthAfter": 236.10000000000002,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 13,
+      "timestamp": "2026-08-03T16:22:58.887Z",
+      "type": "TURN_ACTION",
+      "floor": 6,
+      "turn": 8,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 55,
+      "critical": false,
+      "monsterHealthBefore": 118,
+      "monsterHealthAfter": 63
+    },
+    {
+      "sequence": 14,
+      "timestamp": "2026-08-03T16:23:04.036Z",
+      "type": "TURN_ACTION",
+      "floor": 6,
+      "turn": 9,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 51,
+      "critical": false,
+      "monsterHealthBefore": 63,
+      "monsterHealthAfter": 12
+    },
+    {
+      "sequence": 15,
+      "timestamp": "2026-08-03T16:23:09.364Z",
+      "type": "TURN_ACTION",
+      "floor": 6,
+      "turn": 10,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 41,
+      "critical": false,
+      "monsterHealthBefore": 12,
+      "monsterHealthAfter": 0
+    },
+    {
+      "sequence": 16,
+      "timestamp": "2026-08-03T16:23:10.745Z",
+      "type": "BATTLE_VICTORY",
+      "floor": 6,
+      "monster": {
+        "level": 6,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "포자 야수",
+        "regionName": "균사 동굴",
+        "imageFile": "spore-beast.png",
+        "maxHealth": 384,
+        "health": 0,
+        "attack": 62,
+        "defense": 14,
+        "magicDefense": 12,
+        "speed": 17,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 75,
+        "skillName": "독성 포자"
+      },
+      "turnsTaken": 10,
+      "rewards": [
+        {
+          "userId": "500285768783101963",
+          "gold": 75,
+          "experience": 108,
+          "newLevel": 7,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": {
+            "id": "common_health_potion",
+            "name": "일반체력포션"
+          }
+        },
+        {
+          "userId": "788944111096430602",
+          "gold": 75,
+          "experience": 81,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": {
+            "id": "common_health_potion",
+            "name": "일반체력포션"
+          }
+        },
+        {
+          "userId": "923095437752287264",
+          "gold": 75,
+          "experience": 81,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": {
+            "id": "74c30e7f-0c84-4472-a828-44f8aad59d43",
+            "name": "평범한 철 모자",
+            "itemLevel": 6,
+            "rarity": "고급",
+            "slot": "머리",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "mana",
+                "label": "마나",
+                "baseValue": 28,
+                "value": 28
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": {
+            "id": "common_mana_potion",
+            "name": "일반마나포션"
+          }
+        },
+        {
+          "userId": "956902203791118366",
+          "gold": 75,
+          "experience": 81,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": {
+            "id": "52cfe1ae-2f86-4e5f-9525-482b6e016ec4",
+            "name": "낡은 가죽 하의",
+            "itemLevel": 6,
+            "rarity": "일반",
+            "slot": "하의",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "health",
+                "label": "체력",
+                "baseValue": 70,
+                "value": 70
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": null
+        },
+        {
+          "userId": "691457164010717244",
+          "gold": 75,
+          "experience": 135,
+          "newLevel": 7,
+          "levelsGained": 1,
+          "equipment": null,
+          "potion": null
+        }
+      ],
+      "partyHealthAfter": {
+        "500285768783101963": 168,
+        "788944111096430602": 212.8,
+        "923095437752287264": 236.10000000000002,
+        "956902203791118366": 218.8,
+        "691457164010717244": 193.6
+      },
+      "partyManaAfter": {
+        "500285768783101963": 121.2,
+        "788944111096430602": 172.4,
+        "923095437752287264": 141.5,
+        "956902203791118366": 156.1,
+        "691457164010717244": 110
+      }
+    },
+    {
+      "sequence": 17,
+      "timestamp": "2026-08-03T16:23:17.456Z",
+      "type": "PARTY_CHOICE",
+      "floor": 6,
+      "userId": "500285768783101963",
+      "action": "continue"
+    },
+    {
+      "sequence": 18,
+      "timestamp": "2026-08-03T16:23:17.824Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 6,
+      "event": "STAIRS",
+      "stairsChance": 0.30000000000000004,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 1
+    },
+    {
+      "sequence": 19,
+      "timestamp": "2026-08-03T16:23:23.068Z",
+      "type": "PARTY_CHOICE",
+      "floor": 6,
+      "userId": "500285768783101963",
+      "action": "stairs_yes"
+    },
+    {
+      "sequence": 20,
+      "timestamp": "2026-08-03T16:23:23.479Z",
+      "type": "FLOOR_CHANGED",
+      "floor": 7,
+      "fromFloor": 6,
+      "toFloor": 7,
+      "method": "STAIRS_OR_BOSS_CLEAR"
+    },
+    {
+      "sequence": 21,
+      "timestamp": "2026-08-03T16:23:23.875Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 7,
+      "event": "SPECIAL",
+      "stairsChance": 0.2,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 0
+    },
+    {
+      "sequence": 22,
+      "timestamp": "2026-08-03T16:23:23.893Z",
+      "type": "TREASURE_REWARD",
+      "floor": 7,
+      "bossChest": false,
+      "rewards": [
+        {
+          "userId": "500285768783101963",
+          "gold": 210,
+          "equipment": {
+            "id": "6fa00bb4-3491-4b8d-a57a-356c8d43e2a5",
+            "name": "낡은 가죽 하의",
+            "itemLevel": 7,
+            "rarity": "일반",
+            "slot": "하의",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "health",
+                "label": "체력",
+                "baseValue": 74,
+                "value": 74
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": null
+        },
+        {
+          "userId": "788944111096430602",
+          "gold": 182,
+          "equipment": {
+            "id": "67be5b3e-2722-42f9-8a05-3780c5995eb9",
+            "name": "평범한 철 모자",
+            "itemLevel": 7,
+            "rarity": "고급",
+            "slot": "머리",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "mana",
+                "label": "마나",
+                "baseValue": 29.6,
+                "value": 29.6
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": {
+            "id": "legendary_health_potion",
+            "name": "전설체력포션"
+          }
+        },
+        {
+          "userId": "923095437752287264",
+          "gold": 126,
+          "equipment": {
+            "id": "fd26da9c-70ac-4b1e-9247-934cd8ed9597",
+            "name": "낡은 가죽 하의",
+            "itemLevel": 7,
+            "rarity": "일반",
+            "slot": "하의",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "health",
+                "label": "체력",
+                "baseValue": 74,
+                "value": 74
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": {
+            "id": "rare_health_potion",
+            "name": "레어체력포션"
+          }
+        },
+        {
+          "userId": "956902203791118366",
+          "gold": 154,
+          "equipment": {
+            "id": "9fca5ae1-267f-4828-a820-bcece0b4bc0d",
+            "name": "낡은 가죽 하의",
+            "itemLevel": 7,
+            "rarity": "일반",
+            "slot": "하의",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "health",
+                "label": "체력",
+                "baseValue": 74,
+                "value": 74
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": {
+            "id": "advanced_mana_potion",
+            "name": "고급마나포션"
+          }
+        },
+        {
+          "userId": "691457164010717244",
+          "gold": 161,
+          "equipment": {
+            "id": "e9c89d45-cf1a-4cb8-9de2-ce881e946eed",
+            "name": "낡은 가죽 상의",
+            "itemLevel": 7,
+            "rarity": "일반",
+            "slot": "상의",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "defense",
+                "label": "방어력",
+                "baseValue": 7.4,
+                "value": 7.4
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": {
+            "id": "common_health_potion",
+            "name": "일반체력포션"
+          }
+        }
+      ]
+    },
+    {
+      "sequence": 23,
+      "timestamp": "2026-08-03T16:23:31.765Z",
+      "type": "PARTY_CHOICE",
+      "floor": 7,
+      "userId": "500285768783101963",
+      "action": "continue"
+    },
+    {
+      "sequence": 24,
+      "timestamp": "2026-08-03T16:23:32.184Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 7,
+      "event": "ENEMY",
+      "stairsChance": 0.2,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 0
+    },
+    {
+      "sequence": 25,
+      "timestamp": "2026-08-03T16:23:32.192Z",
+      "type": "BATTLE_STARTED",
+      "floor": 7,
+      "encounter": "NORMAL",
+      "monster": {
+        "level": 7,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "포자 야수",
+        "regionName": "균사 동굴",
+        "imageFile": "spore-beast.png",
+        "maxHealth": 432,
+        "health": 432,
+        "attack": 69,
+        "defense": 15,
+        "magicDefense": 14,
+        "speed": 18,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 85,
+        "skillName": "독성 포자"
+      },
+      "players": {
+        "500285768783101963": {
+          "stats": {
+            "playerLevel": 7,
+            "health": 168,
+            "defense": 22,
+            "attack": 45.7,
+            "magicAttack": 40,
+            "mana": 121.2,
+            "speed": 21,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 168,
+          "maxHealth": 168,
+          "mana": 121.2
+        },
+        "788944111096430602": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 212.8,
+            "defense": 28.7,
+            "attack": 52.7,
+            "magicAttack": 49.6,
+            "mana": 172.4,
+            "speed": 31,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 212.8,
+          "maxHealth": 212.8,
+          "mana": 172.4
+        },
+        "923095437752287264": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 291.1,
+            "defense": 25.6,
+            "attack": 43,
+            "magicAttack": 43,
+            "mana": 141.5,
+            "speed": 22,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 236.10000000000002,
+          "maxHealth": 291.1,
+          "mana": 141.5
+        },
+        "956902203791118366": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 218.8,
+            "defense": 26.6,
+            "attack": 52.7,
+            "magicAttack": 54.6,
+            "mana": 156.1,
+            "speed": 41.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.4
+          },
+          "health": 218.8,
+          "maxHealth": 218.8,
+          "mana": 156.1
+        },
+        "691457164010717244": {
+          "stats": {
+            "playerLevel": 7,
+            "health": 193.6,
+            "defense": 22,
+            "attack": 48.8,
+            "magicAttack": 48,
+            "mana": 118,
+            "speed": 21.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.7
+          },
+          "health": 193.6,
+          "maxHealth": 193.6,
+          "mana": 118
+        }
+      },
+      "initialTurnOrder": [
+        {
+          "key": "PLAYER:500285768783101963",
+          "type": "PLAYER",
+          "userId": "500285768783101963",
+          "speed": 21,
+          "nextActionAt": 476.1904761904762
+        },
+        {
+          "key": "PLAYER:788944111096430602",
+          "type": "PLAYER",
+          "userId": "788944111096430602",
+          "speed": 31,
+          "nextActionAt": 322.5806451612903
+        },
+        {
+          "key": "PLAYER:923095437752287264",
+          "type": "PLAYER",
+          "userId": "923095437752287264",
+          "speed": 22,
+          "nextActionAt": 454.54545454545456
+        },
+        {
+          "key": "PLAYER:956902203791118366",
+          "type": "PLAYER",
+          "userId": "956902203791118366",
+          "speed": 41.4,
+          "nextActionAt": 241.54589371980677
+        },
+        {
+          "key": "PLAYER:691457164010717244",
+          "type": "PLAYER",
+          "userId": "691457164010717244",
+          "speed": 21.4,
+          "nextActionAt": 467.2897196261683
+        },
+        {
+          "key": "ENEMY",
+          "type": "ENEMY",
+          "speed": 18,
+          "nextActionAt": 555.5555555555555
+        }
+      ]
+    },
+    {
+      "sequence": 26,
+      "timestamp": "2026-08-03T16:23:36.207Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 1,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 50,
+      "critical": false,
+      "monsterHealthBefore": 432,
+      "monsterHealthAfter": 382
+    },
+    {
+      "sequence": 27,
+      "timestamp": "2026-08-03T16:23:41.227Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 2,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 54,
+      "critical": false,
+      "monsterHealthBefore": 382,
+      "monsterHealthAfter": 328
+    },
+    {
+      "sequence": 28,
+      "timestamp": "2026-08-03T16:23:49.006Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 3,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "ITEM",
+      "itemId": "common_health_potion",
+      "itemName": "일반체력포션",
+      "resource": "HEALTH",
+      "resourceBefore": 236.10000000000002,
+      "resourceAfter": 251.10000000000002,
+      "recovered": 15,
+      "remainingQuantity": 1
+    },
+    {
+      "sequence": 29,
+      "timestamp": "2026-08-03T16:23:56.783Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 4,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 47,
+      "critical": false,
+      "monsterHealthBefore": 328,
+      "monsterHealthAfter": 281
+    },
+    {
+      "sequence": 30,
+      "timestamp": "2026-08-03T16:24:03.849Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 5,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 46,
+      "critical": false,
+      "monsterHealthBefore": 281,
+      "monsterHealthAfter": 235
+    },
+    {
+      "sequence": 31,
+      "timestamp": "2026-08-03T16:24:08.994Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 6,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 49,
+      "critical": false,
+      "monsterHealthBefore": 235,
+      "monsterHealthAfter": 186
+    },
+    {
+      "sequence": 32,
+      "timestamp": "2026-08-03T16:24:10.365Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 7,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "포자 야수",
+      "action": "독성 포자",
+      "targetId": "956902203791118366",
+      "damage": 66,
+      "critical": false,
+      "targetHealthBefore": 218.8,
+      "targetHealthAfter": 152.8,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 33,
+      "timestamp": "2026-08-03T16:24:17.336Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 8,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 55,
+      "critical": false,
+      "monsterHealthBefore": 186,
+      "monsterHealthAfter": 131
+    },
+    {
+      "sequence": 34,
+      "timestamp": "2026-08-03T16:24:23.095Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 9,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 52,
+      "critical": false,
+      "monsterHealthBefore": 131,
+      "monsterHealthAfter": 79
+    },
+    {
+      "sequence": 35,
+      "timestamp": "2026-08-03T16:24:29.313Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 10,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 44,
+      "critical": false,
+      "monsterHealthBefore": 79,
+      "monsterHealthAfter": 35
+    },
+    {
+      "sequence": 36,
+      "timestamp": "2026-08-03T16:24:35.573Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 11,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 50,
+      "critical": false,
+      "monsterHealthBefore": 35,
+      "monsterHealthAfter": 0
+    },
+    {
+      "sequence": 37,
+      "timestamp": "2026-08-03T16:24:36.968Z",
+      "type": "BATTLE_VICTORY",
+      "floor": 7,
+      "monster": {
+        "level": 7,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "포자 야수",
+        "regionName": "균사 동굴",
+        "imageFile": "spore-beast.png",
+        "maxHealth": 432,
+        "health": 0,
+        "attack": 69,
+        "defense": 15,
+        "magicDefense": 14,
+        "speed": 18,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 85,
+        "skillName": "독성 포자"
+      },
+      "turnsTaken": 11,
+      "rewards": [
+        {
+          "userId": "500285768783101963",
+          "gold": 85,
+          "experience": 150,
+          "newLevel": 7,
+          "levelsGained": 0,
+          "equipment": {
+            "id": "04a594e3-551f-4b71-b5fe-a420f6f76182",
+            "name": "낡은 가죽 하의",
+            "itemLevel": 7,
+            "rarity": "일반",
+            "slot": "하의",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "health",
+                "label": "체력",
+                "baseValue": 74,
+                "value": 74
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": {
+            "id": "rare_mana_potion",
+            "name": "레어마나포션"
+          }
+        },
+        {
+          "userId": "788944111096430602",
+          "gold": 85,
+          "experience": 120,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "923095437752287264",
+          "gold": 85,
+          "experience": 120,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "956902203791118366",
+          "gold": 85,
+          "experience": 120,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": {
+            "id": "acc94d07-283a-480e-8a35-e11203ca0506",
+            "name": "낡은 철검",
+            "itemLevel": 7,
+            "rarity": "일반",
+            "slot": "무기",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "attack",
+                "label": "공격력",
+                "baseValue": 14.8,
+                "value": 14.8
+              },
+              {
+                "stat": "magicAttack",
+                "label": "마법 공격력",
+                "baseValue": 14.8,
+                "value": 14.8
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": null
+        },
+        {
+          "userId": "691457164010717244",
+          "gold": 85,
+          "experience": 150,
+          "newLevel": 7,
+          "levelsGained": 0,
+          "equipment": {
+            "id": "9fed8b09-abb9-48b4-9bc8-7217bf4fcb77",
+            "name": "낡은 가죽 하의",
+            "itemLevel": 7,
+            "rarity": "일반",
+            "slot": "하의",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "health",
+                "label": "체력",
+                "baseValue": 74,
+                "value": 74
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": {
+            "id": "common_mana_potion",
+            "name": "일반마나포션"
+          }
+        }
+      ],
+      "partyHealthAfter": {
+        "500285768783101963": 168,
+        "788944111096430602": 212.8,
+        "923095437752287264": 251.10000000000002,
+        "956902203791118366": 152.8,
+        "691457164010717244": 193.6
+      },
+      "partyManaAfter": {
+        "500285768783101963": 121.2,
+        "788944111096430602": 172.4,
+        "923095437752287264": 141.5,
+        "956902203791118366": 156.1,
+        "691457164010717244": 118
+      }
+    },
+    {
+      "sequence": 38,
+      "timestamp": "2026-08-03T16:25:09.463Z",
+      "type": "PARTY_CHOICE",
+      "floor": 7,
+      "userId": "500285768783101963",
+      "action": "continue"
+    },
+    {
+      "sequence": 39,
+      "timestamp": "2026-08-03T16:25:09.830Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 7,
+      "event": "SPECIAL",
+      "stairsChance": 0.30000000000000004,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 1
+    },
+    {
+      "sequence": 40,
+      "timestamp": "2026-08-03T16:25:09.845Z",
+      "type": "TREASURE_REWARD",
+      "floor": 7,
+      "bossChest": false,
+      "rewards": [
+        {
+          "userId": "500285768783101963",
+          "gold": 133,
+          "equipment": {
+            "id": "adcbde30-da2e-4665-ae92-6c63d1eaed7f",
+            "name": "낡은 가죽 장화",
+            "itemLevel": 7,
+            "rarity": "일반",
+            "slot": "신발",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "speed",
+                "label": "속도",
+                "baseValue": 7.4,
+                "value": 7.4
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": {
+            "id": "advanced_health_potion",
+            "name": "고급체력포션"
+          }
+        },
+        {
+          "userId": "788944111096430602",
+          "gold": 147,
+          "equipment": {
+            "id": "fd42503c-d8c0-466b-8d5d-4ce953403ced",
+            "name": "빛나는 신발",
+            "itemLevel": 7,
+            "rarity": "레어",
+            "slot": "신발",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "speed",
+                "label": "속도",
+                "baseValue": 7.4,
+                "value": 7.4
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": {
+            "id": "common_health_potion",
+            "name": "일반체력포션"
+          }
+        },
+        {
+          "userId": "923095437752287264",
+          "gold": 210,
+          "equipment": {
+            "id": "8ef99138-77ff-4f1a-84d7-054d5da6e1fb",
+            "name": "낡은 가죽 하의",
+            "itemLevel": 7,
+            "rarity": "일반",
+            "slot": "하의",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "health",
+                "label": "체력",
+                "baseValue": 74,
+                "value": 74
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": {
+            "id": "common_health_potion",
+            "name": "일반체력포션"
+          }
+        },
+        {
+          "userId": "956902203791118366",
+          "gold": 189,
+          "equipment": {
+            "id": "3710dbfa-2004-4e0e-a276-c57ed8053502",
+            "name": "낡은 가죽 장화",
+            "itemLevel": 7,
+            "rarity": "일반",
+            "slot": "신발",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "speed",
+                "label": "속도",
+                "baseValue": 7.4,
+                "value": 7.4
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": null
+        },
+        {
+          "userId": "691457164010717244",
+          "gold": 70,
+          "equipment": {
+            "id": "683584ca-0730-46b9-8455-231e3986e7c2",
+            "name": "평범한 철 상의",
+            "itemLevel": 7,
+            "rarity": "고급",
+            "slot": "상의",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "defense",
+                "label": "방어력",
+                "baseValue": 7.4,
+                "value": 7.4
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": null
+        }
+      ]
+    },
+    {
+      "sequence": 41,
+      "timestamp": "2026-08-03T16:25:16.187Z",
+      "type": "PARTY_CHOICE",
+      "floor": 7,
+      "userId": "500285768783101963",
+      "action": "continue"
+    },
+    {
+      "sequence": 42,
+      "timestamp": "2026-08-03T16:25:16.571Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 7,
+      "event": "ENEMY",
+      "stairsChance": 0.30000000000000004,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 1
+    },
+    {
+      "sequence": 43,
+      "timestamp": "2026-08-03T16:25:16.577Z",
+      "type": "BATTLE_STARTED",
+      "floor": 7,
+      "encounter": "NORMAL",
+      "monster": {
+        "level": 7,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "포자 야수",
+        "regionName": "균사 동굴",
+        "imageFile": "spore-beast.png",
+        "maxHealth": 432,
+        "health": 432,
+        "attack": 69,
+        "defense": 15,
+        "magicDefense": 14,
+        "speed": 18,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 85,
+        "skillName": "독성 포자"
+      },
+      "players": {
+        "500285768783101963": {
+          "stats": {
+            "playerLevel": 7,
+            "health": 168,
+            "defense": 22,
+            "attack": 45.7,
+            "magicAttack": 40,
+            "mana": 121.2,
+            "speed": 21,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 168,
+          "maxHealth": 168,
+          "mana": 121.2
+        },
+        "788944111096430602": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 212.8,
+            "defense": 28.7,
+            "attack": 52.7,
+            "magicAttack": 49.6,
+            "mana": 172.4,
+            "speed": 31,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 212.8,
+          "maxHealth": 212.8,
+          "mana": 172.4
+        },
+        "923095437752287264": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 291.1,
+            "defense": 25.6,
+            "attack": 43,
+            "magicAttack": 43,
+            "mana": 141.5,
+            "speed": 22,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 251.10000000000002,
+          "maxHealth": 291.1,
+          "mana": 141.5
+        },
+        "956902203791118366": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 218.8,
+            "defense": 26.6,
+            "attack": 52.7,
+            "magicAttack": 54.6,
+            "mana": 156.1,
+            "speed": 41.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.4
+          },
+          "health": 152.8,
+          "maxHealth": 218.8,
+          "mana": 156.1
+        },
+        "691457164010717244": {
+          "stats": {
+            "playerLevel": 7,
+            "health": 193.6,
+            "defense": 22,
+            "attack": 48.8,
+            "magicAttack": 48,
+            "mana": 118,
+            "speed": 21.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.7
+          },
+          "health": 193.6,
+          "maxHealth": 193.6,
+          "mana": 118
+        }
+      },
+      "initialTurnOrder": [
+        {
+          "key": "PLAYER:500285768783101963",
+          "type": "PLAYER",
+          "userId": "500285768783101963",
+          "speed": 21,
+          "nextActionAt": 476.1904761904762
+        },
+        {
+          "key": "PLAYER:788944111096430602",
+          "type": "PLAYER",
+          "userId": "788944111096430602",
+          "speed": 31,
+          "nextActionAt": 322.5806451612903
+        },
+        {
+          "key": "PLAYER:923095437752287264",
+          "type": "PLAYER",
+          "userId": "923095437752287264",
+          "speed": 22,
+          "nextActionAt": 454.54545454545456
+        },
+        {
+          "key": "PLAYER:956902203791118366",
+          "type": "PLAYER",
+          "userId": "956902203791118366",
+          "speed": 41.4,
+          "nextActionAt": 241.54589371980677
+        },
+        {
+          "key": "PLAYER:691457164010717244",
+          "type": "PLAYER",
+          "userId": "691457164010717244",
+          "speed": 21.4,
+          "nextActionAt": 467.2897196261683
+        },
+        {
+          "key": "ENEMY",
+          "type": "ENEMY",
+          "speed": 18,
+          "nextActionAt": 555.5555555555555
+        }
+      ]
+    },
+    {
+      "sequence": 44,
+      "timestamp": "2026-08-03T16:25:20.747Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 1,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 49,
+      "critical": false,
+      "monsterHealthBefore": 432,
+      "monsterHealthAfter": 383
+    },
+    {
+      "sequence": 45,
+      "timestamp": "2026-08-03T16:25:26.839Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 2,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 50,
+      "critical": false,
+      "monsterHealthBefore": 383,
+      "monsterHealthAfter": 333
+    },
+    {
+      "sequence": 46,
+      "timestamp": "2026-08-03T16:25:31.789Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 3,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 42,
+      "critical": false,
+      "monsterHealthBefore": 333,
+      "monsterHealthAfter": 291
+    },
+    {
+      "sequence": 47,
+      "timestamp": "2026-08-03T16:25:36.718Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 4,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 44,
+      "critical": false,
+      "monsterHealthBefore": 291,
+      "monsterHealthAfter": 247
+    },
+    {
+      "sequence": 48,
+      "timestamp": "2026-08-03T16:26:18.108Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 5,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 40,
+      "critical": false,
+      "monsterHealthBefore": 247,
+      "monsterHealthAfter": 207
+    },
+    {
+      "sequence": 49,
+      "timestamp": "2026-08-03T16:26:24.419Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 6,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 52,
+      "critical": false,
+      "monsterHealthBefore": 207,
+      "monsterHealthAfter": 155
+    },
+    {
+      "sequence": 50,
+      "timestamp": "2026-08-03T16:26:25.930Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 7,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "포자 야수",
+      "action": "독성 포자",
+      "targetId": "956902203791118366",
+      "damage": 57,
+      "critical": false,
+      "targetHealthBefore": 152.8,
+      "targetHealthAfter": 95.80000000000001,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 51,
+      "timestamp": "2026-08-03T16:26:51.644Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 8,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 52,
+      "critical": false,
+      "monsterHealthBefore": 155,
+      "monsterHealthAfter": 103
+    },
+    {
+      "sequence": 52,
+      "timestamp": "2026-08-03T16:27:00.962Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 9,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "ITEM",
+      "itemId": "legendary_health_potion",
+      "itemName": "전설체력포션",
+      "resource": "HEALTH",
+      "resourceBefore": 95.80000000000001,
+      "resourceAfter": 204.8,
+      "recovered": 109,
+      "remainingQuantity": 1
+    },
+    {
+      "sequence": 53,
+      "timestamp": "2026-08-03T16:27:06.643Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 10,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 40,
+      "critical": false,
+      "monsterHealthBefore": 103,
+      "monsterHealthAfter": 63
+    },
+    {
+      "sequence": 54,
+      "timestamp": "2026-08-03T16:27:16.576Z",
+      "type": "TURN_ACTION",
+      "floor": 7,
+      "turn": 11,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 71,
+      "critical": true,
+      "monsterHealthBefore": 63,
+      "monsterHealthAfter": 0
+    },
+    {
+      "sequence": 55,
+      "timestamp": "2026-08-03T16:27:18.006Z",
+      "type": "BATTLE_VICTORY",
+      "floor": 7,
+      "monster": {
+        "level": 7,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "포자 야수",
+        "regionName": "균사 동굴",
+        "imageFile": "spore-beast.png",
+        "maxHealth": 432,
+        "health": 0,
+        "attack": 69,
+        "defense": 15,
+        "magicDefense": 14,
+        "speed": 18,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 85,
+        "skillName": "독성 포자"
+      },
+      "turnsTaken": 11,
+      "rewards": [
+        {
+          "userId": "500285768783101963",
+          "gold": 85,
+          "experience": 150,
+          "newLevel": 8,
+          "levelsGained": 1,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "788944111096430602",
+          "gold": 85,
+          "experience": 120,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "923095437752287264",
+          "gold": 85,
+          "experience": 120,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "956902203791118366",
+          "gold": 85,
+          "experience": 120,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "691457164010717244",
+          "gold": 85,
+          "experience": 150,
+          "newLevel": 7,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        }
+      ],
+      "partyHealthAfter": {
+        "500285768783101963": 176,
+        "788944111096430602": 212.8,
+        "923095437752287264": 251.10000000000002,
+        "956902203791118366": 204.8,
+        "691457164010717244": 193.6
+      },
+      "partyManaAfter": {
+        "500285768783101963": 121.2,
+        "788944111096430602": 172.4,
+        "923095437752287264": 141.5,
+        "956902203791118366": 156.1,
+        "691457164010717244": 118
+      }
+    },
+    {
+      "sequence": 56,
+      "timestamp": "2026-08-03T16:27:30.952Z",
+      "type": "PARTY_CHOICE",
+      "floor": 7,
+      "userId": "500285768783101963",
+      "action": "continue"
+    },
+    {
+      "sequence": 57,
+      "timestamp": "2026-08-03T16:27:31.378Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 7,
+      "event": "STAIRS",
+      "stairsChance": 0.4,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 2
+    },
+    {
+      "sequence": 58,
+      "timestamp": "2026-08-03T16:27:38.520Z",
+      "type": "PARTY_CHOICE",
+      "floor": 7,
+      "userId": "500285768783101963",
+      "action": "stairs_yes"
+    },
+    {
+      "sequence": 59,
+      "timestamp": "2026-08-03T16:27:38.859Z",
+      "type": "FLOOR_CHANGED",
+      "floor": 8,
+      "fromFloor": 7,
+      "toFloor": 8,
+      "method": "STAIRS_OR_BOSS_CLEAR"
+    },
+    {
+      "sequence": 60,
+      "timestamp": "2026-08-03T16:27:39.252Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 8,
+      "event": "ENEMY",
+      "stairsChance": 0.2,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 0
+    },
+    {
+      "sequence": 61,
+      "timestamp": "2026-08-03T16:27:39.259Z",
+      "type": "BATTLE_STARTED",
+      "floor": 8,
+      "encounter": "NORMAL",
+      "monster": {
+        "level": 8,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "포자 야수",
+        "regionName": "균사 동굴",
+        "imageFile": "spore-beast.png",
+        "maxHealth": 480,
+        "health": 480,
+        "attack": 76,
+        "defense": 17,
+        "magicDefense": 16,
+        "speed": 20,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 95,
+        "skillName": "독성 포자"
+      },
+      "players": {
+        "500285768783101963": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 176,
+            "defense": 24,
+            "attack": 49.1,
+            "magicAttack": 43,
+            "mana": 129.2,
+            "speed": 22,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 176,
+          "maxHealth": 176,
+          "mana": 129.2
+        },
+        "788944111096430602": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 212.8,
+            "defense": 28.7,
+            "attack": 52.7,
+            "magicAttack": 49.6,
+            "mana": 172.4,
+            "speed": 31,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 212.8,
+          "maxHealth": 212.8,
+          "mana": 172.4
+        },
+        "923095437752287264": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 291.1,
+            "defense": 25.6,
+            "attack": 43,
+            "magicAttack": 43,
+            "mana": 141.5,
+            "speed": 22,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 251.10000000000002,
+          "maxHealth": 291.1,
+          "mana": 141.5
+        },
+        "956902203791118366": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 218.8,
+            "defense": 26.6,
+            "attack": 52.7,
+            "magicAttack": 54.6,
+            "mana": 156.1,
+            "speed": 41.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.4
+          },
+          "health": 204.8,
+          "maxHealth": 218.8,
+          "mana": 156.1
+        },
+        "691457164010717244": {
+          "stats": {
+            "playerLevel": 7,
+            "health": 193.6,
+            "defense": 22,
+            "attack": 48.8,
+            "magicAttack": 48,
+            "mana": 118,
+            "speed": 21.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.7
+          },
+          "health": 193.6,
+          "maxHealth": 193.6,
+          "mana": 118
+        }
+      },
+      "initialTurnOrder": [
+        {
+          "key": "PLAYER:500285768783101963",
+          "type": "PLAYER",
+          "userId": "500285768783101963",
+          "speed": 22,
+          "nextActionAt": 454.54545454545456
+        },
+        {
+          "key": "PLAYER:788944111096430602",
+          "type": "PLAYER",
+          "userId": "788944111096430602",
+          "speed": 31,
+          "nextActionAt": 322.5806451612903
+        },
+        {
+          "key": "PLAYER:923095437752287264",
+          "type": "PLAYER",
+          "userId": "923095437752287264",
+          "speed": 22,
+          "nextActionAt": 454.54545454545456
+        },
+        {
+          "key": "PLAYER:956902203791118366",
+          "type": "PLAYER",
+          "userId": "956902203791118366",
+          "speed": 41.4,
+          "nextActionAt": 241.54589371980677
+        },
+        {
+          "key": "PLAYER:691457164010717244",
+          "type": "PLAYER",
+          "userId": "691457164010717244",
+          "speed": 21.4,
+          "nextActionAt": 467.2897196261683
+        },
+        {
+          "key": "ENEMY",
+          "type": "ENEMY",
+          "speed": 20,
+          "nextActionAt": 500
+        }
+      ]
+    },
+    {
+      "sequence": 62,
+      "timestamp": "2026-08-03T16:27:43.023Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 1,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 51,
+      "critical": false,
+      "monsterHealthBefore": 480,
+      "monsterHealthAfter": 429
+    },
+    {
+      "sequence": 63,
+      "timestamp": "2026-08-03T16:27:50.392Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 2,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 51,
+      "critical": false,
+      "monsterHealthBefore": 429,
+      "monsterHealthAfter": 378
+    },
+    {
+      "sequence": 64,
+      "timestamp": "2026-08-03T16:27:57.720Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 3,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 47,
+      "critical": false,
+      "monsterHealthBefore": 378,
+      "monsterHealthAfter": 331
+    },
+    {
+      "sequence": 65,
+      "timestamp": "2026-08-03T16:28:02.995Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 4,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 42,
+      "critical": false,
+      "monsterHealthBefore": 331,
+      "monsterHealthAfter": 289
+    },
+    {
+      "sequence": 66,
+      "timestamp": "2026-08-03T16:28:08.022Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 5,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 45,
+      "critical": false,
+      "monsterHealthBefore": 289,
+      "monsterHealthAfter": 244
+    },
+    {
+      "sequence": 67,
+      "timestamp": "2026-08-03T16:28:12.389Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 6,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 50,
+      "critical": false,
+      "monsterHealthBefore": 244,
+      "monsterHealthAfter": 194
+    },
+    {
+      "sequence": 68,
+      "timestamp": "2026-08-03T16:28:13.869Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 7,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "포자 야수",
+      "action": "독성 포자",
+      "targetId": "956902203791118366",
+      "damage": 69,
+      "critical": false,
+      "targetHealthBefore": 204.8,
+      "targetHealthAfter": 135.8,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 69,
+      "timestamp": "2026-08-03T16:28:23.397Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 8,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 52,
+      "critical": false,
+      "monsterHealthBefore": 194,
+      "monsterHealthAfter": 142
+    },
+    {
+      "sequence": 70,
+      "timestamp": "2026-08-03T16:28:34.344Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 9,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "956902203791118366",
+      "healing": 44,
+      "targetHealthBefore": 135.8,
+      "targetHealthAfter": 179.8,
+      "manaBefore": 156.1,
+      "manaAfter": 146.1
+    },
+    {
+      "sequence": 71,
+      "timestamp": "2026-08-03T16:28:40.989Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 10,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 47,
+      "critical": false,
+      "monsterHealthBefore": 142,
+      "monsterHealthAfter": 95
+    },
+    {
+      "sequence": 72,
+      "timestamp": "2026-08-03T16:28:46.906Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 11,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 37,
+      "critical": false,
+      "monsterHealthBefore": 95,
+      "monsterHealthAfter": 58
+    },
+    {
+      "sequence": 73,
+      "timestamp": "2026-08-03T16:28:51.779Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 12,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 45,
+      "critical": false,
+      "monsterHealthBefore": 58,
+      "monsterHealthAfter": 13
+    },
+    {
+      "sequence": 74,
+      "timestamp": "2026-08-03T16:28:57.242Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 13,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 52,
+      "critical": false,
+      "monsterHealthBefore": 13,
+      "monsterHealthAfter": 0
+    },
+    {
+      "sequence": 75,
+      "timestamp": "2026-08-03T16:28:58.826Z",
+      "type": "BATTLE_VICTORY",
+      "floor": 8,
+      "monster": {
+        "level": 8,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "포자 야수",
+        "regionName": "균사 동굴",
+        "imageFile": "spore-beast.png",
+        "maxHealth": 480,
+        "health": 0,
+        "attack": 76,
+        "defense": 17,
+        "magicDefense": 16,
+        "speed": 20,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 95,
+        "skillName": "독성 포자"
+      },
+      "turnsTaken": 13,
+      "rewards": [
+        {
+          "userId": "500285768783101963",
+          "gold": 95,
+          "experience": 165,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "788944111096430602",
+          "gold": 95,
+          "experience": 165,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": {
+            "id": "advanced_mana_potion",
+            "name": "고급마나포션"
+          }
+        },
+        {
+          "userId": "923095437752287264",
+          "gold": 95,
+          "experience": 165,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": {
+            "id": "acfd4640-d44a-4a12-845a-ad61d54ec3cf",
+            "name": "빛나는 블레이드",
+            "itemLevel": 8,
+            "rarity": "레어",
+            "slot": "무기",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "attack",
+                "label": "공격력",
+                "baseValue": 15.6,
+                "value": 15.6
+              },
+              {
+                "stat": "magicAttack",
+                "label": "마법 공격력",
+                "baseValue": 15.6,
+                "value": 15.6
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": {
+            "id": "common_health_potion",
+            "name": "일반체력포션"
+          }
+        },
+        {
+          "userId": "956902203791118366",
+          "gold": 95,
+          "experience": 165,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "691457164010717244",
+          "gold": 95,
+          "experience": 198,
+          "newLevel": 7,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        }
+      ],
+      "partyHealthAfter": {
+        "500285768783101963": 176,
+        "788944111096430602": 212.8,
+        "923095437752287264": 251.10000000000002,
+        "956902203791118366": 179.8,
+        "691457164010717244": 193.6
+      },
+      "partyManaAfter": {
+        "500285768783101963": 129.2,
+        "788944111096430602": 172.4,
+        "923095437752287264": 141.5,
+        "956902203791118366": 146.1,
+        "691457164010717244": 118
+      }
+    },
+    {
+      "sequence": 76,
+      "timestamp": "2026-08-03T16:30:05.185Z",
+      "type": "PARTY_CHOICE",
+      "floor": 8,
+      "userId": "500285768783101963",
+      "action": "continue"
+    },
+    {
+      "sequence": 77,
+      "timestamp": "2026-08-03T16:30:05.579Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 8,
+      "event": "ENEMY",
+      "stairsChance": 0.30000000000000004,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 1
+    },
+    {
+      "sequence": 78,
+      "timestamp": "2026-08-03T16:30:05.588Z",
+      "type": "BATTLE_STARTED",
+      "floor": 8,
+      "encounter": "NORMAL",
+      "monster": {
+        "level": 8,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "포자 야수",
+        "regionName": "균사 동굴",
+        "imageFile": "spore-beast.png",
+        "maxHealth": 480,
+        "health": 480,
+        "attack": 76,
+        "defense": 17,
+        "magicDefense": 16,
+        "speed": 20,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 95,
+        "skillName": "독성 포자"
+      },
+      "players": {
+        "500285768783101963": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 176,
+            "defense": 24,
+            "attack": 49.1,
+            "magicAttack": 43,
+            "mana": 129.2,
+            "speed": 22,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 176,
+          "maxHealth": 176,
+          "mana": 129.2
+        },
+        "788944111096430602": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 212.8,
+            "defense": 28.7,
+            "attack": 52.7,
+            "magicAttack": 49.6,
+            "mana": 172.4,
+            "speed": 31,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 212.8,
+          "maxHealth": 212.8,
+          "mana": 172.4
+        },
+        "923095437752287264": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 291.1,
+            "defense": 25.6,
+            "attack": 43,
+            "magicAttack": 43,
+            "mana": 141.5,
+            "speed": 22,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 251.10000000000002,
+          "maxHealth": 291.1,
+          "mana": 141.5
+        },
+        "956902203791118366": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 218.8,
+            "defense": 26.6,
+            "attack": 52.7,
+            "magicAttack": 54.6,
+            "mana": 156.1,
+            "speed": 41.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.4
+          },
+          "health": 179.8,
+          "maxHealth": 218.8,
+          "mana": 156.1
+        },
+        "691457164010717244": {
+          "stats": {
+            "playerLevel": 7,
+            "health": 193.6,
+            "defense": 22,
+            "attack": 48.8,
+            "magicAttack": 48,
+            "mana": 118,
+            "speed": 21.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.7
+          },
+          "health": 193.6,
+          "maxHealth": 193.6,
+          "mana": 118
+        }
+      },
+      "initialTurnOrder": [
+        {
+          "key": "PLAYER:500285768783101963",
+          "type": "PLAYER",
+          "userId": "500285768783101963",
+          "speed": 22,
+          "nextActionAt": 454.54545454545456
+        },
+        {
+          "key": "PLAYER:788944111096430602",
+          "type": "PLAYER",
+          "userId": "788944111096430602",
+          "speed": 31,
+          "nextActionAt": 322.5806451612903
+        },
+        {
+          "key": "PLAYER:923095437752287264",
+          "type": "PLAYER",
+          "userId": "923095437752287264",
+          "speed": 22,
+          "nextActionAt": 454.54545454545456
+        },
+        {
+          "key": "PLAYER:956902203791118366",
+          "type": "PLAYER",
+          "userId": "956902203791118366",
+          "speed": 41.4,
+          "nextActionAt": 241.54589371980677
+        },
+        {
+          "key": "PLAYER:691457164010717244",
+          "type": "PLAYER",
+          "userId": "691457164010717244",
+          "speed": 21.4,
+          "nextActionAt": 467.2897196261683
+        },
+        {
+          "key": "ENEMY",
+          "type": "ENEMY",
+          "speed": 20,
+          "nextActionAt": 500
+        }
+      ]
+    },
+    {
+      "sequence": 79,
+      "timestamp": "2026-08-03T16:30:11.581Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 1,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 46,
+      "critical": false,
+      "monsterHealthBefore": 480,
+      "monsterHealthAfter": 434
+    },
+    {
+      "sequence": 80,
+      "timestamp": "2026-08-03T16:30:16.910Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 2,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 54,
+      "critical": false,
+      "monsterHealthBefore": 434,
+      "monsterHealthAfter": 380
+    },
+    {
+      "sequence": 81,
+      "timestamp": "2026-08-03T16:30:24.338Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 3,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 43,
+      "critical": false,
+      "monsterHealthBefore": 380,
+      "monsterHealthAfter": 337
+    },
+    {
+      "sequence": 82,
+      "timestamp": "2026-08-03T16:30:30.583Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 4,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 40,
+      "critical": false,
+      "monsterHealthBefore": 337,
+      "monsterHealthAfter": 297
+    },
+    {
+      "sequence": 83,
+      "timestamp": "2026-08-03T16:30:36.126Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 5,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 43,
+      "critical": false,
+      "monsterHealthBefore": 297,
+      "monsterHealthAfter": 254
+    },
+    {
+      "sequence": 84,
+      "timestamp": "2026-08-03T16:30:40.870Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 6,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 46,
+      "critical": false,
+      "monsterHealthBefore": 254,
+      "monsterHealthAfter": 208
+    },
+    {
+      "sequence": 85,
+      "timestamp": "2026-08-03T16:30:42.294Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 7,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "포자 야수",
+      "action": "독성 포자",
+      "targetId": "691457164010717244",
+      "damage": 73,
+      "critical": false,
+      "targetHealthBefore": 193.6,
+      "targetHealthAfter": 120.6,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 86,
+      "timestamp": "2026-08-03T16:30:53.014Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 8,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 45,
+      "critical": false,
+      "monsterHealthBefore": 208,
+      "monsterHealthAfter": 163
+    },
+    {
+      "sequence": 87,
+      "timestamp": "2026-08-03T16:30:59.172Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 9,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 53,
+      "critical": false,
+      "monsterHealthBefore": 163,
+      "monsterHealthAfter": 110
+    },
+    {
+      "sequence": 88,
+      "timestamp": "2026-08-03T16:31:04.477Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 10,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 48,
+      "critical": false,
+      "monsterHealthBefore": 110,
+      "monsterHealthAfter": 62
+    },
+    {
+      "sequence": 89,
+      "timestamp": "2026-08-03T16:31:10.027Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 11,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 39,
+      "critical": false,
+      "monsterHealthBefore": 62,
+      "monsterHealthAfter": 23
+    },
+    {
+      "sequence": 90,
+      "timestamp": "2026-08-03T16:31:14.591Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 12,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 46,
+      "critical": false,
+      "monsterHealthBefore": 23,
+      "monsterHealthAfter": 0
+    },
+    {
+      "sequence": 91,
+      "timestamp": "2026-08-03T16:31:16.092Z",
+      "type": "BATTLE_VICTORY",
+      "floor": 8,
+      "monster": {
+        "level": 8,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "포자 야수",
+        "regionName": "균사 동굴",
+        "imageFile": "spore-beast.png",
+        "maxHealth": 480,
+        "health": 0,
+        "attack": 76,
+        "defense": 17,
+        "magicDefense": 16,
+        "speed": 20,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 95,
+        "skillName": "독성 포자"
+      },
+      "turnsTaken": 12,
+      "rewards": [
+        {
+          "userId": "500285768783101963",
+          "gold": 95,
+          "experience": 165,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "788944111096430602",
+          "gold": 95,
+          "experience": 165,
+          "newLevel": 9,
+          "levelsGained": 1,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "923095437752287264",
+          "gold": 95,
+          "experience": 165,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "956902203791118366",
+          "gold": 95,
+          "experience": 165,
+          "newLevel": 9,
+          "levelsGained": 1,
+          "equipment": {
+            "id": "717dcdae-18ea-4c2f-9271-d2fd6efec85f",
+            "name": "낡은 가죽 상의",
+            "itemLevel": 8,
+            "rarity": "일반",
+            "slot": "상의",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "defense",
+                "label": "방어력",
+                "baseValue": 7.8,
+                "value": 7.8
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": null
+        },
+        {
+          "userId": "691457164010717244",
+          "gold": 95,
+          "experience": 198,
+          "newLevel": 8,
+          "levelsGained": 1,
+          "equipment": null,
+          "potion": null
+        }
+      ],
+      "partyHealthAfter": {
+        "500285768783101963": 176,
+        "788944111096430602": 220.8,
+        "923095437752287264": 251.10000000000002,
+        "956902203791118366": 187.8,
+        "691457164010717244": 128.6
+      },
+      "partyManaAfter": {
+        "500285768783101963": 129.2,
+        "788944111096430602": 172.4,
+        "923095437752287264": 141.5,
+        "956902203791118366": 156.1,
+        "691457164010717244": 118
+      }
+    },
+    {
+      "sequence": 92,
+      "timestamp": "2026-08-03T16:31:21.263Z",
+      "type": "PARTY_CHOICE",
+      "floor": 8,
+      "userId": "500285768783101963",
+      "action": "continue"
+    },
+    {
+      "sequence": 93,
+      "timestamp": "2026-08-03T16:31:21.654Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 8,
+      "event": "ENEMY",
+      "stairsChance": 0.4,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 2
+    },
+    {
+      "sequence": 94,
+      "timestamp": "2026-08-03T16:31:21.662Z",
+      "type": "BATTLE_STARTED",
+      "floor": 8,
+      "encounter": "NORMAL",
+      "monster": {
+        "level": 8,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "포자 야수",
+        "regionName": "균사 동굴",
+        "imageFile": "spore-beast.png",
+        "maxHealth": 480,
+        "health": 480,
+        "attack": 76,
+        "defense": 17,
+        "magicDefense": 16,
+        "speed": 20,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 95,
+        "skillName": "독성 포자"
+      },
+      "players": {
+        "500285768783101963": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 176,
+            "defense": 24,
+            "attack": 49.1,
+            "magicAttack": 43,
+            "mana": 129.2,
+            "speed": 22,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 176,
+          "maxHealth": 176,
+          "mana": 129.2
+        },
+        "788944111096430602": {
+          "stats": {
+            "playerLevel": 9,
+            "health": 220.8,
+            "defense": 31.1,
+            "attack": 56,
+            "magicAttack": 52.7,
+            "mana": 181.3,
+            "speed": 32,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 220.8,
+          "maxHealth": 220.8,
+          "mana": 181.3
+        },
+        "923095437752287264": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 291.1,
+            "defense": 25.6,
+            "attack": 43,
+            "magicAttack": 43,
+            "mana": 141.5,
+            "speed": 22,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 251.10000000000002,
+          "maxHealth": 291.1,
+          "mana": 141.5
+        },
+        "956902203791118366": {
+          "stats": {
+            "playerLevel": 9,
+            "health": 226.8,
+            "defense": 28.6,
+            "attack": 56.3,
+            "magicAttack": 58.3,
+            "mana": 165.1,
+            "speed": 42.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.4
+          },
+          "health": 187.8,
+          "maxHealth": 226.8,
+          "mana": 165.1
+        },
+        "691457164010717244": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 201.6,
+            "defense": 24,
+            "attack": 52.1,
+            "magicAttack": 51.2,
+            "mana": 126,
+            "speed": 22.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.7
+          },
+          "health": 128.6,
+          "maxHealth": 201.6,
+          "mana": 126
+        }
+      },
+      "initialTurnOrder": [
+        {
+          "key": "PLAYER:500285768783101963",
+          "type": "PLAYER",
+          "userId": "500285768783101963",
+          "speed": 22,
+          "nextActionAt": 454.54545454545456
+        },
+        {
+          "key": "PLAYER:788944111096430602",
+          "type": "PLAYER",
+          "userId": "788944111096430602",
+          "speed": 32,
+          "nextActionAt": 312.5
+        },
+        {
+          "key": "PLAYER:923095437752287264",
+          "type": "PLAYER",
+          "userId": "923095437752287264",
+          "speed": 22,
+          "nextActionAt": 454.54545454545456
+        },
+        {
+          "key": "PLAYER:956902203791118366",
+          "type": "PLAYER",
+          "userId": "956902203791118366",
+          "speed": 42.4,
+          "nextActionAt": 235.8490566037736
+        },
+        {
+          "key": "PLAYER:691457164010717244",
+          "type": "PLAYER",
+          "userId": "691457164010717244",
+          "speed": 22.4,
+          "nextActionAt": 446.42857142857144
+        },
+        {
+          "key": "ENEMY",
+          "type": "ENEMY",
+          "speed": 20,
+          "nextActionAt": 500
+        }
+      ]
+    },
+    {
+      "sequence": 95,
+      "timestamp": "2026-08-03T16:31:26.669Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 1,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 54,
+      "critical": false,
+      "monsterHealthBefore": 480,
+      "monsterHealthAfter": 426
+    },
+    {
+      "sequence": 96,
+      "timestamp": "2026-08-03T16:31:32.750Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 2,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 54,
+      "critical": false,
+      "monsterHealthBefore": 426,
+      "monsterHealthAfter": 372
+    },
+    {
+      "sequence": 97,
+      "timestamp": "2026-08-03T16:31:37.643Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 3,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 47,
+      "critical": false,
+      "monsterHealthBefore": 372,
+      "monsterHealthAfter": 325
+    },
+    {
+      "sequence": 98,
+      "timestamp": "2026-08-03T16:31:44.360Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 4,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 49,
+      "critical": false,
+      "monsterHealthBefore": 325,
+      "monsterHealthAfter": 276
+    },
+    {
+      "sequence": 99,
+      "timestamp": "2026-08-03T16:31:49.211Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 5,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 41,
+      "critical": false,
+      "monsterHealthBefore": 276,
+      "monsterHealthAfter": 235
+    },
+    {
+      "sequence": 100,
+      "timestamp": "2026-08-03T16:31:53.455Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 6,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 58,
+      "critical": false,
+      "monsterHealthBefore": 235,
+      "monsterHealthAfter": 177
+    },
+    {
+      "sequence": 101,
+      "timestamp": "2026-08-03T16:31:54.879Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 7,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "포자 야수",
+      "action": "독성 포자",
+      "targetId": "956902203791118366",
+      "damage": 68,
+      "critical": false,
+      "targetHealthBefore": 187.8,
+      "targetHealthAfter": 119.80000000000001,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 102,
+      "timestamp": "2026-08-03T16:32:07.696Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 8,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 53,
+      "critical": false,
+      "monsterHealthBefore": 177,
+      "monsterHealthAfter": 124
+    },
+    {
+      "sequence": 103,
+      "timestamp": "2026-08-03T16:32:15.725Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 9,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "ITEM",
+      "itemId": "advanced_health_potion",
+      "itemName": "고급체력포션",
+      "resource": "HEALTH",
+      "resourceBefore": 119.80000000000001,
+      "resourceAfter": 142.8,
+      "recovered": 23,
+      "remainingQuantity": 3
+    },
+    {
+      "sequence": 104,
+      "timestamp": "2026-08-03T16:32:46.019Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 10,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 47,
+      "critical": false,
+      "monsterHealthBefore": 124,
+      "monsterHealthAfter": 77
+    },
+    {
+      "sequence": 105,
+      "timestamp": "2026-08-03T16:32:52.094Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 11,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 48,
+      "critical": false,
+      "monsterHealthBefore": 77,
+      "monsterHealthAfter": 29
+    },
+    {
+      "sequence": 106,
+      "timestamp": "2026-08-03T16:32:57.510Z",
+      "type": "TURN_ACTION",
+      "floor": 8,
+      "turn": 12,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 42,
+      "critical": false,
+      "monsterHealthBefore": 29,
+      "monsterHealthAfter": 0
+    },
+    {
+      "sequence": 107,
+      "timestamp": "2026-08-03T16:32:58.989Z",
+      "type": "BATTLE_VICTORY",
+      "floor": 8,
+      "monster": {
+        "level": 8,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "포자 야수",
+        "regionName": "균사 동굴",
+        "imageFile": "spore-beast.png",
+        "maxHealth": 480,
+        "health": 0,
+        "attack": 76,
+        "defense": 17,
+        "magicDefense": 16,
+        "speed": 20,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 95,
+        "skillName": "독성 포자"
+      },
+      "turnsTaken": 12,
+      "rewards": [
+        {
+          "userId": "500285768783101963",
+          "gold": 95,
+          "experience": 165,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "788944111096430602",
+          "gold": 95,
+          "experience": 132,
+          "newLevel": 9,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "923095437752287264",
+          "gold": 95,
+          "experience": 165,
+          "newLevel": 9,
+          "levelsGained": 1,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "956902203791118366",
+          "gold": 95,
+          "experience": 132,
+          "newLevel": 9,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "691457164010717244",
+          "gold": 95,
+          "experience": 165,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": {
+            "id": "advanced_health_potion",
+            "name": "고급체력포션"
+          }
+        }
+      ],
+      "partyHealthAfter": {
+        "500285768783101963": 176,
+        "788944111096430602": 220.8,
+        "923095437752287264": 259.1,
+        "956902203791118366": 142.8,
+        "691457164010717244": 128.6
+      },
+      "partyManaAfter": {
+        "500285768783101963": 129.2,
+        "788944111096430602": 181.3,
+        "923095437752287264": 141.5,
+        "956902203791118366": 165.1,
+        "691457164010717244": 126
+      }
+    },
+    {
+      "sequence": 108,
+      "timestamp": "2026-08-03T16:33:08.222Z",
+      "type": "PARTY_CHOICE",
+      "floor": 8,
+      "userId": "500285768783101963",
+      "action": "continue"
+    },
+    {
+      "sequence": 109,
+      "timestamp": "2026-08-03T16:33:08.585Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 8,
+      "event": "STAIRS",
+      "stairsChance": 0.5,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 3
+    },
+    {
+      "sequence": 110,
+      "timestamp": "2026-08-03T16:33:16.756Z",
+      "type": "PARTY_CHOICE",
+      "floor": 8,
+      "userId": "500285768783101963",
+      "action": "stairs_yes"
+    },
+    {
+      "sequence": 111,
+      "timestamp": "2026-08-03T16:33:17.131Z",
+      "type": "FLOOR_CHANGED",
+      "floor": 9,
+      "fromFloor": 8,
+      "toFloor": 9,
+      "method": "STAIRS_OR_BOSS_CLEAR"
+    },
+    {
+      "sequence": 112,
+      "timestamp": "2026-08-03T16:33:17.479Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 9,
+      "event": "ENEMY",
+      "stairsChance": 0.2,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 0
+    },
+    {
+      "sequence": 113,
+      "timestamp": "2026-08-03T16:33:17.489Z",
+      "type": "BATTLE_STARTED",
+      "floor": 9,
+      "encounter": "NORMAL",
+      "monster": {
+        "level": 9,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "포자 야수",
+        "regionName": "균사 동굴",
+        "imageFile": "spore-beast.png",
+        "maxHealth": 528,
+        "health": 528,
+        "attack": 83,
+        "defense": 19,
+        "magicDefense": 17,
+        "speed": 21,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 105,
+        "skillName": "독성 포자"
+      },
+      "players": {
+        "500285768783101963": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 176,
+            "defense": 24,
+            "attack": 49.1,
+            "magicAttack": 43,
+            "mana": 129.2,
+            "speed": 22,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 176,
+          "maxHealth": 176,
+          "mana": 129.2
+        },
+        "788944111096430602": {
+          "stats": {
+            "playerLevel": 9,
+            "health": 220.8,
+            "defense": 31.1,
+            "attack": 56,
+            "magicAttack": 52.7,
+            "mana": 181.3,
+            "speed": 32,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 220.8,
+          "maxHealth": 220.8,
+          "mana": 181.3
+        },
+        "923095437752287264": {
+          "stats": {
+            "playerLevel": 9,
+            "health": 301.7,
+            "defense": 27.6,
+            "attack": 46,
+            "magicAttack": 46,
+            "mana": 149.5,
+            "speed": 23,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 259.1,
+          "maxHealth": 299.1,
+          "mana": 149.5
+        },
+        "956902203791118366": {
+          "stats": {
+            "playerLevel": 9,
+            "health": 226.8,
+            "defense": 28.6,
+            "attack": 56.3,
+            "magicAttack": 58.3,
+            "mana": 165.1,
+            "speed": 42.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.4
+          },
+          "health": 142.8,
+          "maxHealth": 226.8,
+          "mana": 165.1
+        },
+        "691457164010717244": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 201.6,
+            "defense": 24,
+            "attack": 52.1,
+            "magicAttack": 51.2,
+            "mana": 126,
+            "speed": 22.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.7
+          },
+          "health": 128.6,
+          "maxHealth": 201.6,
+          "mana": 126
+        }
+      },
+      "initialTurnOrder": [
+        {
+          "key": "PLAYER:500285768783101963",
+          "type": "PLAYER",
+          "userId": "500285768783101963",
+          "speed": 22,
+          "nextActionAt": 454.54545454545456
+        },
+        {
+          "key": "PLAYER:788944111096430602",
+          "type": "PLAYER",
+          "userId": "788944111096430602",
+          "speed": 32,
+          "nextActionAt": 312.5
+        },
+        {
+          "key": "PLAYER:923095437752287264",
+          "type": "PLAYER",
+          "userId": "923095437752287264",
+          "speed": 23,
+          "nextActionAt": 434.7826086956522
+        },
+        {
+          "key": "PLAYER:956902203791118366",
+          "type": "PLAYER",
+          "userId": "956902203791118366",
+          "speed": 42.4,
+          "nextActionAt": 235.8490566037736
+        },
+        {
+          "key": "PLAYER:691457164010717244",
+          "type": "PLAYER",
+          "userId": "691457164010717244",
+          "speed": 22.4,
+          "nextActionAt": 446.42857142857144
+        },
+        {
+          "key": "ENEMY",
+          "type": "ENEMY",
+          "speed": 21,
+          "nextActionAt": 476.1904761904762
+        }
+      ]
+    },
+    {
+      "sequence": 114,
+      "timestamp": "2026-08-03T16:33:24.062Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 1,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "956902203791118366",
+      "healing": 47,
+      "targetHealthBefore": 142.8,
+      "targetHealthAfter": 189.8,
+      "manaBefore": 165.1,
+      "manaAfter": 155.1
+    },
+    {
+      "sequence": 115,
+      "timestamp": "2026-08-03T16:33:30.178Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 2,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 48,
+      "critical": false,
+      "monsterHealthBefore": 528,
+      "monsterHealthAfter": 480
+    },
+    {
+      "sequence": 116,
+      "timestamp": "2026-08-03T16:33:35.327Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 3,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 47,
+      "critical": false,
+      "monsterHealthBefore": 480,
+      "monsterHealthAfter": 433
+    },
+    {
+      "sequence": 117,
+      "timestamp": "2026-08-03T16:33:43.912Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 4,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "ITEM",
+      "itemId": "advanced_health_potion",
+      "itemName": "고급체력포션",
+      "resource": "HEALTH",
+      "resourceBefore": 128.6,
+      "resourceAfter": 148.6,
+      "recovered": 20,
+      "remainingQuantity": 1
+    },
+    {
+      "sequence": 118,
+      "timestamp": "2026-08-03T16:33:50.504Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 5,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 50,
+      "critical": false,
+      "monsterHealthBefore": 433,
+      "monsterHealthAfter": 383
+    },
+    {
+      "sequence": 119,
+      "timestamp": "2026-08-03T16:33:55.014Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 6,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 54,
+      "critical": false,
+      "monsterHealthBefore": 383,
+      "monsterHealthAfter": 329
+    },
+    {
+      "sequence": 120,
+      "timestamp": "2026-08-03T16:33:56.391Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 7,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "포자 야수",
+      "action": "독성 포자",
+      "targetId": "691457164010717244",
+      "damage": 76,
+      "critical": false,
+      "targetHealthBefore": 148.6,
+      "targetHealthAfter": 72.6,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 121,
+      "timestamp": "2026-08-03T16:34:05.933Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 8,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 57,
+      "critical": false,
+      "monsterHealthBefore": 329,
+      "monsterHealthAfter": 272
+    },
+    {
+      "sequence": 122,
+      "timestamp": "2026-08-03T16:34:12.808Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 9,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 56,
+      "critical": false,
+      "monsterHealthBefore": 272,
+      "monsterHealthAfter": 216
+    },
+    {
+      "sequence": 123,
+      "timestamp": "2026-08-03T16:34:25.568Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 10,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "691457164010717244",
+      "healing": 37,
+      "targetHealthBefore": 72.6,
+      "targetHealthAfter": 109.6,
+      "manaBefore": 149.5,
+      "manaAfter": 139.5
+    },
+    {
+      "sequence": 124,
+      "timestamp": "2026-08-03T16:34:33.417Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 11,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "ITEM",
+      "itemId": "advanced_health_potion",
+      "itemName": "고급체력포션",
+      "resource": "HEALTH",
+      "resourceBefore": 109.6,
+      "resourceAfter": 129.6,
+      "recovered": 20,
+      "remainingQuantity": 0
+    },
+    {
+      "sequence": 125,
+      "timestamp": "2026-08-03T16:34:46.696Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 12,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "691457164010717244",
+      "healing": 34,
+      "targetHealthBefore": 129.6,
+      "targetHealthAfter": 163.6,
+      "manaBefore": 129.2,
+      "manaAfter": 119.19999999999999
+    },
+    {
+      "sequence": 126,
+      "timestamp": "2026-08-03T16:34:54.163Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 13,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 51,
+      "critical": false,
+      "monsterHealthBefore": 216,
+      "monsterHealthAfter": 165
+    },
+    {
+      "sequence": 127,
+      "timestamp": "2026-08-03T16:34:58.637Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 14,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 51,
+      "critical": false,
+      "monsterHealthBefore": 165,
+      "monsterHealthAfter": 114
+    },
+    {
+      "sequence": 128,
+      "timestamp": "2026-08-03T16:35:00.064Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 15,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "포자 야수",
+      "action": "독성 포자",
+      "targetId": "788944111096430602",
+      "damage": 70,
+      "critical": false,
+      "targetHealthBefore": 220.8,
+      "targetHealthAfter": 150.8,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 129,
+      "timestamp": "2026-08-03T16:35:08.737Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 16,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 52,
+      "critical": false,
+      "monsterHealthBefore": 114,
+      "monsterHealthAfter": 62
+    },
+    {
+      "sequence": 130,
+      "timestamp": "2026-08-03T16:35:15.582Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 17,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 48,
+      "critical": false,
+      "monsterHealthBefore": 62,
+      "monsterHealthAfter": 14
+    },
+    {
+      "sequence": 131,
+      "timestamp": "2026-08-03T16:35:20.828Z",
+      "type": "TURN_ACTION",
+      "floor": 9,
+      "turn": 18,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 44,
+      "critical": false,
+      "monsterHealthBefore": 14,
+      "monsterHealthAfter": 0
+    },
+    {
+      "sequence": 132,
+      "timestamp": "2026-08-03T16:35:22.248Z",
+      "type": "BATTLE_VICTORY",
+      "floor": 9,
+      "monster": {
+        "level": 9,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "포자 야수",
+        "regionName": "균사 동굴",
+        "imageFile": "spore-beast.png",
+        "maxHealth": 528,
+        "health": 0,
+        "attack": 83,
+        "defense": 19,
+        "magicDefense": 17,
+        "speed": 21,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 105,
+        "skillName": "독성 포자"
+      },
+      "turnsTaken": 18,
+      "rewards": [
+        {
+          "userId": "500285768783101963",
+          "gold": 105,
+          "experience": 216,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "788944111096430602",
+          "gold": 105,
+          "experience": 180,
+          "newLevel": 9,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "923095437752287264",
+          "gold": 105,
+          "experience": 180,
+          "newLevel": 9,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": {
+            "id": "common_health_potion",
+            "name": "일반체력포션"
+          }
+        },
+        {
+          "userId": "956902203791118366",
+          "gold": 105,
+          "experience": 180,
+          "newLevel": 9,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "691457164010717244",
+          "gold": 105,
+          "experience": 216,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": {
+            "id": "344a12d7-4d38-4cfd-a6e0-7c8e0b2987f8",
+            "name": "낡은 가죽 하의",
+            "itemLevel": 9,
+            "rarity": "일반",
+            "slot": "하의",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "health",
+                "label": "체력",
+                "baseValue": 82,
+                "value": 82
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": {
+            "id": "common_mana_potion",
+            "name": "일반마나포션"
+          }
+        }
+      ],
+      "partyHealthAfter": {
+        "500285768783101963": 176,
+        "788944111096430602": 150.8,
+        "923095437752287264": 259.1,
+        "956902203791118366": 189.8,
+        "691457164010717244": 163.6
+      },
+      "partyManaAfter": {
+        "500285768783101963": 119.19999999999999,
+        "788944111096430602": 181.3,
+        "923095437752287264": 139.5,
+        "956902203791118366": 155.1,
+        "691457164010717244": 126
+      }
+    },
+    {
+      "sequence": 133,
+      "timestamp": "2026-08-03T16:35:37.999Z",
+      "type": "PARTY_CHOICE",
+      "floor": 9,
+      "userId": "500285768783101963",
+      "action": "continue"
+    },
+    {
+      "sequence": 134,
+      "timestamp": "2026-08-03T16:35:38.462Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 9,
+      "event": "STAIRS",
+      "stairsChance": 0.30000000000000004,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 1
+    },
+    {
+      "sequence": 135,
+      "timestamp": "2026-08-03T16:35:41.846Z",
+      "type": "PARTY_CHOICE",
+      "floor": 9,
+      "userId": "500285768783101963",
+      "action": "stairs_yes"
+    },
+    {
+      "sequence": 136,
+      "timestamp": "2026-08-03T16:35:42.212Z",
+      "type": "FLOOR_CHANGED",
+      "floor": 10,
+      "fromFloor": 9,
+      "toFloor": 10,
+      "method": "STAIRS_OR_BOSS_CLEAR"
+    },
+    {
+      "sequence": 137,
+      "timestamp": "2026-08-03T16:35:42.567Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 10,
+      "event": "BOSS",
+      "stairsChance": 0.2,
+      "stairsIncluded": false,
+      "bossPending": true,
+      "combatsWonThisFloor": 0
+    },
+    {
+      "sequence": 138,
+      "timestamp": "2026-08-03T16:35:44.577Z",
+      "type": "BATTLE_STARTED",
+      "floor": 10,
+      "encounter": "BOSS",
+      "monster": {
+        "level": 10,
+        "isMimic": false,
+        "isBoss": true,
+        "name": "균사 여왕",
+        "regionName": "균사 동굴",
+        "imageFile": "mycelium-queen.png",
+        "maxHealth": 1037,
+        "health": 1037,
+        "attack": 112,
+        "defense": 26,
+        "magicDefense": 24,
+        "speed": 28,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 345,
+        "skillName": "만개하는 역병"
+      },
+      "players": {
+        "500285768783101963": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 176,
+            "defense": 24,
+            "attack": 49.1,
+            "magicAttack": 43,
+            "mana": 129.2,
+            "speed": 22,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 176,
+          "maxHealth": 176,
+          "mana": 129.2
+        },
+        "788944111096430602": {
+          "stats": {
+            "playerLevel": 9,
+            "health": 220.8,
+            "defense": 31.1,
+            "attack": 56,
+            "magicAttack": 52.7,
+            "mana": 181.3,
+            "speed": 32,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 150.8,
+          "maxHealth": 220.8,
+          "mana": 181.3
+        },
+        "923095437752287264": {
+          "stats": {
+            "playerLevel": 9,
+            "health": 301.7,
+            "defense": 27.6,
+            "attack": 46,
+            "magicAttack": 46,
+            "mana": 149.5,
+            "speed": 23,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 259.1,
+          "maxHealth": 299.1,
+          "mana": 149.5
+        },
+        "956902203791118366": {
+          "stats": {
+            "playerLevel": 9,
+            "health": 226.8,
+            "defense": 28.6,
+            "attack": 56.3,
+            "magicAttack": 58.3,
+            "mana": 165.1,
+            "speed": 42.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.4
+          },
+          "health": 189.8,
+          "maxHealth": 226.8,
+          "mana": 165.1
+        },
+        "691457164010717244": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 201.6,
+            "defense": 24,
+            "attack": 52.1,
+            "magicAttack": 51.2,
+            "mana": 126,
+            "speed": 22.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.7
+          },
+          "health": 163.6,
+          "maxHealth": 201.6,
+          "mana": 126
+        }
+      },
+      "initialTurnOrder": [
+        {
+          "key": "PLAYER:500285768783101963",
+          "type": "PLAYER",
+          "userId": "500285768783101963",
+          "speed": 22,
+          "nextActionAt": 454.54545454545456
+        },
+        {
+          "key": "PLAYER:788944111096430602",
+          "type": "PLAYER",
+          "userId": "788944111096430602",
+          "speed": 32,
+          "nextActionAt": 312.5
+        },
+        {
+          "key": "PLAYER:923095437752287264",
+          "type": "PLAYER",
+          "userId": "923095437752287264",
+          "speed": 23,
+          "nextActionAt": 434.7826086956522
+        },
+        {
+          "key": "PLAYER:956902203791118366",
+          "type": "PLAYER",
+          "userId": "956902203791118366",
+          "speed": 42.4,
+          "nextActionAt": 235.8490566037736
+        },
+        {
+          "key": "PLAYER:691457164010717244",
+          "type": "PLAYER",
+          "userId": "691457164010717244",
+          "speed": 22.4,
+          "nextActionAt": 446.42857142857144
+        },
+        {
+          "key": "ENEMY",
+          "type": "ENEMY",
+          "speed": 28,
+          "nextActionAt": 357.14285714285717
+        }
+      ]
+    },
+    {
+      "sequence": 139,
+      "timestamp": "2026-08-03T16:35:50.147Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 1,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 48,
+      "critical": false,
+      "monsterHealthBefore": 1037,
+      "monsterHealthAfter": 989
+    },
+    {
+      "sequence": 140,
+      "timestamp": "2026-08-03T16:36:04.241Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 2,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "ITEM",
+      "itemId": "common_health_potion",
+      "itemName": "일반체력포션",
+      "resource": "HEALTH",
+      "resourceBefore": 150.8,
+      "resourceAfter": 161.8,
+      "recovered": 11,
+      "remainingQuantity": 9
+    },
+    {
+      "sequence": 141,
+      "timestamp": "2026-08-03T16:36:05.944Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 3,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "균사 여왕",
+      "action": "만개하는 역병",
+      "targetId": "500285768783101963",
+      "damage": 112,
+      "critical": false,
+      "targetHealthBefore": 176,
+      "targetHealthAfter": 64,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 142,
+      "timestamp": "2026-08-03T16:36:14.367Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 4,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 41,
+      "critical": false,
+      "monsterHealthBefore": 989,
+      "monsterHealthAfter": 948
+    },
+    {
+      "sequence": 143,
+      "timestamp": "2026-08-03T16:36:19.344Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 5,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 45,
+      "critical": false,
+      "monsterHealthBefore": 948,
+      "monsterHealthAfter": 903
+    },
+    {
+      "sequence": 144,
+      "timestamp": "2026-08-03T16:36:28.395Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 6,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "ITEM",
+      "itemId": "legendary_health_potion",
+      "itemName": "전설체력포션",
+      "resource": "HEALTH",
+      "resourceBefore": 64,
+      "resourceAfter": 152,
+      "recovered": 88,
+      "remainingQuantity": 0
+    },
+    {
+      "sequence": 145,
+      "timestamp": "2026-08-03T16:36:33.861Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 7,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 52,
+      "critical": false,
+      "monsterHealthBefore": 903,
+      "monsterHealthAfter": 851
+    },
+    {
+      "sequence": 146,
+      "timestamp": "2026-08-03T16:36:43.995Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 8,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 54,
+      "critical": false,
+      "monsterHealthBefore": 851,
+      "monsterHealthAfter": 797
+    },
+    {
+      "sequence": 147,
+      "timestamp": "2026-08-03T16:36:48.810Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 9,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 55,
+      "critical": false,
+      "monsterHealthBefore": 797,
+      "monsterHealthAfter": 742
+    },
+    {
+      "sequence": 148,
+      "timestamp": "2026-08-03T16:36:50.210Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 10,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "균사 여왕",
+      "action": "만개하는 역병",
+      "targetId": "956902203791118366",
+      "damage": 108,
+      "critical": false,
+      "targetHealthBefore": 189.8,
+      "targetHealthAfter": 81.80000000000001,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 149,
+      "timestamp": "2026-08-03T16:36:58.073Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 11,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 46,
+      "critical": false,
+      "monsterHealthBefore": 742,
+      "monsterHealthAfter": 696
+    },
+    {
+      "sequence": 150,
+      "timestamp": "2026-08-03T16:37:06.230Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 12,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 49,
+      "critical": false,
+      "monsterHealthBefore": 696,
+      "monsterHealthAfter": 647
+    },
+    {
+      "sequence": 151,
+      "timestamp": "2026-08-03T16:37:16.812Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 13,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "956902203791118366",
+      "healing": 34,
+      "targetHealthBefore": 81.80000000000001,
+      "targetHealthAfter": 115.80000000000001,
+      "manaBefore": 129.2,
+      "manaAfter": 119.19999999999999
+    },
+    {
+      "sequence": 152,
+      "timestamp": "2026-08-03T16:37:41.449Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 14,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "ITEM",
+      "itemId": "advanced_health_potion",
+      "itemName": "고급체력포션",
+      "resource": "HEALTH",
+      "resourceBefore": 161.8,
+      "resourceAfter": 183.8,
+      "recovered": 22,
+      "remainingQuantity": 1
+    },
+    {
+      "sequence": 153,
+      "timestamp": "2026-08-03T16:37:50.461Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 15,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "956902203791118366",
+      "healing": 47,
+      "targetHealthBefore": 115.80000000000001,
+      "targetHealthAfter": 162.8,
+      "manaBefore": 165.1,
+      "manaAfter": 155.1
+    },
+    {
+      "sequence": 154,
+      "timestamp": "2026-08-03T16:37:52.331Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 16,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "균사 여왕",
+      "action": "만개하는 역병",
+      "targetId": "691457164010717244",
+      "damage": 105,
+      "critical": false,
+      "targetHealthBefore": 163.6,
+      "targetHealthAfter": 58.599999999999994,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 155,
+      "timestamp": "2026-08-03T16:37:58.516Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 17,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 49,
+      "critical": false,
+      "monsterHealthBefore": 647,
+      "monsterHealthAfter": 598
+    },
+    {
+      "sequence": 156,
+      "timestamp": "2026-08-03T16:38:03.194Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 18,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 48,
+      "critical": false,
+      "monsterHealthBefore": 598,
+      "monsterHealthAfter": 550
+    },
+    {
+      "sequence": 157,
+      "timestamp": "2026-08-03T16:38:15.632Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 19,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "691457164010717244",
+      "healing": 37,
+      "targetHealthBefore": 58.599999999999994,
+      "targetHealthAfter": 95.6,
+      "manaBefore": 149.5,
+      "manaAfter": 139.5
+    },
+    {
+      "sequence": 158,
+      "timestamp": "2026-08-03T16:38:27.753Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 20,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "691457164010717244",
+      "healing": 41,
+      "targetHealthBefore": 95.6,
+      "targetHealthAfter": 136.6,
+      "manaBefore": 126,
+      "manaAfter": 116
+    },
+    {
+      "sequence": 159,
+      "timestamp": "2026-08-03T16:38:45.816Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 21,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 48,
+      "critical": false,
+      "monsterHealthBefore": 550,
+      "monsterHealthAfter": 502
+    },
+    {
+      "sequence": 160,
+      "timestamp": "2026-08-03T16:38:50.617Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 22,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 52,
+      "critical": false,
+      "monsterHealthBefore": 502,
+      "monsterHealthAfter": 450
+    },
+    {
+      "sequence": 161,
+      "timestamp": "2026-08-03T16:38:51.999Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 23,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "균사 여왕",
+      "action": "만개하는 역병",
+      "targetId": "691457164010717244",
+      "damage": 93,
+      "critical": false,
+      "targetHealthBefore": 136.6,
+      "targetHealthAfter": 43.599999999999994,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 162,
+      "timestamp": "2026-08-03T16:39:03.611Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 24,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 54,
+      "critical": false,
+      "monsterHealthBefore": 450,
+      "monsterHealthAfter": 396
+    },
+    {
+      "sequence": 163,
+      "timestamp": "2026-08-03T16:39:10.047Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 25,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 56,
+      "critical": false,
+      "monsterHealthBefore": 396,
+      "monsterHealthAfter": 340
+    },
+    {
+      "sequence": 164,
+      "timestamp": "2026-08-03T16:39:18.947Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 26,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "691457164010717244",
+      "healing": 37,
+      "targetHealthBefore": 43.599999999999994,
+      "targetHealthAfter": 80.6,
+      "manaBefore": 139.5,
+      "manaAfter": 129.5
+    },
+    {
+      "sequence": 165,
+      "timestamp": "2026-08-03T16:39:28.608Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 27,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "691457164010717244",
+      "healing": 41,
+      "targetHealthBefore": 80.6,
+      "targetHealthAfter": 121.6,
+      "manaBefore": 116,
+      "manaAfter": 106
+    },
+    {
+      "sequence": 166,
+      "timestamp": "2026-08-03T16:39:30.355Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 28,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "균사 여왕",
+      "action": "만개하는 역병",
+      "targetId": "788944111096430602",
+      "damage": 110,
+      "critical": false,
+      "targetHealthBefore": 183.8,
+      "targetHealthAfter": 73.80000000000001,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 167,
+      "timestamp": "2026-08-03T16:39:43.643Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 29,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "SKILL",
+      "skillId": "basic_heal",
+      "skillName": "치유의 빛",
+      "targetId": "788944111096430602",
+      "healing": 34,
+      "targetHealthBefore": 73.80000000000001,
+      "targetHealthAfter": 107.80000000000001,
+      "manaBefore": 119.19999999999999,
+      "manaAfter": 109.19999999999999
+    },
+    {
+      "sequence": 168,
+      "timestamp": "2026-08-03T16:39:47.999Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 30,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 47,
+      "critical": false,
+      "monsterHealthBefore": 340,
+      "monsterHealthAfter": 293
+    },
+    {
+      "sequence": 169,
+      "timestamp": "2026-08-03T16:39:52.675Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 31,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 95,
+      "critical": true,
+      "monsterHealthBefore": 293,
+      "monsterHealthAfter": 198
+    },
+    {
+      "sequence": 170,
+      "timestamp": "2026-08-03T16:39:58.028Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 32,
+      "actorType": "PLAYER",
+      "actorId": "956902203791118366",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 50,
+      "critical": false,
+      "monsterHealthBefore": 198,
+      "monsterHealthAfter": 148
+    },
+    {
+      "sequence": 171,
+      "timestamp": "2026-08-03T16:39:59.440Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 33,
+      "actorType": "ENEMY",
+      "actorId": "ENEMY",
+      "actorName": "균사 여왕",
+      "action": "만개하는 역병",
+      "targetId": "788944111096430602",
+      "damage": 92,
+      "critical": false,
+      "targetHealthBefore": 107.80000000000001,
+      "targetHealthAfter": 15.800000000000011,
+      "lostEquipment": []
+    },
+    {
+      "sequence": 172,
+      "timestamp": "2026-08-03T16:40:07.940Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 34,
+      "actorType": "PLAYER",
+      "actorId": "923095437752287264",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 41,
+      "critical": false,
+      "monsterHealthBefore": 148,
+      "monsterHealthAfter": 107
+    },
+    {
+      "sequence": 173,
+      "timestamp": "2026-08-03T16:40:13.586Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 35,
+      "actorType": "PLAYER",
+      "actorId": "788944111096430602",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 53,
+      "critical": false,
+      "monsterHealthBefore": 107,
+      "monsterHealthAfter": 54
+    },
+    {
+      "sequence": 174,
+      "timestamp": "2026-08-03T16:40:19.429Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 36,
+      "actorType": "PLAYER",
+      "actorId": "691457164010717244",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 46,
+      "critical": false,
+      "monsterHealthBefore": 54,
+      "monsterHealthAfter": 8
+    },
+    {
+      "sequence": 175,
+      "timestamp": "2026-08-03T16:40:24.475Z",
+      "type": "TURN_ACTION",
+      "floor": 10,
+      "turn": 37,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 43,
+      "critical": false,
+      "monsterHealthBefore": 8,
+      "monsterHealthAfter": 0
+    },
+    {
+      "sequence": 176,
+      "timestamp": "2026-08-03T16:40:26.046Z",
+      "type": "BATTLE_VICTORY",
+      "floor": 10,
+      "monster": {
+        "level": 10,
+        "isMimic": false,
+        "isBoss": true,
+        "name": "균사 여왕",
+        "regionName": "균사 동굴",
+        "imageFile": "mycelium-queen.png",
+        "maxHealth": 1037,
+        "health": 0,
+        "attack": 112,
+        "defense": 26,
+        "magicDefense": 24,
+        "speed": 28,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 345,
+        "skillName": "만개하는 역병"
+      },
+      "turnsTaken": 37,
+      "rewards": [
+        {
+          "userId": "500285768783101963",
+          "gold": 345,
+          "experience": 546,
+          "newLevel": 9,
+          "levelsGained": 1,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "788944111096430602",
+          "gold": 345,
+          "experience": 468,
+          "newLevel": 9,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "923095437752287264",
+          "gold": 345,
+          "experience": 468,
+          "newLevel": 9,
+          "levelsGained": 0,
+          "equipment": {
+            "id": "3221bf0c-2c0f-457a-8fb2-a4ef160f5700",
+            "name": "빛나는 상의",
+            "itemLevel": 10,
+            "rarity": "레어",
+            "slot": "상의",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "defense",
+                "label": "방어력",
+                "baseValue": 8.6,
+                "value": 8.6
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": null
+        },
+        {
+          "userId": "956902203791118366",
+          "gold": 345,
+          "experience": 468,
+          "newLevel": 9,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        },
+        {
+          "userId": "691457164010717244",
+          "gold": 345,
+          "experience": 546,
+          "newLevel": 8,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        }
+      ],
+      "partyHealthAfter": {
+        "500285768783101963": 160,
+        "788944111096430602": 15.800000000000011,
+        "923095437752287264": 259.1,
+        "956902203791118366": 162.8,
+        "691457164010717244": 121.6
+      },
+      "partyManaAfter": {
+        "500285768783101963": 109.19999999999999,
+        "788944111096430602": 181.3,
+        "923095437752287264": 129.5,
+        "956902203791118366": 155.1,
+        "691457164010717244": 106
+      }
+    },
+    {
+      "sequence": 177,
+      "timestamp": "2026-08-03T16:40:26.725Z",
+      "type": "TREASURE_REWARD",
+      "floor": 10,
+      "bossChest": true,
+      "rewards": [
+        {
+          "userId": "500285768783101963",
+          "gold": 100,
+          "equipment": {
+            "id": "1a4c6b7d-7af0-4104-af2a-2f9335e607fb",
+            "name": "평범한 철 하의",
+            "itemLevel": 10,
+            "rarity": "고급",
+            "slot": "하의",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "health",
+                "label": "체력",
+                "baseValue": 86,
+                "value": 86
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": null
+        },
+        {
+          "userId": "788944111096430602",
+          "gold": 130,
+          "equipment": {
+            "id": "e3323244-f787-4cb7-a468-ef35d19cc170",
+            "name": "낡은 가죽 하의",
+            "itemLevel": 10,
+            "rarity": "일반",
+            "slot": "하의",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "health",
+                "label": "체력",
+                "baseValue": 86,
+                "value": 86
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": {
+            "id": "advanced_health_potion",
+            "name": "고급체력포션"
+          }
+        },
+        {
+          "userId": "923095437752287264",
+          "gold": 180,
+          "equipment": {
+            "id": "7b5a4fb8-f86a-4338-abb9-44f4e421a024",
+            "name": "빛나는 블레이드",
+            "itemLevel": 10,
+            "rarity": "레어",
+            "slot": "무기",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "attack",
+                "label": "공격력",
+                "baseValue": 17.2,
+                "value": 17.2
+              },
+              {
+                "stat": "magicAttack",
+                "label": "마법 공격력",
+                "baseValue": 17.2,
+                "value": 17.2
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": null
+        },
+        {
+          "userId": "956902203791118366",
+          "gold": 110,
+          "equipment": {
+            "id": "4da62c81-b6f8-4378-bc63-147f6f257b50",
+            "name": "빛나는 모자",
+            "itemLevel": 10,
+            "rarity": "레어",
+            "slot": "머리",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "mana",
+                "label": "마나",
+                "baseValue": 34.4,
+                "value": 34.4
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": {
+            "id": "advanced_mana_potion",
+            "name": "고급마나포션"
+          }
+        },
+        {
+          "userId": "691457164010717244",
+          "gold": 220,
+          "equipment": {
+            "id": "f60f2cec-5f9f-4874-9a53-278852f25cd5",
+            "name": "평범한 철검",
+            "itemLevel": 10,
+            "rarity": "고급",
+            "slot": "무기",
+            "enhancement": 0,
+            "mainOptions": [
+              {
+                "stat": "attack",
+                "label": "공격력",
+                "baseValue": 17.2,
+                "value": 17.2
+              },
+              {
+                "stat": "magicAttack",
+                "label": "마법 공격력",
+                "baseValue": 17.2,
+                "value": 17.2
+              }
+            ],
+            "subOptions": [],
+            "locked": false
+          },
+          "potion": null
+        }
+      ]
+    },
+    {
+      "sequence": 178,
+      "timestamp": "2026-08-03T16:40:31.384Z",
+      "type": "PARTY_CHOICE",
+      "floor": 10,
+      "userId": "500285768783101963",
+      "action": "boss_checkpoint_yes"
+    },
+    {
+      "sequence": 179,
+      "timestamp": "2026-08-03T16:40:31.751Z",
+      "type": "CHECKPOINT_SAVED",
+      "floor": 10,
+      "userId": "500285768783101963",
+      "checkpointFloor": 11
+    },
+    {
+      "sequence": 180,
+      "timestamp": "2026-08-03T16:40:32.234Z",
+      "type": "FLOOR_CHANGED",
+      "floor": 11,
+      "fromFloor": 10,
+      "toFloor": 11,
+      "method": "STAIRS_OR_BOSS_CLEAR"
+    },
+    {
+      "sequence": 181,
+      "timestamp": "2026-08-03T16:40:32.836Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 11,
+      "event": "ENEMY",
+      "stairsChance": 0.2,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 0
+    },
+    {
+      "sequence": 182,
+      "timestamp": "2026-08-03T16:40:32.846Z",
+      "type": "BATTLE_STARTED",
+      "floor": 11,
+      "encounter": "NORMAL",
+      "monster": {
+        "level": 11,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "해골 기사",
+        "regionName": "망자의 묘지",
+        "imageFile": "skeleton-knight.png",
+        "maxHealth": 624,
+        "health": 624,
+        "attack": 96,
+        "defense": 22,
+        "magicDefense": 21,
+        "speed": 24,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 125,
+        "skillName": "녹슨 참격"
+      },
+      "players": {
+        "500285768783101963": {
+          "stats": {
+            "playerLevel": 9,
+            "health": 184,
+            "defense": 26,
+            "attack": 52.6,
+            "magicAttack": 46,
+            "mana": 137.2,
+            "speed": 23,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 160,
+          "maxHealth": 184,
+          "mana": 137.2
+        },
+        "788944111096430602": {
+          "stats": {
+            "playerLevel": 9,
+            "health": 220.8,
+            "defense": 31.1,
+            "attack": 56,
+            "magicAttack": 52.7,
+            "mana": 181.3,
+            "speed": 32,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 15.800000000000011,
+          "maxHealth": 220.8,
+          "mana": 181.3
+        },
+        "923095437752287264": {
+          "stats": {
+            "playerLevel": 9,
+            "health": 301.7,
+            "defense": 27.6,
+            "attack": 46,
+            "magicAttack": 46,
+            "mana": 149.5,
+            "speed": 23,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 259.1,
+          "maxHealth": 299.1,
+          "mana": 149.5
+        },
+        "956902203791118366": {
+          "stats": {
+            "playerLevel": 9,
+            "health": 226.8,
+            "defense": 28.6,
+            "attack": 56.3,
+            "magicAttack": 58.3,
+            "mana": 165.1,
+            "speed": 42.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.4
+          },
+          "health": 162.8,
+          "maxHealth": 226.8,
+          "mana": 165.1
+        },
+        "691457164010717244": {
+          "stats": {
+            "playerLevel": 8,
+            "health": 201.6,
+            "defense": 24,
+            "attack": 52.1,
+            "magicAttack": 51.2,
+            "mana": 126,
+            "speed": 22.4,
+            "criticalChance": 5,
+            "criticalDamage": 168.7
+          },
+          "health": 121.6,
+          "maxHealth": 201.6,
+          "mana": 126
+        }
+      },
+      "initialTurnOrder": [
+        {
+          "key": "PLAYER:500285768783101963",
+          "type": "PLAYER",
+          "userId": "500285768783101963",
+          "speed": 23,
+          "nextActionAt": 434.7826086956522
+        },
+        {
+          "key": "PLAYER:788944111096430602",
+          "type": "PLAYER",
+          "userId": "788944111096430602",
+          "speed": 32,
+          "nextActionAt": 312.5
+        },
+        {
+          "key": "PLAYER:923095437752287264",
+          "type": "PLAYER",
+          "userId": "923095437752287264",
+          "speed": 23,
+          "nextActionAt": 434.7826086956522
+        },
+        {
+          "key": "PLAYER:956902203791118366",
+          "type": "PLAYER",
+          "userId": "956902203791118366",
+          "speed": 42.4,
+          "nextActionAt": 235.8490566037736
+        },
+        {
+          "key": "PLAYER:691457164010717244",
+          "type": "PLAYER",
+          "userId": "691457164010717244",
+          "speed": 22.4,
+          "nextActionAt": 446.42857142857144
+        },
+        {
+          "key": "ENEMY",
+          "type": "ENEMY",
+          "speed": 24,
+          "nextActionAt": 416.6666666666667
+        }
+      ]
+    },
+    {
+      "sequence": 183,
+      "timestamp": "2026-08-03T16:40:46.180Z",
+      "type": "ADVENTURE_ENDED",
+      "reason": "PARTY_STOP_VOTE_PASSED",
+      "floor": 11,
+      "remainingMemberIds": [
+        "500285768783101963",
+        "788944111096430602",
+        "923095437752287264",
+        "956902203791118366",
+        "691457164010717244"
+      ],
+      "healthByUser": {
+        "500285768783101963": 160,
+        "788944111096430602": 15.800000000000011,
+        "923095437752287264": 259.1,
+        "956902203791118366": 162.8,
+        "691457164010717244": 121.6
+      }
+    }
+  ]
+}

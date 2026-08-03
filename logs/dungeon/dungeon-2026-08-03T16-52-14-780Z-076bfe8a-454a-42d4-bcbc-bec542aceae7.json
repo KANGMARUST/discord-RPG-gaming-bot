@@ -1,0 +1,416 @@
+{
+  "logVersion": 1,
+  "adventureId": "076bfe8a-454a-42d4-bcbc-bec542aceae7",
+  "guildId": "1533722582526853315",
+  "leaderId": "500285768783101963",
+  "memberIds": [
+    "500285768783101963"
+  ],
+  "startedAt": "2026-08-03T16:52:14.780Z",
+  "endedAt": "2026-08-03T16:52:48.111Z",
+  "endReason": "SOLO_STOP_COMMAND",
+  "highestFloor": 2,
+  "players": {
+    "500285768783101963": {
+      "playerLevel": 9,
+      "experience": 444,
+      "totalStats": {
+        "playerLevel": 9,
+        "health": 184,
+        "defense": 26,
+        "attack": 52.6,
+        "magicAttack": 46,
+        "mana": 137.2,
+        "speed": 23,
+        "criticalChance": 5,
+        "criticalDamage": 150
+      },
+      "equipment": {
+        "머리": {
+          "id": "008d0c50-ca8f-412a-a95b-c3a7cef0202f",
+          "name": "평범한 철 모자",
+          "itemLevel": 3,
+          "rarity": "고급",
+          "slot": "머리",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "mana",
+              "label": "마나",
+              "baseValue": 23.2,
+              "value": 23.2
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "상의": {
+          "id": "849a7a71-7838-4227-b459-3e498947b1ef",
+          "name": "낡은 가죽 상의",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "상의",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "defense",
+              "label": "방어력",
+              "baseValue": 5,
+              "value": 5
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "하의": {
+          "id": "d0f8da85-b5f4-4fcd-bff2-607549cdfce5",
+          "name": "낡은 가죽 하의",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "하의",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "health",
+              "label": "체력",
+              "baseValue": 50,
+              "value": 50
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "신발": {
+          "id": "1ddaf9c7-dee9-4b38-8226-a9f34e578f59",
+          "name": "낡은 가죽 신발",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "신발",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "speed",
+              "label": "속도",
+              "baseValue": 5,
+              "value": 5
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        "무기": {
+          "id": "2938d14e-a5b7-4fa5-bcf1-0a7b3e1fc33c",
+          "name": "낡은 철검",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "무기",
+          "enhancement": 1,
+          "mainOptions": [
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "baseValue": 10,
+              "value": 12
+            },
+            {
+              "stat": "magicAttack",
+              "label": "마법 공격력",
+              "baseValue": 10,
+              "value": 12
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "value": 14.3,
+              "operation": "MULTIPLIER"
+            }
+          ],
+          "locked": false
+        }
+      },
+      "equippedSkills": [
+        "basic_heal",
+        null,
+        null
+      ]
+    }
+  },
+  "events": [
+    {
+      "sequence": 1,
+      "timestamp": "2026-08-03T16:52:15.577Z",
+      "type": "ADVENTURE_STARTED",
+      "floor": 1,
+      "partySize": 1
+    },
+    {
+      "sequence": 2,
+      "timestamp": "2026-08-03T16:52:21.516Z",
+      "type": "PARTY_CHOICE",
+      "floor": 1,
+      "userId": "500285768783101963",
+      "action": "checkpoint_no"
+    },
+    {
+      "sequence": 3,
+      "timestamp": "2026-08-03T16:52:21.940Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 1,
+      "event": "STAIRS",
+      "stairsChance": 0.2,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 0
+    },
+    {
+      "sequence": 4,
+      "timestamp": "2026-08-03T16:52:24.223Z",
+      "type": "PARTY_CHOICE",
+      "floor": 1,
+      "userId": "500285768783101963",
+      "action": "stairs_yes"
+    },
+    {
+      "sequence": 5,
+      "timestamp": "2026-08-03T16:52:24.558Z",
+      "type": "FLOOR_CHANGED",
+      "floor": 2,
+      "fromFloor": 1,
+      "toFloor": 2,
+      "method": "STAIRS_OR_BOSS_CLEAR"
+    },
+    {
+      "sequence": 6,
+      "timestamp": "2026-08-03T16:52:24.945Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 2,
+      "event": "ENEMY",
+      "stairsChance": 0.2,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 0
+    },
+    {
+      "sequence": 7,
+      "timestamp": "2026-08-03T16:52:24.948Z",
+      "type": "BATTLE_STARTED",
+      "floor": 2,
+      "encounter": "NORMAL",
+      "monster": {
+        "level": 2,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "청록 슬라임",
+        "regionName": "이끼 낀 폐허",
+        "imageFile": "moss-slime.png",
+        "maxHealth": 60,
+        "health": 60,
+        "attack": 20,
+        "defense": 4,
+        "magicDefense": 3,
+        "speed": 9,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 35,
+        "skillName": "산성 몸통박치기"
+      },
+      "players": {
+        "500285768783101963": {
+          "stats": {
+            "playerLevel": 9,
+            "health": 184,
+            "defense": 26,
+            "attack": 52.6,
+            "magicAttack": 46,
+            "mana": 137.2,
+            "speed": 23,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 184,
+          "maxHealth": 184,
+          "mana": 137.2
+        }
+      },
+      "initialTurnOrder": [
+        {
+          "key": "PLAYER:500285768783101963",
+          "type": "PLAYER",
+          "userId": "500285768783101963",
+          "speed": 23,
+          "nextActionAt": 434.7826086956522
+        },
+        {
+          "key": "ENEMY",
+          "type": "ENEMY",
+          "speed": 9,
+          "nextActionAt": 1111.111111111111
+        }
+      ]
+    },
+    {
+      "sequence": 8,
+      "timestamp": "2026-08-03T16:52:31.229Z",
+      "type": "TURN_ACTION",
+      "floor": 2,
+      "turn": 1,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 52,
+      "critical": false,
+      "monsterHealthBefore": 60,
+      "monsterHealthAfter": 8
+    },
+    {
+      "sequence": 9,
+      "timestamp": "2026-08-03T16:52:36.280Z",
+      "type": "TURN_ACTION",
+      "floor": 2,
+      "turn": 2,
+      "actorType": "PLAYER",
+      "actorId": "500285768783101963",
+      "action": "NORMAL_ATTACK",
+      "targetId": "ENEMY",
+      "damage": 50,
+      "critical": false,
+      "monsterHealthBefore": 8,
+      "monsterHealthAfter": 0
+    },
+    {
+      "sequence": 10,
+      "timestamp": "2026-08-03T16:52:37.703Z",
+      "type": "BATTLE_VICTORY",
+      "floor": 2,
+      "monster": {
+        "level": 2,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "청록 슬라임",
+        "regionName": "이끼 낀 폐허",
+        "imageFile": "moss-slime.png",
+        "maxHealth": 60,
+        "health": 0,
+        "attack": 20,
+        "defense": 4,
+        "magicDefense": 3,
+        "speed": 9,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 35,
+        "skillName": "산성 몸통박치기"
+      },
+      "turnsTaken": 2,
+      "rewards": [
+        {
+          "userId": "500285768783101963",
+          "gold": 35,
+          "experience": 38,
+          "newLevel": 9,
+          "levelsGained": 0,
+          "equipment": null,
+          "potion": null
+        }
+      ],
+      "partyHealthAfter": {
+        "500285768783101963": 184
+      },
+      "partyManaAfter": {
+        "500285768783101963": 137.2
+      }
+    },
+    {
+      "sequence": 11,
+      "timestamp": "2026-08-03T16:52:39.701Z",
+      "type": "PARTY_CHOICE",
+      "floor": 2,
+      "userId": "500285768783101963",
+      "action": "continue"
+    },
+    {
+      "sequence": 12,
+      "timestamp": "2026-08-03T16:52:40.106Z",
+      "type": "EXPLORATION_EVENT",
+      "floor": 2,
+      "event": "ENEMY",
+      "stairsChance": 0.30000000000000004,
+      "stairsIncluded": true,
+      "bossPending": false,
+      "combatsWonThisFloor": 1
+    },
+    {
+      "sequence": 13,
+      "timestamp": "2026-08-03T16:52:40.109Z",
+      "type": "BATTLE_STARTED",
+      "floor": 2,
+      "encounter": "NORMAL",
+      "monster": {
+        "level": 2,
+        "isMimic": false,
+        "isBoss": false,
+        "name": "청록 슬라임",
+        "regionName": "이끼 낀 폐허",
+        "imageFile": "moss-slime.png",
+        "maxHealth": 60,
+        "health": 60,
+        "attack": 20,
+        "defense": 4,
+        "magicDefense": 3,
+        "speed": 9,
+        "criticalChance": 5,
+        "criticalDamage": 150,
+        "goldReward": 35,
+        "skillName": "산성 몸통박치기"
+      },
+      "players": {
+        "500285768783101963": {
+          "stats": {
+            "playerLevel": 9,
+            "health": 184,
+            "defense": 26,
+            "attack": 52.6,
+            "magicAttack": 46,
+            "mana": 137.2,
+            "speed": 23,
+            "criticalChance": 5,
+            "criticalDamage": 150
+          },
+          "health": 184,
+          "maxHealth": 184,
+          "mana": 137.2
+        }
+      },
+      "initialTurnOrder": [
+        {
+          "key": "PLAYER:500285768783101963",
+          "type": "PLAYER",
+          "userId": "500285768783101963",
+          "speed": 23,
+          "nextActionAt": 434.7826086956522
+        },
+        {
+          "key": "ENEMY",
+          "type": "ENEMY",
+          "speed": 9,
+          "nextActionAt": 1111.111111111111
+        }
+      ]
+    },
+    {
+      "sequence": 14,
+      "timestamp": "2026-08-03T16:52:48.111Z",
+      "type": "ADVENTURE_ENDED",
+      "reason": "SOLO_STOP_COMMAND",
+      "floor": 2,
+      "remainingMemberIds": [
+        "500285768783101963"
+      ],
+      "healthByUser": {
+        "500285768783101963": 184
+      }
+    }
+  ]
+}
