@@ -1,0 +1,1805 @@
+import 'dotenv/config';
+import { randomUUID } from 'node:crypto';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import {
+  ActionRowBuilder,
+  AttachmentBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  Client,
+  EmbedBuilder,
+  Events,
+  GatewayIntentBits,
+  MessageFlags,
+  PermissionFlagsBits,
+} from 'discord.js';
+import {
+  calculateTotalStats,
+  createEquipment,
+  enhanceEquipment,
+  equipmentSlots,
+  formatEquipmentDetails,
+  formatEquipmentName,
+  getMaxEnhancement,
+  getEquipmentName,
+} from './equipment.js';
+import { playerStore } from './player-store.js';
+import { adventureManager, ENTRANCE_CHANNEL_NAME } from './adventure-manager.js';
+import { AdventureSystem } from './adventure-system.js';
+import { pvpManager } from './pvp-manager.js';
+import { getPotionDescription, potionCatalog } from './items.js';
+import { getRequiredExperience } from './leveling.js';
+import { formatSkill, getSkill, skillCatalog } from './skills.js';
+
+if (!process.env.DISCORD_TOKEN) {
+  console.error('.env 파일에 DISCORD_TOKEN을 입력해 주세요.');
+  process.exit(1);
+}
+
+const client = new Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
+});
+const adventureSystem = new AdventureSystem(client, adventureManager, playerStore);
+const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
+const enhancementImagePath = path.join(currentDirectory, '..', 'assets', 'ui', 'equipment-enhancement.png');
+
+const choices = {
+  rock: { label: '바위', emoji: '✊', beats: 'scissors' },
+  paper: { label: '보', emoji: '✋', beats: 'rock' },
+  scissors: { label: '가위', emoji: '✌️', beats: 'paper' },
+};
+
+const INVITATION_DURATION_MS = 30_000;
+const STOP_VOTE_DURATION_MS = 30_000;
+const DUEL_INVITATION_DURATION_MS = 30_000;
+const pendingDuels = new Map();
+const debugGiveOptions = [
+  { name: '[재화] 골드', value: 'currency:gold' },
+  { name: '[재료] 마석', value: 'material:magic_stone' },
+  ...Object.values(potionCatalog).map((potion) => ({
+    name: `[포션] [${potion.rarity}] ${potion.name}`,
+    value: `potion:${potion.id}`,
+  })),
+  ...['일반', '고급', '레어', '전설'].flatMap((rarity) =>
+    equipmentSlots.map((slot) => ({
+      name: `[장비] [${rarity}] ${getEquipmentName(rarity, slot)}`,
+      value: `equipment:${rarity}:${slot}`,
+    })),
+  ),
+];
+
+function hasPendingDuel(userId) {
+  return [...pendingDuels.values()].some(
+    (duel) => duel.challengerId === userId || duel.opponentId === userId,
+  );
+}
+const pendingInvitations = new Map();
+const pendingInvitationByUser = new Map();
+const stopVotes = new Map();
+
+function canStopDuringBattle(battle) {
+  return !battle.partyHasTakenDamage || !battle.partyHasAttacked;
+}
+
+function createChoiceButtons(prefix, id, yesLabel, noLabel) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`${prefix}:${id}:yes`)
+      .setLabel(yesLabel)
+      .setStyle(ButtonStyle.Success),
+    new ButtonBuilder()
+      .setCustomId(`${prefix}:${id}:no`)
+      .setLabel(noLabel)
+      .setStyle(ButtonStyle.Danger),
+  );
+}
+
+function invitationText(invitation) {
+  const waitingCount =
+    invitation.invitedIds.length - invitation.acceptedIds.size - invitation.declinedIds.size;
+  return [
+    `## ⚔️ <@${invitation.leaderId}>님의 던전 공대 모집`,
+    invitation.invitedIds.map((id) => `<@${id}>`).join(' '),
+    '**모험에 동행하시겠습니까?**',
+    `동행 ${invitation.acceptedIds.size}명 · 거절 ${invitation.declinedIds.size}명 · 대기 ${waitingCount}명`,
+    '30초 안에 선택해 주세요. 명령어를 입력한 사람은 공대장이 됩니다.',
+  ].join('\n');
+}
+
+async function finishInvitation(invitationId) {
+  const invitation = pendingInvitations.get(invitationId);
+  if (!invitation || invitation.closing) return;
+  invitation.closing = true;
+  clearTimeout(invitation.timeout);
+  pendingInvitations.delete(invitationId);
+  for (const userId of invitation.invitedIds) pendingInvitationByUser.delete(userId);
+
+  const guild = client.guilds.cache.get(invitation.guildId);
+  if (!guild) return;
+
+  const acceptedMembers = (
+    await Promise.all(
+      [...invitation.acceptedIds].map((id) => guild.members.fetch(id).catch(() => null)),
+    )
+  ).filter(
+    (member) =>
+      member &&
+      !member.user.bot &&
+      member.voice.channelId === invitation.entranceChannelId &&
+      !adventureManager.getByUser(member.id),
+  );
+  const leader = acceptedMembers.find((member) => member.id === invitation.leaderId);
+
+  if (!leader) {
+    await invitation.message
+      .edit({ content: '❌ 공대장이 던전입장 채널을 떠나 모집이 취소됐습니다.', components: [] })
+      .catch(() => {});
+    return;
+  }
+
+  const maxHealthByUser = {};
+  for (const member of acceptedMembers) {
+    const player = await playerStore.getOrCreate(member.id);
+    maxHealthByUser[member.id] = calculateTotalStats(player).health;
+  }
+
+  try {
+    const result = await adventureManager.startParty(guild, leader, acceptedMembers, maxHealthByUser);
+    if (!result.ok) {
+      const reason = result.reason === 'BOT_MISSING_PERMISSIONS'
+        ? '봇에게 채널 관리와 멤버 이동 권한이 없습니다.'
+        : '파티원 중 이미 모험 중인 사람이 있어 시작할 수 없습니다.';
+      await invitation.message.edit({ content: `❌ ${reason}`, components: [] }).catch(() => {});
+      return;
+    }
+
+    await adventureSystem.start(result.adventure);
+
+    await invitation.message
+      .edit({
+        content: `✅ 공대 모집 완료! ${acceptedMembers.map((member) => `<@${member.id}>`).join(' ')}님이 1층으로 이동했습니다.`,
+        components: [],
+      })
+      .catch(() => {});
+  } catch (error) {
+    console.error('파티 모험 시작 중 오류가 발생했습니다.', error);
+    await invitation.message
+      .edit({ content: '❌ 파티 채널 생성 또는 이동에 실패했습니다. 봇 권한을 확인해 주세요.', components: [] })
+      .catch(() => {});
+  }
+}
+
+function stopVoteText(vote) {
+  const threshold = Math.floor(vote.memberIds.length / 2) + 1;
+  return [
+    '## 🛑 모험 중지 투표',
+    `<@${vote.startedBy}>님이 모험 중지를 요청했습니다.`,
+    `찬성 **${vote.yesIds.size}/${threshold}표** · 반대 **${vote.noIds.size}표**`,
+    '파티의 과반수가 찬성하면 모험이 종료됩니다. 30초 안에 투표해 주세요.',
+  ].join('\n');
+}
+
+async function closeStopVote(vote, content) {
+  clearTimeout(vote.timeout);
+  stopVotes.delete(vote.adventureId);
+  await vote.message?.edit({ content, components: [] }).catch(() => {});
+}
+
+function createGameButtons() {
+  return new ActionRowBuilder().addComponents(
+    Object.entries(choices).map(([value, choice]) =>
+      new ButtonBuilder()
+        .setCustomId(`rps:${value}`)
+        .setLabel(choice.label)
+        .setEmoji(choice.emoji)
+        .setStyle(ButtonStyle.Primary),
+    ),
+  );
+}
+
+function formatEquipmentItem(item) {
+  if (!item) return '비어 있음';
+  return formatEquipmentDetails(item);
+}
+
+function createPlayerEmbed(user, player) {
+  const { equipment } = player;
+  const stats = calculateTotalStats(player);
+
+  return new EmbedBuilder()
+    .setColor(0x5865f2)
+    .setTitle(`⚔️ ${user.displayName}님의 던전 캐릭터`)
+    .setThumbnail(user.displayAvatarURL())
+    .addFields(
+      {
+        name: '📊 스탯',
+        value: [
+          `플레이어 레벨: **${stats.playerLevel}**`,
+          `경험치: **${player.experience}/${getRequiredExperience(stats.playerLevel)}**`,
+          `체력: **${stats.health}**`,
+          `방어력: **${stats.defense}**`,
+          `공격력: **${stats.attack}**`,
+          `마법 공격력: **${stats.magicAttack}**`,
+          `마나: **${stats.mana}**`,
+          `속도: **${stats.speed}**`,
+          `치명타 확률: **${stats.criticalChance}%**`,
+          `치명타 피해: **${stats.criticalDamage}%**`,
+        ].join('\n'),
+        inline: true,
+      },
+      {
+        name: '🎒 장비창',
+        value: equipmentSlots
+          .map((slot) => `**[${slot}]**\n${formatEquipmentItem(equipment[slot])}`)
+          .join('\n\n'),
+        inline: false,
+      },
+    )
+    .setFooter({ text: '장비를 획득하면 각 슬롯에 장착할 수 있습니다.' });
+}
+
+function createEquipmentInventoryEmbed(user, player) {
+  const equippedList = equipmentSlots
+    .map((slot) => `**[${slot}]** ${player.equipment[slot] ? formatEquipmentDetails(player.equipment[slot]) : '비어 있음'}`)
+    .join('\n\n');
+  const equipmentList = player.equipmentInventory.equipment.length
+    ? player.equipmentInventory.equipment
+        .map((item, index) => `**${index + 1}.** ${formatEquipmentDetails(item)}`)
+        .join('\n\n')
+    : '보유한 아이템이 없습니다.';
+  const materialList = Object.entries(player.equipmentInventory.materials)
+    .map(([name, quantity]) => `${name}: **${quantity.toLocaleString('ko-KR')}개**`)
+    .join('\n');
+
+  return new EmbedBuilder()
+    .setColor(0x2ecc71)
+    .setTitle(`🛡️ ${user.displayName}님의 장비 인벤토리`)
+    .setDescription(`## 📌 현재 착용 중\n${equippedList}\n\n## 🎒 장비 인벤토리\n${equipmentList}`.slice(0, 4096))
+    .addFields(
+      { name: '💎 강화 재료', value: materialList || '보유한 강화 재료가 없습니다.' },
+      { name: '💰 보유 골드', value: `**${player.gold.toLocaleString('ko-KR')} 골드**` },
+    )
+    .setFooter({ text: '/장비장착, /장비강화, /장비분해 또는 /장비잠금 명령어를 사용할 수 있습니다.' });
+}
+
+function createItemInventoryEmbed(user, player) {
+  const itemList = player.itemInventory.length
+    ? player.itemInventory
+        .map(
+          (item, index) =>
+            `**${index + 1}. ${item.name} × ${item.quantity ?? 1}**${item.description ? `\n${item.description}` : ''}`,
+        )
+        .join('\n\n')
+    : '던전에서 사용할 수 있는 아이템이 없습니다.';
+
+  return new EmbedBuilder()
+    .setColor(0x9b59b6)
+    .setTitle(`🧪 ${user.displayName}님의 아이템 인벤토리`)
+    .setDescription(itemList)
+    .addFields({ name: '💰 보유 골드', value: `**${player.gold.toLocaleString('ko-KR')} 골드**` })
+    .setFooter({ text: '이곳의 아이템은 던전 전투에서 사용할 수 있습니다.' });
+}
+
+function createSkillInventoryEmbed(user, player) {
+  const ownedSkills = player.skillInventory
+    .map((skillId) => getSkill(skillId))
+    .filter(Boolean)
+    .map((skill) => `**${formatSkill(skill)}**`)
+    .join('\n\n');
+  const equippedSkills = player.equippedSkills
+    .map((skillId, index) => {
+      const skill = skillId ? getSkill(skillId) : null;
+      return `**${index + 1}번 슬롯:** ${skill ? `[${skill.rarity}] ${skill.name}` : '비어 있음'}`;
+    })
+    .join('\n');
+  return new EmbedBuilder()
+    .setColor(0x8e44ad)
+    .setTitle(`📚 ${user.displayName}님의 스킬 인벤토리`)
+    .addFields(
+      { name: '장착 스킬', value: equippedSkills },
+      { name: '보유 스킬', value: ownedSkills || '보유한 스킬이 없습니다.' },
+    )
+    .setFooter({ text: '/스킬장착으로 최대 3개까지 장착하고 /스킬해제로 슬롯을 비울 수 있습니다.' });
+}
+
+function createShopPayload(user, player) {
+  const potions = Object.values(potionCatalog);
+  const embed = new EmbedBuilder()
+    .setColor(0xf1c40f)
+    .setTitle('🏪 포션 상점')
+    .setDescription(
+      potions
+        .map(
+          (potion) => {
+            const owned = player.itemInventory.find((item) => item.id === potion.id)?.quantity ?? 0;
+            const salePrice = Math.max(1, Math.floor(potion.price * 0.5));
+            return `**${potion.name}** · 구매 ${potion.price.toLocaleString('ko-KR')}G · 판매 ${salePrice.toLocaleString('ko-KR')}G · 보유 ${owned}개\n${getPotionDescription(potion)}`;
+          },
+        )
+        .join('\n\n'),
+    )
+    .addFields({
+      name: '💰 현재 보유 골드',
+      value: `**${player.gold.toLocaleString('ko-KR')} 골드**`,
+    })
+    .addFields({
+      name: '💎 강화 재료 교환',
+      value: '**마석 1개** · 500골드',
+    })
+    .setFooter({ text: '구매 또는 판매 버튼을 누르면 포션 1개를 거래합니다.' });
+  const rows = [];
+  for (let index = 0; index < potions.length; index += 4) {
+    rows.push(
+      new ActionRowBuilder().addComponents(
+        potions.slice(index, index + 4).map((potion) =>
+          new ButtonBuilder()
+            .setCustomId(`shop:buy:${potion.id}:${user.id}`)
+            .setLabel(`구매 · ${potion.name}`)
+            .setStyle(potion.type === 'HEALTH' ? ButtonStyle.Danger : ButtonStyle.Primary),
+        ),
+      ),
+    );
+  }
+  for (let index = 0; index < potions.length; index += 4) {
+    rows.push(
+      new ActionRowBuilder().addComponents(
+        potions.slice(index, index + 4).map((potion) => {
+          const owned = player.itemInventory.find((item) => item.id === potion.id)?.quantity ?? 0;
+          return new ButtonBuilder()
+            .setCustomId(`shop:sell:${potion.id}:${user.id}`)
+            .setLabel(`판매 · ${potion.name}`)
+            .setStyle(ButtonStyle.Secondary)
+            .setDisabled(owned <= 0);
+        }),
+      ),
+    );
+  }
+  rows.push(
+    new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId(`shop:material:magic_stone:${user.id}`)
+        .setLabel('마석 1개 교환 · 500G')
+        .setEmoji('💎')
+        .setStyle(ButtonStyle.Success),
+    ),
+  );
+  return { embeds: [embed], components: rows, flags: MessageFlags.Ephemeral };
+}
+
+function createHelpEmbed() {
+  return new EmbedBuilder()
+    .setColor(0x5865f2)
+    .setTitle('📖 던전 게임 도움말')
+    .setDescription('명령어는 `/`를 입력한 뒤 선택해서 사용할 수 있습니다.')
+    .addFields(
+      {
+        name: '🧙 캐릭터',
+        value: [
+          '`/내정보` — 내 스탯과 현재 장착 장비 확인',
+          '`/정보 플레이어` — 선택한 다른 플레이어의 스탯과 장착 장비 확인',
+          '`/파티원스텟` — 모험 중인 전투 채널에서 현재 체력·마나를 포함한 파티 전체 스탯 확인',
+        ].join('\n'),
+      },
+      {
+        name: '🎒 인벤토리 및 장비',
+        value: [
+          '`/장비인벤토리` — 보유 장비, 마석, 골드 확인',
+          '`/아이템인벤토리` — 보유 포션 등 소비 아이템 확인',
+          '`/스킬인벤토리` — 보유 스킬과 최대 3개의 장착 슬롯 확인',
+          '`/스킬장착 스킬 슬롯` — 보유 스킬을 1~3번 슬롯에 장착',
+          '`/스킬해제 슬롯` — 지정 슬롯의 스킬 장착 해제(스킬은 인벤토리에 유지)',
+          '스킬 장착과 해제는 모험 중에는 변경할 수 없습니다.',
+          '`/장비장착 아이템이름` — 플레이어 레벨 이하의 고유 레벨 장비 장착',
+          '`/자동장착` — 내 레벨 이하 장비만 대상으로 고유 레벨 → 등급 순 자동 장착',
+          '`/장비강화 아이템이름` — 마석을 사용하여 인벤토리 또는 장착 중인 장비 강화',
+          '`/장비분해 장비` — 장비를 분해하여 등급·강화 단계에 따른 마석 획득',
+          '`/장비일괄분해 고유레벨이하 등급이하` — 조건에 맞는 잠금 해제 장비 일괄 분해',
+          '`/장비잠금 장비 상태` — 실수로 분해하지 않도록 장비 잠금 또는 해제',
+        ].join('\n'),
+      },
+      {
+        name: '🏪 상점',
+        value: '`/상점` — 포션 구매·판매 또는 500골드로 마석 1개 교환',
+      },
+      {
+        name: '⚔️ 던전',
+        value: [
+          '`/모험시작` — 던전입장 음성 채널에서 모험 또는 공대 모집 시작 (공대장 체크포인트 사용 가능)',
+          '`/모험중지` — 전투 중에는 파티의 공격·피격이 모두 발생하기 전까지만 1인 종료/파티 중지 투표',
+          '전투에서는 자신의 턴에 일반 공격, 장착 스킬, 아이템 사용 버튼을 선택합니다.',
+          '전투 파티 상세에는 체력·마나 바, 다음 5턴 순서, 파티 스탯이 표시됩니다.',
+          '모험 기록은 적·파티 스탯과 전투 과정을 자동 저장하며 최근 10개까지만 유지됩니다.',
+          '관전자는 모험 채팅과 음성방을 볼 수 있지만 입장·채팅·명령·전투 조작은 할 수 없습니다.',
+        ].join('\n'),
+      },
+      {
+        name: '🏟️ PVP',
+        value: [
+          '`/결투신청 상대` — 같은 음성 채널의 플레이어에게 결투 신청',
+          '`/항복` — 진행 중인 결투에서 항복하고 상대방의 승리로 종료',
+        ].join('\n'),
+      },
+      {
+        name: '🎮 기타',
+        value: [
+          '`/게임시작` — 가위바위보 미니게임 시작',
+          '`/ping` — 봇 연결 상태와 지연 시간 확인',
+          '`/도움말` — 현재 도움말 표시',
+          '`/도움말 항목:확률` — 던전의 탐험·드랍·전투 확률 확인',
+          '`/도움말 아이템이름` — 포션·보유 장비·스킬의 상세 정보 확인',
+        ].join('\n'),
+      },
+      {
+        name: '🛡️ 관리자',
+        value: [
+          '`/전체초기화 확인:전체초기화` — 모든 플레이어 데이터를 최초 상태로 초기화',
+          '`/give 플레이어 아이템 수량` — 디버그용 포션, 장비, 골드 또는 마석 지급',
+          '`/디버그 모험 다음층이동` — 현재 모험을 강제로 다음 층으로 이동',
+          '`/디버그 모험 킬` — 현재 전투 중인 몬스터를 즉시 처치하고 정상 보상 지급',
+        ].join('\n'),
+      },
+    )
+    .setFooter({ text: '이 도움말은 명령어를 실행한 사용자에게만 표시됩니다.' });
+}
+
+function createProbabilityHelpEmbed() {
+  return new EmbedBuilder()
+    .setColor(0xf1c40f)
+    .setTitle('🎲 던전 확률 정보')
+    .setDescription('현재 게임에 적용 중인 확률입니다. 층수와 전투 횟수에 따라 바뀌는 항목은 계산식도 함께 표시합니다.')
+    .addFields(
+      {
+        name: '🧭 일반 층 탐험',
+        value: [
+          '계단: **20% + 현재 층 처치 전투당 10%** (최대 65%)',
+          '특수 이벤트: **20%**',
+          '적 조우: 남은 확률 (처음 60% → 처치 1회당 10% 감소, 최소 15%)',
+          '발견한 계단에서 “더 탐험”: 특수 이벤트 **30%** / 적 조우 **70%**',
+        ].join('\n'),
+      },
+      {
+        name: '👑 5층 단위 보스 층',
+        value: [
+          '보스를 아직 처치하지 않았을 때: 보스 조우 **30%** / 특수 이벤트 **20%** / 일반 적 **50%**',
+          '보스를 처치하면 보물상자 **100%** 획득 후 다음 층으로 이동할 수 있습니다.',
+        ].join('\n'),
+      },
+      {
+        name: '✨ 특수 이벤트',
+        value: [
+          '보물상자: **50%** · 함정: **30%** · 휴식: **20%**',
+          '보물상자 발견 시: 일반 상자 **90%** / 미믹 전투 **10%**',
+          '휴식은 잃은 체력의 50%를 회복합니다.',
+        ].join('\n'),
+      },
+      {
+        name: '🎁 장비·포션 드랍',
+        value: [
+          '장비: 일반 적·보스 **30%**, 미믹 **70%**, 보물상자 **100%**',
+          '포션: 일반 적·보스·미믹 **30%**, 보물상자 **65%**',
+          '포션 등급(드랍 성공 시): 일반 **55%** / 고급 **28%** / 레어 **12%** / 전설 **5%**',
+          '포션 종류(등급 결정 후): 체력 **50%** / 마나 **50%**',
+        ].join('\n'),
+      },
+      {
+        name: '🛡️ 장비 등급·강화',
+        value: [
+          '장비 등급은 층이 높을수록 전설·레어·고급 확률이 상승합니다.',
+          '예시 — 1층: 일반 75% / 고급 20% / 레어 5% / 전설 0%',
+          '5층: 일반 64% / 고급 24% / 레어 11% / 전설 1%',
+          '10층: 일반 46.5% / 고급 29% / 레어 18.5% / 전설 6%',
+          '17층 이후: 일반 25% / 고급 35% / 레어 28% / 전설 12%',
+          '강화 때 부옵션은 중복 없이 남은 부옵션 종류 중 균등 확률로 1개 추가됩니다.',
+        ].join('\n'),
+      },
+      {
+        name: '⚔️ 전투 확률',
+        value: [
+          '피해량 변동: 계산된 피해의 **90~110%**',
+          '치명타: 공격자 자신의 치명타 확률을 따름',
+          '다인 파티에서 적의 공격 대상: 살아 있는 파티원 중 균등 확률',
+          '명중·회피 확률은 현재 적용하지 않습니다.',
+        ].join('\n'),
+      },
+    )
+    .setFooter({ text: '이 확률 정보는 명령어를 실행한 사용자에게만 표시됩니다.' });
+}
+
+async function createItemHelpEmbed(userId, itemReference) {
+  const player = await playerStore.getOrCreate(userId);
+  const normalizedReference = itemReference.trim().toLocaleLowerCase('ko-KR');
+  const equipment = [
+    ...player.equipmentInventory.equipment,
+    ...Object.values(player.equipment).filter(Boolean),
+  ];
+
+  const potionId = itemReference.startsWith('potion:') ? itemReference.slice('potion:'.length) : null;
+  const skillId = itemReference.startsWith('skill:') ? itemReference.slice('skill:'.length) : null;
+  const equipmentId = itemReference.startsWith('equipment:') ? itemReference.slice('equipment:'.length) : null;
+  const potion = potionId
+    ? potionCatalog[potionId]
+    : Object.values(potionCatalog).find((entry) =>
+      entry.name.toLocaleLowerCase('ko-KR') === normalizedReference,
+    );
+  if (potion) {
+    const owned = player.itemInventory.find((item) => item.id === potion.id)?.quantity ?? 0;
+    return new EmbedBuilder()
+      .setColor(0x2ecc71)
+      .setTitle(`🧪 [${potion.rarity}] ${potion.name}`)
+      .addFields(
+        { name: '효과', value: getPotionDescription(potion), inline: true },
+        { name: '상점 가격', value: `${potion.price}골드`, inline: true },
+        { name: '보유 수량', value: `${owned}개`, inline: true },
+      );
+  }
+
+  const skill = skillId
+    ? skillCatalog[skillId]
+    : Object.values(skillCatalog).find((entry) =>
+      entry.name.toLocaleLowerCase('ko-KR') === normalizedReference,
+    );
+  if (skill) {
+    const owned = player.skillInventory.includes(skill.id);
+    return new EmbedBuilder()
+      .setColor(0x9b59b6)
+      .setTitle(`✨ [${skill.rarity}] ${skill.name}`)
+      .setDescription(formatSkill(skill))
+      .addFields({ name: '보유 상태', value: owned ? '보유 중' : '미보유', inline: true });
+  }
+
+  const selectedEquipment = equipment.find((item) =>
+    item.id === equipmentId ||
+    item.id === itemReference ||
+    item.name.toLocaleLowerCase('ko-KR') === normalizedReference,
+  );
+  if (selectedEquipment) {
+    const equipped = Object.values(player.equipment).some((item) => item?.id === selectedEquipment.id);
+    return new EmbedBuilder()
+      .setColor(0x3498db)
+      .setTitle(`🛡️ ${formatEquipmentName(selectedEquipment)}`)
+      .setDescription(formatEquipmentDetails(selectedEquipment))
+      .addFields(
+        { name: '보관 위치', value: equipped ? '현재 장착 중' : '장비 인벤토리', inline: true },
+        { name: '착용 조건', value: `플레이어 Lv.${selectedEquipment.itemLevel} 이상`, inline: true },
+      );
+  }
+
+  return null;
+}
+
+async function createPartyStatEmbeds(adventure) {
+  const battle = adventureSystem.battles.get(adventure.id);
+  const partyFields = await Promise.all(
+    adventure.memberIds.map(async (userId) => {
+      const player = await playerStore.getOrCreate(userId);
+      const stats = battle?.playerStats[userId] ?? calculateTotalStats(player);
+      const health = adventure.healthByUser[userId];
+      const maxHealth = adventure.maxHealthByUser[userId];
+      const mana = battle?.manaByUser[userId] ?? stats.mana;
+      return {
+        name: `<@${userId}> · Lv.${stats.playerLevel}`,
+        value: [
+          `❤️ 체력 ${health}/${maxHealth}\t🔷 마나 ${mana}/${stats.mana}`,
+          `🛡️ 방어력 ${stats.defense}\t⚔️ 공격력 ${stats.attack}\t✨ 마법 공격력 ${stats.magicAttack}`,
+          `💨 속도 ${stats.speed}\t🎯 치명타 ${stats.criticalChance}%\t💥 치명타 피해 ${stats.criticalDamage}%`,
+        ].join('\n'),
+        inline: false,
+      };
+    }),
+  );
+  const embeds = [];
+  for (let index = 0; index < partyFields.length; index += 25) {
+    const page = Math.floor(index / 25) + 1;
+    const pageCount = Math.ceil(partyFields.length / 25);
+    embeds.push(
+      new EmbedBuilder()
+        .setColor(0x5865f2)
+        .setTitle(`⚔️ ${adventure.floor}층 파티원 스탯${pageCount > 1 ? ` (${page}/${pageCount})` : ''}`)
+        .addFields(partyFields.slice(index, index + 25)),
+    );
+  }
+  return embeds;
+}
+
+client.once(Events.ClientReady, (readyClient) => {
+  console.log(`${readyClient.user.tag}(으)로 로그인했습니다.`);
+});
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  try {
+    if (interaction.isAutocomplete()) {
+      if (interaction.commandName === '도움말') {
+        const focusedValue = interaction.options.getFocused().toLocaleLowerCase('ko-KR');
+        const player = await playerStore.getOrCreate(interaction.user.id);
+        const equipment = [
+          ...player.equipmentInventory.equipment,
+          ...Object.values(player.equipment).filter(Boolean),
+        ];
+        const choices = [
+          ...Object.values(potionCatalog).map((potion) => ({
+            name: `[포션] [${potion.rarity}] ${potion.name}`,
+            value: `potion:${potion.id}`,
+          })),
+          ...Object.values(skillCatalog).map((skill) => ({
+            name: `[스킬] [${skill.rarity}] ${skill.name}`,
+            value: `skill:${skill.id}`,
+          })),
+          ...equipment.map((item) => ({
+            name: `[장비] ${formatEquipmentName(item)} · 고유 Lv.${item.itemLevel}`.slice(0, 100),
+            value: `equipment:${item.id}`,
+          })),
+        ]
+          .filter((choice) => choice.name.toLocaleLowerCase('ko-KR').includes(focusedValue))
+          .slice(0, 25);
+        await interaction.respond(choices);
+        return;
+      }
+
+      if (interaction.commandName === 'give') {
+        if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+          await interaction.respond([]);
+          return;
+        }
+        const focusedValue = interaction.options.getFocused().toLocaleLowerCase('ko-KR');
+        await interaction.respond(
+          debugGiveOptions
+            .filter((option) => option.name.toLocaleLowerCase('ko-KR').includes(focusedValue))
+            .slice(0, 25),
+        );
+        return;
+      }
+
+      if (interaction.commandName === '스킬장착') {
+        const player = await playerStore.getOrCreate(interaction.user.id);
+        const focusedValue = interaction.options.getFocused().toLocaleLowerCase('ko-KR');
+        const choices = player.skillInventory
+          .map((skillId) => getSkill(skillId))
+          .filter(
+            (skill) =>
+              skill &&
+              `${skill.name} ${skill.rarity}`.toLocaleLowerCase('ko-KR').includes(focusedValue),
+          )
+          .slice(0, 25)
+          .map((skill) => ({ name: `[${skill.rarity}] ${skill.name}`, value: skill.id }));
+        await interaction.respond(choices);
+        return;
+      }
+
+      if (interaction.commandName === '스킬해제') {
+        if (adventureManager.getByUser(interaction.user.id)) {
+          await interaction.reply({
+            content: '모험 중에는 스킬 장착을 해제할 수 없습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const slot = interaction.options.getInteger('슬롯', true);
+        const result = await playerStore.unequipSkill(interaction.user.id, slot);
+        if (!result.ok && result.reason === 'EMPTY_SLOT') {
+          await interaction.reply({
+            content: `${result.slot}번 슬롯은 이미 비어 있습니다.`,
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        if (!result.ok) {
+          await interaction.reply({ content: '올바르지 않은 스킬 슬롯입니다.', flags: MessageFlags.Ephemeral });
+          return;
+        }
+        await interaction.reply({
+          content: `✅ ${result.slot}번 슬롯의 [${result.skill.rarity}] ${result.skill.name} 장착을 해제했습니다.`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      if (!['장비장착', '장비강화', '장비분해', '장비잠금'].includes(interaction.commandName)) {
+        await interaction.respond([]);
+        return;
+      }
+      const player = await playerStore.getOrCreate(interaction.user.id);
+      const focusedValue = interaction.options.getFocused().toLocaleLowerCase('ko-KR');
+      const availableEquipment = ['장비잠금', '장비강화'].includes(interaction.commandName)
+        ? [
+            ...player.equipmentInventory.equipment,
+            ...Object.values(player.equipment).filter(Boolean),
+          ]
+        : player.equipmentInventory.equipment;
+      const selectableEquipment = availableEquipment;
+      const choices = selectableEquipment
+        .filter((item) =>
+          `${item.name} ${item.rarity} ${item.itemLevel}`
+            .toLocaleLowerCase('ko-KR')
+            .includes(focusedValue),
+        )
+        .slice(0, 25)
+        .map((item) => {
+          const levelBlocked =
+            interaction.commandName === '장비장착' && item.itemLevel > player.stats.playerLevel;
+          const location = Object.values(player.equipment).includes(item) ? '[장착 중]' : '[인벤토리]';
+          const status = levelBlocked ? `[장착 불가 · Lv.${item.itemLevel} 필요]` : location;
+          return {
+            name: `${status} ${formatEquipmentName(item)} · 고유 Lv.${item.itemLevel}`.slice(0, 100),
+            value: item.id,
+          };
+        });
+      await interaction.respond(choices);
+      return;
+    }
+
+    if (interaction.isChatInputCommand()) {
+      if (interaction.commandName === '디버그') {
+        if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+          await interaction.reply({
+            content: '이 명령어는 서버 관리자만 사용할 수 있습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const group = interaction.options.getSubcommandGroup(true);
+        const subcommand = interaction.options.getSubcommand(true);
+        if (group === '모험' && subcommand === '다음층이동') {
+          const adventure = adventureManager.getByUser(interaction.user.id);
+          if (!adventure) {
+            await interaction.reply({
+              content: '현재 참여 중인 모험이 없습니다.',
+              flags: MessageFlags.Ephemeral,
+            });
+            return;
+          }
+          if (interaction.channelId !== adventure.textChannelId) {
+            await interaction.reply({
+              content: '현재 모험의 `던전-전투` 채널에서 사용해 주세요.',
+              flags: MessageFlags.Ephemeral,
+            });
+            return;
+          }
+          await interaction.reply({
+            content: `🛠️ 디버그 명령으로 ${adventure.floor + 1}층 이동을 시작합니다.`,
+            flags: MessageFlags.Ephemeral,
+          });
+          await adventureSystem.moveToNextFloor(adventure, interaction.channel);
+          return;
+        }
+        if (group === '모험' && subcommand === '킬') {
+          const adventure = adventureManager.getByUser(interaction.user.id);
+          if (!adventure) {
+            await interaction.reply({
+              content: '현재 참여 중인 모험이 없습니다.',
+              flags: MessageFlags.Ephemeral,
+            });
+            return;
+          }
+          if (interaction.channelId !== adventure.textChannelId) {
+            await interaction.reply({
+              content: '현재 모험의 `던전-전투` 채널에서 사용해 주세요.',
+              flags: MessageFlags.Ephemeral,
+            });
+            return;
+          }
+          const battle = adventureSystem.battles.get(adventure.id);
+          if (!battle) {
+            await interaction.reply({
+              content: '현재 전투 중인 몬스터가 없습니다.',
+              flags: MessageFlags.Ephemeral,
+            });
+            return;
+          }
+          if (battle.debugKillInProgress) {
+            await interaction.reply({
+              content: '이미 디버그 처치가 처리 중입니다.',
+              flags: MessageFlags.Ephemeral,
+            });
+            return;
+          }
+          battle.debugKillInProgress = true;
+          await interaction.reply({
+            content: `🛠️ 디버그 명령으로 **Lv.${battle.monster.level} ${battle.monster.name}**을(를) 즉시 처치합니다.`,
+            flags: MessageFlags.Ephemeral,
+          });
+          battle.monster.health = 0;
+          adventure.currentActionToken = null;
+          await battle.turnMessage?.edit({ components: [] }).catch(() => {});
+          await interaction.channel.send(
+            `# 🛠️ 관리자 디버그 킬\n**Lv.${battle.monster.level} ${battle.monster.name}**을(를) 즉시 처치했습니다.`,
+          );
+          await adventureSystem.finishBattleVictory(adventure, battle);
+          return;
+        }
+      }
+
+      if (interaction.commandName === 'give') {
+        if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+          await interaction.reply({ content: '이 명령어는 서버 관리자만 사용할 수 있습니다.', flags: MessageFlags.Ephemeral });
+          return;
+        }
+        const target = interaction.options.getUser('플레이어', true);
+        if (target.bot) {
+          await interaction.reply({ content: '봇 계정에는 아이템을 지급할 수 없습니다.', flags: MessageFlags.Ephemeral });
+          return;
+        }
+        const selected = interaction.options.getString('아이템', true);
+        const quantity = interaction.options.getInteger('수량') ?? 1;
+        const availableOption = debugGiveOptions.find((option) => option.value === selected);
+        if (!availableOption) {
+          await interaction.reply({ content: '자동완성 목록에서 올바른 아이템을 선택해 주세요.', flags: MessageFlags.Ephemeral });
+          return;
+        }
+        const [type, first, second] = selected.split(':');
+        let itemText;
+        if (type === 'potion') {
+          const potion = potionCatalog[first];
+          await playerStore.addItem(target.id, potion.id, quantity);
+          itemText = `[${potion.rarity}] ${potion.name} ${quantity.toLocaleString('ko-KR')}개`;
+        } else if (type === 'currency') {
+          await playerStore.addDebugResources(target.id, { gold: quantity });
+          itemText = `골드 ${quantity.toLocaleString('ko-KR')}`;
+        } else if (type === 'material') {
+          await playerStore.addDebugResources(target.id, { magicStones: quantity });
+          itemText = `마석 ${quantity.toLocaleString('ko-KR')}개`;
+        } else {
+          if (quantity > 100) {
+            await interaction.reply({
+              content: '장비는 한 번에 최대 100개까지 지급할 수 있습니다.',
+              flags: MessageFlags.Ephemeral,
+            });
+            return;
+          }
+          const player = await playerStore.getOrCreate(target.id);
+          let sampleItem;
+          for (let index = 0; index < quantity; index += 1) {
+            const item = createEquipment({
+              name: getEquipmentName(first, second),
+              itemLevel: player.stats.playerLevel,
+              rarity: first,
+              slot: second,
+            });
+            sampleItem ??= item;
+            await playerStore.addAdventureReward(target.id, 0, item);
+          }
+          itemText = `${formatEquipmentName(sampleItem)} (고유 Lv.${sampleItem.itemLevel}) ${quantity.toLocaleString('ko-KR')}개`;
+        }
+        await interaction.reply({
+          content: `✅ 관리자 디버그 지급: <@${target.id}>님에게 **${itemText}**을(를) 지급했습니다.`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '항복') {
+        const session = pvpManager.getByUser(interaction.user.id);
+        if (!session) {
+          await interaction.reply({
+            content: '현재 참여 중인 PVP 결투가 없습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        if (interaction.channelId !== session.textChannelId) {
+          await interaction.reply({
+            content: '항복은 결투 전용 `채팅-콜로세움`에서만 사용할 수 있습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const winnerId = session.memberIds.find((userId) => userId !== interaction.user.id);
+        await interaction.reply(
+          `# 🏳️ 항복\n<@${interaction.user.id}>님이 항복했습니다.\n# 🏆 <@${winnerId}>님 승리!`,
+        );
+        await pvpManager.end(client, session.id, '플레이어 항복');
+        return;
+      }
+
+      if (interaction.commandName === '결투신청') {
+        const challenger = interaction.member;
+        const opponent = interaction.options.getMember('상대');
+        if (!challenger?.voice.channelId) {
+          await interaction.reply({ content: '먼저 음성 채널에 들어가 주세요.', flags: MessageFlags.Ephemeral });
+          return;
+        }
+        if (!opponent || opponent.user.bot || opponent.id === challenger.id) {
+          await interaction.reply({ content: '자신이나 봇에게는 결투를 신청할 수 없습니다.', flags: MessageFlags.Ephemeral });
+          return;
+        }
+        if (opponent.voice.channelId !== challenger.voice.channelId) {
+          await interaction.reply({ content: '결투 상대가 같은 음성 채널에 있어야 합니다.', flags: MessageFlags.Ephemeral });
+          return;
+        }
+        if (
+          adventureManager.getByUser(challenger.id) || adventureManager.getByUser(opponent.id) ||
+          pendingInvitationByUser.has(challenger.id) || pendingInvitationByUser.has(opponent.id) ||
+          pvpManager.getByUser(challenger.id) || pvpManager.getByUser(opponent.id) ||
+          hasPendingDuel(challenger.id) || hasPendingDuel(opponent.id)
+        ) {
+          await interaction.reply({ content: '두 플레이어 중 한 명이 이미 모험, 결투 또는 결투 신청 중입니다.', flags: MessageFlags.Ephemeral });
+          return;
+        }
+
+        const duelId = randomUUID();
+        const row = createChoiceButtons('duel_invite', duelId, '결투 수락', '결투 거절');
+        const message = await interaction.reply({
+          content: `# ⚔️ 결투 신청\n<@${challenger.id}>님이 <@${opponent.id}>님에게 결투를 신청했습니다.\n30초 안에 선택해 주세요.`,
+          components: [row],
+          withResponse: true,
+        });
+        const duel = {
+          id: duelId,
+          guildId: interaction.guildId,
+          channelId: interaction.channelId,
+          voiceChannelId: challenger.voice.channelId,
+          challengerId: challenger.id,
+          opponentId: opponent.id,
+          message: message.resource?.message,
+          timeout: null,
+        };
+        pendingDuels.set(duelId, duel);
+        duel.timeout = setTimeout(async () => {
+          if (!pendingDuels.delete(duelId)) return;
+          await duel.message?.edit({ content: '⌛ 결투 신청 시간이 만료됐습니다.', components: [] }).catch(() => {});
+        }, DUEL_INVITATION_DURATION_MS);
+        return;
+      }
+
+      if (interaction.commandName === '전체초기화') {
+        if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+          await interaction.reply({
+            content: '이 명령어는 서버 관리자만 사용할 수 있습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        if (interaction.options.getString('확인', true) !== '전체초기화') {
+          await interaction.reply({
+            content: '초기화가 취소되었습니다. 확인란에 `전체초기화`를 정확히 입력해야 합니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        if (adventureManager.adventures.size > 0) {
+          await interaction.reply({
+            content: '진행 중인 모험이 있어 초기화할 수 없습니다. 모든 모험이 끝난 뒤 다시 실행해 주세요.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const result = await playerStore.resetAllPlayers();
+        await interaction.reply({
+          content: `✅ 플레이어 **${result.resetCount}명**의 스탯, 장비, 인벤토리, 골드, 스킬, 경험치와 체크포인트를 모두 초기화했습니다.`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '도움말') {
+        const itemReference = interaction.options.getString('아이템이름');
+        if (itemReference) {
+          const itemEmbed = await createItemHelpEmbed(interaction.user.id, itemReference);
+          await interaction.reply({
+            content: itemEmbed ? undefined : '해당 아이템을 찾지 못했습니다. 자동완성 목록에서 선택해 주세요.',
+            embeds: itemEmbed ? [itemEmbed] : [],
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        await interaction.reply({
+          embeds: [
+            interaction.options.getString('항목') === '확률'
+              ? createProbabilityHelpEmbed()
+              : createHelpEmbed(),
+          ],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '파티원스텟') {
+        const adventure = adventureManager.getByUser(interaction.user.id);
+        if (!adventure || interaction.channelId !== adventure.textChannelId) {
+          await interaction.reply({
+            content: '현재 참여 중인 모험의 전투 채널에서만 사용할 수 있습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        await interaction.reply({ embeds: await createPartyStatEmbeds(adventure) });
+        return;
+      }
+
+      if (interaction.commandName === 'ping') {
+        await interaction.reply(`Pong! 지연 시간: ${client.ws.ping}ms`);
+        return;
+      }
+
+      if (interaction.commandName === '게임시작') {
+        await interaction.reply({
+          content: '가위, 바위, 보 중 하나를 선택하세요!',
+          components: [createGameButtons()],
+        });
+        return;
+      }
+
+      if (interaction.commandName === '내정보') {
+        const player = await playerStore.getOrCreate(interaction.user.id);
+        await interaction.reply({
+          embeds: [createPlayerEmbed(interaction.user, player)],
+        });
+        return;
+      }
+
+      if (interaction.commandName === '정보') {
+        const target = interaction.options.getUser('플레이어', true);
+        if (target.bot) {
+          await interaction.reply({
+            content: '봇 계정의 던전 정보는 확인할 수 없습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const player = await playerStore.getOrCreate(target.id);
+        await interaction.reply({
+          embeds: [createPlayerEmbed(target, player)],
+        });
+        return;
+      }
+
+      if (interaction.commandName === '장비인벤토리') {
+        const player = await playerStore.getOrCreate(interaction.user.id);
+        await interaction.reply({
+          embeds: [createEquipmentInventoryEmbed(interaction.user, player)],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '아이템인벤토리') {
+        const player = await playerStore.getOrCreate(interaction.user.id);
+        await interaction.reply({
+          embeds: [createItemInventoryEmbed(interaction.user, player)],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '스킬인벤토리') {
+        const player = await playerStore.getOrCreate(interaction.user.id);
+        await interaction.reply({
+          embeds: [createSkillInventoryEmbed(interaction.user, player)],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '스킬장착') {
+        if (adventureManager.getByUser(interaction.user.id)) {
+          await interaction.reply({
+            content: '모험 중에는 스킬 장착을 변경할 수 없습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const skillId = interaction.options.getString('스킬', true);
+        const slot = interaction.options.getInteger('슬롯', true);
+        const result = await playerStore.equipSkill(interaction.user.id, skillId, slot);
+        if (!result.ok) {
+          await interaction.reply({
+            content: '보유 스킬에서 해당 스킬을 찾지 못했습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        await interaction.reply({
+          content: `✅ [${result.skill.rarity}] ${result.skill.name}을(를) **${result.slot}번 슬롯**에 장착했습니다.`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '상점') {
+        if (adventureManager.getByUser(interaction.user.id)) {
+          await interaction.reply({
+            content: '모험 중에는 상점을 이용할 수 없습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const player = await playerStore.getOrCreate(interaction.user.id);
+        await interaction.reply(createShopPayload(interaction.user, player));
+        return;
+      }
+
+      if (interaction.commandName === '장비장착') {
+        if (adventureManager.getByUser(interaction.user.id)) {
+          await interaction.reply({
+            content: '모험 중에는 장비를 변경할 수 없습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const itemName = interaction.options.getString('아이템이름', true);
+        const result = await playerStore.equipItem(interaction.user.id, itemName);
+
+        if (!result.ok) {
+          const content = result.reason === 'LEVEL_TOO_LOW'
+            ? [
+                `레벨이 부족하여 ${formatEquipmentName(result.item)}을(를) 장착할 수 없습니다.`,
+                `필요 레벨: **Lv.${result.requiredLevel}** · 현재 레벨: **Lv.${result.playerLevel}**`,
+              ].join('\n')
+            : '장비 인벤토리에서 해당 아이템을 찾지 못했습니다. 자동완성 목록에서 다시 선택해 주세요.';
+          await interaction.reply({
+            content,
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        const previousMessage = result.previousItem
+          ? ` 기존 ${formatEquipmentName(result.previousItem)}은(는) 인벤토리로 이동했습니다.`
+          : '';
+        await interaction.reply({
+          content: `✅ ${formatEquipmentName(result.item)}을(를) **${result.item.slot}** 슬롯에 장착했습니다.${previousMessage}`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '자동장착') {
+        if (adventureManager.getByUser(interaction.user.id)) {
+          await interaction.reply({
+            content: '모험 중에는 장비를 변경할 수 없습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const result = await playerStore.autoEquipBest(interaction.user.id);
+        if (result.changes.length === 0) {
+          await interaction.reply({
+            content: [
+              '현재 이미 장착 가능한 장비 중 가장 우선순위가 높은 장비를 착용하고 있습니다.',
+              result.skippedEquipment.length > 0
+                ? `-# 플레이어 레벨(${result.playerLevel})보다 높은 고유 레벨 장비 ${result.skippedEquipment.length}개는 제외했습니다.`
+                : null,
+            ].filter(Boolean).join('\n'),
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const changeLines = result.changes.map(({ slot, item }) =>
+          item
+            ? `**[${slot}]** ${formatEquipmentName(item)} · 고유 Lv.${item.itemLevel}`
+            : `**[${slot}]** 비어 있음`,
+        );
+        await interaction.reply({
+          content: [
+            '✅ 자동 장착을 완료했습니다.',
+            `-# 플레이어 Lv.${result.playerLevel} 이하 장비만 대상 · 우선순위: 고유 레벨 → 등급 → 강화 단계`,
+            result.skippedEquipment.length > 0
+              ? `-# 고유 레벨이 더 높은 장비 ${result.skippedEquipment.length}개는 인벤토리에 유지했습니다.`
+              : null,
+            ...changeLines,
+          ].filter(Boolean).join('\n'),
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '장비강화') {
+        if (adventureManager.getByUser(interaction.user.id)) {
+          await interaction.reply({
+            content: '모험 중에는 장비를 강화할 수 없습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const itemName = interaction.options.getString('아이템이름', true);
+        const result = await playerStore.enhanceInventoryItem(
+          interaction.user.id,
+          itemName,
+          enhanceEquipment,
+        );
+
+        if (!result.ok && result.reason === 'NOT_FOUND') {
+          await interaction.reply({
+            content: `보유 또는 장착 중인 장비에서 **${itemName}** 아이템을 찾지 못했습니다.`,
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        if (!result.ok && result.reason === 'MAX') {
+          await interaction.reply({
+            content: `${formatEquipmentName(result.item)}은(는) 최대 강화 단계인 +${getMaxEnhancement(result.item)}입니다.`,
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        if (!result.ok && result.reason === 'NOT_ENOUGH_MAGIC_STONES') {
+          await interaction.reply({
+            content: [
+              `${formatEquipmentName(result.item)}의 다음 강화에는 **마석 ${result.requiredMagicStones}개**가 필요합니다.`,
+              `현재 보유량: **${result.ownedMagicStones}개**`,
+            ].join('\n'),
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        const attachmentName = 'equipment-enhancement.png';
+        const attachment = new AttachmentBuilder(enhancementImagePath, { name: attachmentName });
+        const embed = new EmbedBuilder()
+          .setColor(0xf1c40f)
+          .setTitle('🔨✨ 장비 강화 성공!')
+          .setDescription([
+            result.equippedSlot ? `현재 **${result.equippedSlot}** 슬롯에 장착 중인 장비입니다.` : '장비 인벤토리에 보관 중인 장비입니다.',
+            '',
+            formatEquipmentDetails(result.item),
+            '',
+            `사용한 마석: **${result.usedMagicStones}개** · 남은 마석: **${result.remainingMagicStones}개**`,
+          ].join('\n'))
+          .setImage(`attachment://${attachmentName}`);
+        await interaction.reply({
+          embeds: [embed],
+          files: [attachment],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '장비분해') {
+        if (adventureManager.getByUser(interaction.user.id)) {
+          await interaction.reply({
+            content: '모험 중에는 장비를 분해할 수 없습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const itemIdentifier = interaction.options.getString('장비', true);
+        const result = await playerStore.dismantleEquipment(
+          interaction.user.id,
+          itemIdentifier,
+        );
+        if (!result.ok) {
+          const content = result.reason === 'LOCKED'
+            ? `🔒 ${formatEquipmentName(result.item)}은(는) 잠긴 장비입니다. 먼저 /장비잠금에서 잠금을 해제해 주세요.`
+            : '장비 인벤토리에서 해당 장비를 찾지 못했습니다.';
+          await interaction.reply({
+            content,
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        await interaction.reply({
+          content: [
+            `🔨 ${formatEquipmentName(result.item)}을(를) 분해했습니다.`,
+            `획득한 마석: **${result.magicStones}개**`,
+            `현재 보유 마석: **${result.totalMagicStones}개**`,
+          ].join('\n'),
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '장비일괄분해') {
+        if (adventureManager.getByUser(interaction.user.id)) {
+          await interaction.reply({
+            content: '모험 중에는 장비를 분해할 수 없습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const maxItemLevel = interaction.options.getInteger('고유레벨이하');
+        const maxRarity = interaction.options.getString('등급이하');
+        if (maxItemLevel === null && maxRarity === null) {
+          await interaction.reply({
+            content: '`고유레벨이하` 또는 `등급이하` 조건을 하나 이상 지정해 주세요.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const result = await playerStore.dismantleEquipmentBulk(interaction.user.id, {
+          maxItemLevel,
+          maxRarity,
+        });
+        if (!result.ok) {
+          await interaction.reply({
+            content: result.lockedExcluded > 0
+              ? `조건에 맞는 장비는 모두 잠겨 있어 분해하지 않았습니다. 잠금 보호 장비: **${result.lockedExcluded}개**`
+              : '조건에 맞는 분해 가능한 장비가 없습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const conditions = [
+          maxItemLevel !== null ? `고유 Lv.${maxItemLevel} 이하` : null,
+          maxRarity !== null ? `${maxRarity} 등급 이하` : null,
+        ].filter(Boolean).join(' + ');
+        await interaction.reply({
+          content: [
+            `🔨 **장비 ${result.dismantledCount}개**를 일괄 분해했습니다.`,
+            `적용 조건: **${conditions}**`,
+            `획득한 마석: **${result.magicStones}개**`,
+            `현재 보유 마석: **${result.totalMagicStones}개**`,
+            result.lockedExcluded > 0
+              ? `🔒 조건에 맞지만 잠겨 있어 보호된 장비: **${result.lockedExcluded}개**`
+              : null,
+          ].filter(Boolean).join('\n'),
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '장비잠금') {
+        const itemIdentifier = interaction.options.getString('장비', true);
+        const lockState = interaction.options.getString('상태', true);
+        const result = await playerStore.setEquipmentLock(
+          interaction.user.id,
+          itemIdentifier,
+          lockState === 'lock',
+        );
+        if (!result.ok) {
+          await interaction.reply({
+            content: '보유 장비에서 해당 장비를 찾지 못했습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        await interaction.reply({
+          content: result.locked
+            ? `🔒 ${formatEquipmentName(result.item)}을(를) 잠갔습니다. 잠금을 해제하기 전에는 분해할 수 없습니다.`
+            : `🔓 ${formatEquipmentName(result.item)}의 잠금을 해제했습니다.`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '모험시작') {
+        const member = await interaction.guild.members.fetch(interaction.user.id);
+        if (member.voice.channel?.name !== ENTRANCE_CHANNEL_NAME) {
+          await interaction.reply({
+            content: '먼저 **던전입장** 음성 채널에 들어가 주세요.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        if (adventureManager.getByUser(member.id) || pvpManager.getByUser(member.id)) {
+          await interaction.reply({
+            content: '이미 진행 중인 모험 또는 결투가 있습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        if (pendingInvitationByUser.has(member.id)) {
+          await interaction.reply({
+            content: '이미 진행 중인 공대 모집이 있습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        if (hasPendingDuel(member.id)) {
+          await interaction.reply({
+            content: '진행 중인 결투 신청에 먼저 응답해 주세요.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        const lobbyMembers = [...member.voice.channel.members.values()].filter(
+          (candidate) => !candidate.user.bot,
+        );
+        if (lobbyMembers.some((candidate) => pendingInvitationByUser.has(candidate.id))) {
+          await interaction.reply({
+            content: '던전입장 채널에서 이미 다른 공대 모집이 진행 중입니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        if (lobbyMembers.length === 1) {
+          await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+          const player = await playerStore.getOrCreate(member.id);
+          const maxHealth = calculateTotalStats(player).health;
+          const result = await adventureManager.startParty(
+            interaction.guild,
+            member,
+            [member],
+            { [member.id]: maxHealth },
+          );
+          if (!result.ok) {
+            await interaction.editReply(
+              '모험을 시작하지 못했습니다. 봇의 채널 관리 및 멤버 이동 권한을 확인해 주세요.',
+            );
+            return;
+          }
+          await adventureSystem.start(result.adventure);
+          await interaction.editReply(
+            `⚔️ 1인 모험을 시작했습니다! <#${result.adventure.textChannelId}> 채널에서 전투를 진행합니다.`,
+          );
+          return;
+        }
+
+        const invitation = {
+          id: randomUUID(),
+          guildId: interaction.guild.id,
+          channelId: interaction.channelId,
+          entranceChannelId: member.voice.channelId,
+          leaderId: member.id,
+          invitedIds: lobbyMembers.map((candidate) => candidate.id),
+          acceptedIds: new Set([member.id]),
+          declinedIds: new Set(),
+          message: null,
+          timeout: null,
+          closing: false,
+        };
+        const row = createChoiceButtons('adventure_join', invitation.id, '동행하기', '거절하기');
+        await interaction.reply({
+          content: invitationText(invitation),
+          components: [row],
+          allowedMentions: { users: invitation.invitedIds },
+        });
+        invitation.message = await interaction.fetchReply();
+        pendingInvitations.set(invitation.id, invitation);
+        for (const userId of invitation.invitedIds) {
+          pendingInvitationByUser.set(userId, invitation.id);
+        }
+        invitation.timeout = setTimeout(() => finishInvitation(invitation.id), INVITATION_DURATION_MS);
+        return;
+      }
+
+      if (interaction.commandName === '모험중지') {
+        const adventure = adventureManager.getByUser(interaction.user.id);
+        if (!adventure) {
+          await interaction.reply({
+            content: '현재 진행 중인 모험이 없습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        const battle = adventureSystem.battles.get(adventure.id);
+        if (battle && !canStopDuringBattle(battle)) {
+          await interaction.reply({
+            content: '⚔️ 파티의 공격과 피격이 모두 발생한 전투 중에는 모험을 중지할 수 없습니다. 전투가 끝난 뒤 다시 시도해 주세요.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        if (interaction.channelId !== adventure.textChannelId) {
+          await interaction.reply({
+            content: `모험 중지는 전용 전투 채널 <#${adventure.textChannelId}>에서만 사용할 수 있습니다.`,
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        if (adventure.memberIds.length === 1) {
+          await interaction.reply({
+            content: '🛑 모험을 종료합니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          adventureSystem.cleanup(adventure.id);
+          await adventureManager.end(client, adventure.id, 'SOLO_STOP_COMMAND');
+          return;
+        }
+
+        if (stopVotes.has(adventure.id)) {
+          await interaction.reply({
+            content: '이미 모험 중지 투표가 진행 중입니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+
+        const textChannel = interaction.guild.channels.cache.get(adventure.textChannelId);
+        const vote = {
+          adventureId: adventure.id,
+          memberIds: [...adventure.memberIds],
+          startedBy: interaction.user.id,
+          yesIds: new Set([interaction.user.id]),
+          noIds: new Set(),
+          message: null,
+          timeout: null,
+        };
+        stopVotes.set(adventure.id, vote);
+        vote.message = await textChannel.send({
+          content: stopVoteText(vote),
+          components: [createChoiceButtons('adventure_stop', adventure.id, '중지 찬성', '중지 반대')],
+        });
+        vote.timeout = setTimeout(
+          () => closeStopVote(vote, '⌛ 모험 중지 투표가 시간 초과로 부결됐습니다.'),
+          STOP_VOTE_DURATION_MS,
+        );
+        await interaction.reply({
+          content: `모험 전용 채널에서 중지 투표를 시작했습니다. 과반수인 **${Math.floor(vote.memberIds.length / 2) + 1}표**가 필요합니다.`,
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith('shop:')) {
+      const [, action, itemId, ownerId] = interaction.customId.split(':');
+      if (interaction.user.id !== ownerId) {
+        await interaction.reply({
+          content: '이 상점은 명령어를 실행한 사용자만 이용할 수 있습니다.',
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      if (adventureManager.getByUser(ownerId)) {
+        await interaction.reply({
+          content: '모험 중에는 상점을 이용할 수 없습니다.',
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      if (action === 'sell') {
+        const result = await playerStore.sellItem(ownerId, itemId);
+        if (!result.ok) {
+          await interaction.reply({
+            content: result.reason === 'NOT_OWNED' ? '판매할 포션을 보유하고 있지 않습니다.' : '존재하지 않는 상품입니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        await interaction.reply({
+          content: `✅ ${result.potion.name} 1개를 **${result.salePrice}골드**에 판매했습니다. 남은 수량: **${result.remaining}개** · 보유 골드: **${result.gold}**`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      if (action === 'material' && itemId === 'magic_stone') {
+        const result = await playerStore.buyMagicStone(ownerId, 500);
+        if (!result.ok) {
+          await interaction.reply({
+            content: `마석 교환에는 **${result.price}골드**가 필요합니다. 현재 골드: **${result.gold}**`,
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        await interaction.reply({
+          content: `✅ **500골드**를 사용해 마석 1개를 교환했습니다. 보유 마석: **${result.magicStones}개** · 남은 골드: **${result.gold}**`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      if (action !== 'buy') {
+        await interaction.reply({ content: '올바르지 않은 상점 동작입니다.', flags: MessageFlags.Ephemeral });
+        return;
+      }
+      const result = await playerStore.buyItem(ownerId, itemId);
+      if (!result.ok && result.reason === 'NOT_ENOUGH_GOLD') {
+        await interaction.reply({
+          content: `${result.potion.name} 구매에 **${result.potion.price}골드**가 필요합니다. 현재 골드: **${result.gold}**`,
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      if (!result.ok) {
+        await interaction.reply({ content: '존재하지 않는 상품입니다.', flags: MessageFlags.Ephemeral });
+        return;
+      }
+      await interaction.reply({
+        content: `✅ ${result.potion.name} 1개를 구매했습니다. 보유 수량: **${result.quantity}개** · 남은 골드: **${result.gold}**`,
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith('potion:')) {
+      await adventureSystem.handlePotionButton(interaction);
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith('skill_target:')) {
+      await adventureSystem.handleSkillTargetButton(interaction);
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith('skill:')) {
+      await adventureSystem.handleSkillButton(interaction);
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith('dungeon:')) {
+      await adventureSystem.handleButton(interaction);
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith('duel_invite:')) {
+      const [, duelId, choice] = interaction.customId.split(':');
+      const duel = pendingDuels.get(duelId);
+      if (!duel) {
+        await interaction.reply({ content: '이미 종료된 결투 신청입니다.', flags: MessageFlags.Ephemeral });
+        return;
+      }
+      if (interaction.user.id !== duel.opponentId) {
+        await interaction.reply({ content: '결투를 신청받은 플레이어만 선택할 수 있습니다.', flags: MessageFlags.Ephemeral });
+        return;
+      }
+      pendingDuels.delete(duelId);
+      clearTimeout(duel.timeout);
+      if (choice !== 'yes') {
+        await interaction.update({ content: `❌ <@${duel.opponentId}>님이 결투를 거절했습니다.`, components: [] });
+        return;
+      }
+
+      const guild = interaction.guild;
+      const challenger = await guild.members.fetch(duel.challengerId).catch(() => null);
+      const opponent = await guild.members.fetch(duel.opponentId).catch(() => null);
+      if (
+        !challenger || !opponent || challenger.voice.channelId !== duel.voiceChannelId ||
+        opponent.voice.channelId !== duel.voiceChannelId
+      ) {
+        await interaction.update({ content: '❌ 두 플레이어가 같은 음성 채널에 있지 않아 결투가 취소됐습니다.', components: [] });
+        return;
+      }
+      if (
+        adventureManager.getByUser(challenger.id) || adventureManager.getByUser(opponent.id) ||
+        pendingInvitationByUser.has(challenger.id) || pendingInvitationByUser.has(opponent.id) ||
+        pvpManager.getByUser(challenger.id) || pvpManager.getByUser(opponent.id)
+      ) {
+        await interaction.update({ content: '❌ 두 플레이어 중 한 명이 이미 다른 콘텐츠를 진행 중입니다.', components: [] });
+        return;
+      }
+      await interaction.update({ content: `✅ <@${duel.opponentId}>님이 결투를 수락했습니다. 콜로세움을 준비합니다.`, components: [] });
+      const result = await pvpManager.start(guild, challenger, opponent);
+      if (!result.ok) {
+        await interaction.followUp({ content: '콜로세움을 만들 수 없습니다. 봇의 채널 관리 및 멤버 이동 권한을 확인해 주세요.', flags: MessageFlags.Ephemeral });
+      }
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith('adventure_join:')) {
+      const [, invitationId, choice] = interaction.customId.split(':');
+      const invitation = pendingInvitations.get(invitationId);
+      if (!invitation || invitation.closing) {
+        await interaction.reply({
+          content: '이미 종료된 공대 모집입니다.',
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      if (!invitation.invitedIds.includes(interaction.user.id)) {
+        await interaction.reply({
+          content: '이 모집의 초대 대상이 아닙니다.',
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      if (
+        invitation.acceptedIds.has(interaction.user.id) ||
+        invitation.declinedIds.has(interaction.user.id)
+      ) {
+        await interaction.reply({
+          content: '이미 응답했습니다.',
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (choice === 'yes') invitation.acceptedIds.add(interaction.user.id);
+      else invitation.declinedIds.add(interaction.user.id);
+      await interaction.reply({
+        content: choice === 'yes' ? '✅ 모험 동행에 동의했습니다.' : '❌ 모험 동행을 거절했습니다.',
+        flags: MessageFlags.Ephemeral,
+      });
+      await invitation.message
+        .edit({
+          content: invitationText(invitation),
+          components: [createChoiceButtons('adventure_join', invitation.id, '동행하기', '거절하기')],
+        })
+        .catch(() => {});
+
+      const responseCount = invitation.acceptedIds.size + invitation.declinedIds.size;
+      if (responseCount === invitation.invitedIds.length) await finishInvitation(invitation.id);
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith('adventure_stop:')) {
+      const [, adventureId, choice] = interaction.customId.split(':');
+      const vote = stopVotes.get(adventureId);
+      const adventure = adventureManager.adventures.get(adventureId);
+      if (!vote || !adventure) {
+        await interaction.reply({
+          content: '이미 종료된 투표입니다.',
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      const battle = adventureSystem.battles.get(adventureId);
+      if (battle && !canStopDuringBattle(battle)) {
+        await closeStopVote(vote, '⚔️ 파티의 공격과 피격이 모두 발생해 모험 중지 투표를 취소했습니다. 전투 종료 후 다시 요청해 주세요.');
+        await interaction.reply({
+          content: '파티의 공격과 피격이 모두 발생한 전투 중에는 모험 중지 투표를 진행할 수 없습니다.',
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      if (!vote.memberIds.includes(interaction.user.id)) {
+        await interaction.reply({
+          content: '현재 파티원만 투표할 수 있습니다.',
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      if (vote.yesIds.has(interaction.user.id) || vote.noIds.has(interaction.user.id)) {
+        await interaction.reply({
+          content: '이미 투표했습니다.',
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (choice === 'yes') vote.yesIds.add(interaction.user.id);
+      else vote.noIds.add(interaction.user.id);
+      await interaction.reply({
+        content: choice === 'yes' ? '✅ 모험 중지에 찬성했습니다.' : '❌ 모험 중지에 반대했습니다.',
+        flags: MessageFlags.Ephemeral,
+      });
+
+      const threshold = Math.floor(vote.memberIds.length / 2) + 1;
+      if (vote.yesIds.size >= threshold) {
+        await closeStopVote(vote, `🛑 찬성 ${vote.yesIds.size}표로 과반수를 넘어 모험을 종료합니다.`);
+        adventureSystem.cleanup(adventureId);
+        await adventureManager.end(client, adventureId, 'PARTY_STOP_VOTE_PASSED');
+        return;
+      }
+
+      if (vote.yesIds.size + vote.noIds.size === vote.memberIds.length) {
+        await closeStopVote(vote, '❌ 과반수 찬성을 얻지 못해 모험 중지 투표가 부결됐습니다.');
+        return;
+      }
+
+      await vote.message.edit({ content: stopVoteText(vote) }).catch(() => {});
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith('rps:')) {
+      const playerKey = interaction.customId.split(':')[1];
+      const botKeys = Object.keys(choices);
+      const botKey = botKeys[Math.floor(Math.random() * botKeys.length)];
+      const playerChoice = choices[playerKey];
+      const botChoice = choices[botKey];
+
+      let result = '무승부입니다!';
+      if (playerChoice.beats === botKey) result = '당신이 이겼습니다! 🎉';
+      if (botChoice.beats === playerKey) result = '봇이 이겼습니다! 🤖';
+
+      await interaction.update({
+        content: [
+          `당신: ${playerChoice.emoji} ${playerChoice.label}`,
+          `봇: ${botChoice.emoji} ${botChoice.label}`,
+          `**${result}**`,
+        ].join('\n'),
+        components: [],
+      });
+    }
+  } catch (error) {
+    console.error('상호작용 처리 중 오류가 발생했습니다.', error);
+
+    if (interaction.isAutocomplete()) {
+      await interaction.respond([]).catch(() => {});
+      return;
+    }
+
+    const message = { content: '명령을 처리하는 중 오류가 발생했습니다.', ephemeral: true };
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp(message).catch(() => {});
+    } else {
+      await interaction.reply(message).catch(() => {});
+    }
+  }
+});
+
+client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
+  try {
+    await adventureManager.handleVoiceStateUpdate(client, oldState, newState);
+    await pvpManager.handleVoiceStateUpdate(client, oldState, newState);
+  } catch (error) {
+    console.error('음성 채널 이탈 처리 중 오류가 발생했습니다.', error);
+  }
+});
+
+client.login(process.env.DISCORD_TOKEN);

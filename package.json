@@ -1,0 +1,20 @@
+{
+  "name": "discord-game-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Discord에서 즐기는 버튼 기반 게임 봇",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "deploy": "node src/deploy-commands.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "discord.js": "^14.27.0",
+    "dotenv": "^17.4.2"
+  }
+}

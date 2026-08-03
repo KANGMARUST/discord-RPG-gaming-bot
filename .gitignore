@@ -1,0 +1,8 @@
+node_modules/
+.env
+npm-debug.log*
+bot-output.log
+bot-error.log
+data/players.json
+logs/dungeon/*.json
+!logs/dungeon/.gitkeep
