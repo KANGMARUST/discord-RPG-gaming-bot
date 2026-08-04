@@ -11,7 +11,13 @@ import {
 } from './equipment.js';
 import { getPotion, getPotionDescription } from './items.js';
 import { grantExperienceToPlayer } from './leveling.js';
-import { getSkill, MAX_EQUIPPED_SKILLS, STARTER_SKILL_IDS } from './skills.js';
+import {
+  getSkill,
+  MAX_EQUIPPED_SKILLS,
+  skillCatalog,
+  skillRarities,
+  STARTER_SKILL_IDS,
+} from './skills.js';
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const dataDirectory = path.join(currentDirectory, '..', 'data');
@@ -63,6 +69,7 @@ function createPlayer(userId) {
     gold: 0,
     experience: 0,
     skillInventory: [...STARTER_SKILL_IDS],
+    skillFragments: Object.fromEntries(skillRarities.map((rarity) => [rarity, 0])),
     equippedSkills: ['magic_bolt', 'basic_heal', null],
     balanceVersion: 1,
     checkpointFloor: 1,
@@ -113,6 +120,10 @@ class PlayerStore {
     player.skillInventory ??= [...defaults.skillInventory];
     for (const skillId of STARTER_SKILL_IDS) {
       if (!player.skillInventory.includes(skillId)) player.skillInventory.push(skillId);
+    }
+    player.skillFragments = { ...defaults.skillFragments, ...player.skillFragments };
+    for (const rarity of skillRarities) {
+      player.skillFragments[rarity] = Math.max(0, Math.floor(Number(player.skillFragments[rarity]) || 0));
     }
     player.equippedSkills ??= [...defaults.equippedSkills];
     player.equippedSkills = Array.from(
@@ -402,6 +413,40 @@ class PlayerStore {
     if (!player.skillInventory.includes(skillId)) player.skillInventory.push(skillId);
     await this.save();
     return { ok: true, skill: getSkill(skillId) };
+  }
+
+  async addSkillFragment(userId, rarity, quantity = 1) {
+    if (!skillRarities.includes(rarity)) throw new Error(`알 수 없는 스킬 조각 등급: ${rarity}`);
+    const player = await this.getOrCreate(userId);
+    const added = Math.max(0, Math.floor(quantity));
+    player.skillFragments[rarity] += added;
+    await this.save();
+    return { rarity, added, total: player.skillFragments[rarity] };
+  }
+
+  async craftSkill(userId, rarity, random = Math.random) {
+    if (!skillRarities.includes(rarity)) return { ok: false, reason: 'INVALID_RARITY' };
+    const player = await this.getOrCreate(userId);
+    const requiredFragments = 10;
+    const availableFragments = player.skillFragments[rarity] ?? 0;
+    if (availableFragments < requiredFragments) {
+      return { ok: false, reason: 'NOT_ENOUGH_FRAGMENTS', availableFragments, requiredFragments };
+    }
+    const candidates = Object.values(skillCatalog).filter(
+      (skill) => skill.rarity === rarity && !player.skillInventory.includes(skill.id),
+    );
+    if (candidates.length === 0) return { ok: false, reason: 'ALL_OWNED', availableFragments };
+    const skill = candidates[Math.floor(random() * candidates.length)];
+    player.skillFragments[rarity] -= requiredFragments;
+    player.skillInventory.push(skill.id);
+    await this.save();
+    return {
+      ok: true,
+      skill,
+      rarity,
+      consumedFragments: requiredFragments,
+      remainingFragments: player.skillFragments[rarity],
+    };
   }
 
   async addAdventureReward(userId, gold, equipmentItem) {

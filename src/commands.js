@@ -67,6 +67,21 @@ export const commands = [
     .setName('스킬도감')
     .setDescription('전체 스킬을 보유 중인 스킬과 미보유 스킬로 나누어 확인합니다.'),
   new SlashCommandBuilder()
+    .setName('스킬제작')
+    .setDescription('같은 등급의 스킬 조각 10개로 새로운 스킬을 제작합니다.')
+    .addStringOption((option) =>
+      option
+        .setName('등급')
+        .setDescription('제작할 스킬의 등급')
+        .setRequired(true)
+        .addChoices(
+          { name: '일반', value: '일반' },
+          { name: '고급', value: '고급' },
+          { name: '레어', value: '레어' },
+          { name: '전설', value: '전설' },
+        ),
+    ),
+  new SlashCommandBuilder()
     .setName('적도감')
     .setDescription('던전에 등장하는 적의 서식 층수와 상세 정보를 확인합니다.')
     .addStringOption((option) =>

@@ -30,7 +30,7 @@ import { AdventureSystem } from './adventure-system.js';
 import { pvpManager } from './pvp-manager.js';
 import { getPotionDescription, potionCatalog } from './items.js';
 import { getRequiredExperience } from './leveling.js';
-import { formatSkill, getSkill, skillCatalog } from './skills.js';
+import { formatSkill, getSkill, skillCatalog, skillRarities } from './skills.js';
 import { getUnlockedCheckpointFloors } from './checkpoints.js';
 import { DUNGEON_REGIONS, createMonsterSkillSet } from './monster-catalog.js';
 
@@ -46,6 +46,7 @@ const BOT_DISPLAY_NAME = '라파엘(Rafael)';
 const adventureSystem = new AdventureSystem(client, adventureManager, playerStore);
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const enhancementImagePath = path.join(currentDirectory, '..', 'assets', 'ui', 'equipment-enhancement.png');
+const skillCraftingImagePath = path.join(currentDirectory, '..', 'assets', 'ui', 'skill-crafting-altar.png');
 const monsterAssetsDirectory = path.join(currentDirectory, '..', 'assets', 'monsters');
 
 const choices = {
@@ -562,14 +563,18 @@ function createSkillInventoryEmbed(user, player) {
         inline: true,
       };
     });
+  const skillFragmentText = skillRarities
+    .map((rarity) => `**${rarity}**: ${player.skillFragments?.[rarity] ?? 0}개`)
+    .join('\n');
   return new EmbedBuilder()
     .setColor(0x8e44ad)
     .setTitle(`📖 ${user.displayName}님의 스킬북`)
     .addFields(
       ...equippedSkillFields,
+      { name: '🧩 보유 스킬 조각', value: skillFragmentText, inline: true },
       { name: '현재 보유 중인 스킬', value: ownedSkills || '보유한 스킬이 없습니다.', inline: false },
     )
-    .setFooter({ text: '/스킬장착으로 최대 3개까지 장착하고 /스킬장착해제로 슬롯을 비울 수 있습니다.' });
+    .setFooter({ text: '같은 등급 조각 10개는 /스킬제작 등급으로 해당 등급의 새 스킬을 제작할 수 있습니다.' });
 }
 
 function createSkillCatalogEmbed(user, player) {
@@ -702,11 +707,13 @@ function createHelpEmbed() {
         value: [
           '`/스킬북` — 장착 슬롯 1~3과 현재 보유한 스킬 확인',
           '`/스킬도감` — 전체 스킬을 보유·미보유 목록으로 나누어 확인',
+          '`/스킬제작 등급` — 해당 등급의 스킬 조각 10개로 새로운 스킬 제작',
           '`/스킬장착 스킬 슬롯` — 보유 스킬을 지정한 1~3번 슬롯에 장착',
           '`/스킬장착해제 슬롯` — 지정 슬롯을 비움(스킬은 스킬북에 유지)',
           '`/도움말 아이템이름` — 선택한 스킬의 등급·마나·계수·효과 확인',
           '스킬은 최대 3개까지 장착하며 모험 중에는 장착 상태를 변경할 수 없습니다.',
           '전투에서 **스킬** 버튼을 누르면 현재 장착한 스킬만 표시되고, 시전 시 마나를 소비합니다.',
+          '스킬 조각은 몬스터·보스·보물상자에서 획득하며, 수량은 `/스킬북`에서 확인합니다.',
         ].join('\n'),
       },
       {
@@ -848,6 +855,18 @@ function createProbabilityHelpEmbed() {
           '포션: 일반 적·보스·미믹 **30%**, 보물상자 **65%**',
           '포션 등급(드랍 성공 시): 일반 **55%** / 고급 **28%** / 레어 **12%** / 전설 **5%**',
           '포션 종류(등급 결정 후): 체력 **50%** / 마나 **50%**',
+        ].join('\n'),
+      },
+      {
+        name: '🧩 스킬 조각 드랍',
+        value: [
+          '일반 몬스터·미믹: **12%**',
+          '보스: **100%**',
+          '일반 보물상자: **30%**',
+          '일반 적 등급: 일반 **55%** / 고급 **30%** / 레어 **12%** / 전설 **3%**',
+          '보스 등급: 일반 **35%** / 고급 **35%** / 레어 **22%** / 전설 **8%**',
+          '보물상자 등급: 일반 **50%** / 고급 **30%** / 레어 **15%** / 전설 **5%**',
+          '같은 등급 조각 **10개**로 아직 보유하지 않은 해당 등급 스킬 1개를 무작위 제작',
         ].join('\n'),
       },
       {
@@ -1622,6 +1641,55 @@ client.on(Events.InteractionCreate, async (interaction) => {
         const player = await playerStore.getOrCreate(interaction.user.id);
         await interaction.reply({
           embeds: [createSkillCatalogEmbed(interaction.user, player)],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '스킬제작') {
+        if (adventureManager.getByUser(interaction.user.id)) {
+          await interaction.reply({
+            content: '모험 중에는 스킬을 제작할 수 없습니다.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const rarity = interaction.options.getString('등급', true);
+        const result = await playerStore.craftSkill(interaction.user.id, rarity);
+        if (!result.ok && result.reason === 'NOT_ENOUGH_FRAGMENTS') {
+          await interaction.reply({
+            content: `🧩 **${rarity} 스킬 조각**이 부족합니다. ${result.availableFragments}/10개 보유 중입니다.`,
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        if (!result.ok && result.reason === 'ALL_OWNED') {
+          await interaction.reply({
+            content: `이미 **${rarity}** 등급의 모든 스킬을 보유하고 있습니다. 조각은 소비되지 않았습니다.`,
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        if (!result.ok) {
+          await interaction.reply({ content: '스킬 제작에 실패했습니다.', flags: MessageFlags.Ephemeral });
+          return;
+        }
+        const attachmentName = 'skill-crafting-altar.png';
+        const attachment = new AttachmentBuilder(skillCraftingImagePath, { name: attachmentName });
+        const embed = new EmbedBuilder()
+          .setColor(0xf1c40f)
+          .setTitle('✨ 스킬 제작 성공!')
+          .setDescription([
+            `🧩 **${rarity} 스킬 조각 10개**를 사용했습니다.`,
+            `## ✨ 획득: [${result.skill.rarity}] ${result.skill.name}`,
+            formatSkill(result.skill),
+            `남은 ${rarity} 조각: **${result.remainingFragments}개**`,
+          ].join('\n\n'))
+          .setImage(`attachment://${attachmentName}`)
+          .setFooter({ text: '스킬북에서 새 스킬을 장착할 수 있습니다.' });
+        await interaction.reply({
+          embeds: [embed],
+          files: [attachment],
           flags: MessageFlags.Ephemeral,
         });
         return;

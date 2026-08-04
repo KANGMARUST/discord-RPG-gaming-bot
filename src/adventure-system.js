@@ -21,7 +21,12 @@ import {
 } from './equipment.js';
 import { getPotion, rollPotionDrop } from './items.js';
 import { LEVEL_STAT_GROWTH } from './leveling.js';
-import { calculateSkillAttackPower, calculateSkillHealing, getSkill } from './skills.js';
+import {
+  calculateSkillAttackPower,
+  calculateSkillHealing,
+  getSkill,
+  rollSkillFragment,
+} from './skills.js';
 import { createMonsterSkillSet, getDungeonRegion } from './monster-catalog.js';
 import { dungeonLogger } from './dungeon-logger.js';
 import { roundHealth } from './adventure-manager.js';
@@ -1570,6 +1575,10 @@ class AdventureSystem {
       }
       const potion = rollPotionDrop(isTreasureMimic ? 'TREASURE' : 'MONSTER');
       if (potion) await this.playerStore.addItem(userId, potion.id, 1);
+      const skillFragmentRarity = rollSkillFragment(
+        battle.monster.isBoss ? 'BOSS' : 'MONSTER',
+      );
+      if (skillFragmentRarity) await this.playerStore.addSkillFragment(userId, skillFragmentRarity, 1);
       rewards.push({
         userId,
         gold: goldReward,
@@ -1579,6 +1588,7 @@ class AdventureSystem {
         levelsGained: experienceResult.levelsGained,
         equipment: equipmentDrop,
         potion: potion ? { id: potion.id, name: potion.name } : null,
+        skillFragment: skillFragmentRarity,
       });
       const levelUpText = experienceResult.levelsGained > 0
         ? [
@@ -1593,7 +1603,7 @@ class AdventureSystem {
         : ` (${experienceResult.experience}/${experienceResult.requiredExperience})`;
       rewardLines.push(
         [
-          `<@${userId}>: **${goldReward}골드**, **경험치 +${experienceResult.gainedExperience}**${levelUpText}${equipmentDrop ? `, ${formatEquipmentName(equipmentDrop)} (고유 Lv.${equipmentDrop.itemLevel})` : ''}${potion ? `, ${potion.name}` : ''}`,
+          `<@${userId}>: **${goldReward}골드**, **경험치 +${experienceResult.gainedExperience}**${levelUpText}${equipmentDrop ? `, ${formatEquipmentName(equipmentDrop)} (고유 Lv.${equipmentDrop.itemLevel})` : ''}${potion ? `, ${potion.name}` : ''}${skillFragmentRarity ? `, 🧩 **${skillFragmentRarity} 스킬 조각**` : ''}`,
           `🟩 경험치 ${this.createResourceBar(experienceResult.experience, experienceResult.requiredExperience, '🟩')} ${experienceResult.experience}/${experienceResult.requiredExperience}`,
         ].join('\n'),
       );
@@ -1725,14 +1735,17 @@ class AdventureSystem {
       this.recordAdventureEquipment(adventure, userId, item.id);
       const potion = rollPotionDrop('TREASURE');
       if (potion) await this.playerStore.addItem(userId, potion.id, 1);
+      const skillFragmentRarity = bossChest ? null : rollSkillFragment('TREASURE');
+      if (skillFragmentRarity) await this.playerStore.addSkillFragment(userId, skillFragmentRarity, 1);
       rewards.push({
         userId,
         gold,
         equipment: item,
         potion: potion ? { id: potion.id, name: potion.name } : null,
+        skillFragment: skillFragmentRarity,
       });
       rewardLines.push(
-        `<@${userId}>: **${gold}골드**, ${formatEquipmentName(item)}${potion ? `, ${potion.name}` : ''}`,
+        `<@${userId}>: **${gold}골드**, ${formatEquipmentName(item)}${potion ? `, ${potion.name}` : ''}${skillFragmentRarity ? `, 🧩 **${skillFragmentRarity} 스킬 조각**` : ''}`,
       );
     }
 

@@ -1,5 +1,21 @@
 export const MAX_EQUIPPED_SKILLS = 3;
 export const STARTER_SKILL_IDS = ['magic_bolt', 'basic_heal'];
+export const skillRarities = ['일반', '고급', '레어', '전설'];
+
+const skillFragmentDropConfig = {
+  MONSTER: {
+    chance: 0.12,
+    weights: { 일반: 55, 고급: 30, 레어: 12, 전설: 3 },
+  },
+  BOSS: {
+    chance: 1,
+    weights: { 일반: 35, 고급: 35, 레어: 22, 전설: 8 },
+  },
+  TREASURE: {
+    chance: 0.3,
+    weights: { 일반: 50, 고급: 30, 레어: 15, 전설: 5 },
+  },
+};
 
 export const skillCatalog = {
   magic_bolt: {
@@ -107,6 +123,19 @@ export const skillCatalog = {
 
 export function getSkill(skillId) {
   return skillCatalog[skillId];
+}
+
+export function rollSkillFragment(source, random = Math.random) {
+  const config = skillFragmentDropConfig[source];
+  if (!config) return null;
+  if (config.chance < 1 && random() >= config.chance) return null;
+  const totalWeight = Object.values(config.weights).reduce((total, weight) => total + weight, 0);
+  let roll = random() * totalWeight;
+  for (const rarity of skillRarities) {
+    roll -= config.weights[rarity] ?? 0;
+    if (roll < 0) return rarity;
+  }
+  return skillRarities.at(-1);
 }
 
 export function calculateSkillHealing(skill, magicAttack) {
