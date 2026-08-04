@@ -2,6 +2,9 @@ import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 
 export const commands = [
   new SlashCommandBuilder()
+    .setName('가이드북')
+    .setDescription('처음 시작하는 플레이어를 위한 던전 게임 안내입니다.'),
+  new SlashCommandBuilder()
     .setName('도움말')
     .setDescription('명령어 또는 게임 확률 정보를 확인합니다.')
     .addStringOption((option) =>
@@ -25,6 +28,19 @@ export const commands = [
   new SlashCommandBuilder()
     .setName('내정보')
     .setDescription('내 던전 캐릭터의 스탯과 장비를 확인합니다.'),
+  new SlashCommandBuilder()
+    .setName('랭킹')
+    .setDescription('레벨, 탑 또는 스탯별 플레이어 순위를 확인합니다.')
+    .addSubcommand((subcommand) => subcommand.setName('레벨').setDescription('플레이어 레벨 순위를 확인합니다.'))
+    .addSubcommand((subcommand) => subcommand.setName('탑').setDescription('최대 도달 층 순위를 확인합니다.'))
+    .addSubcommand((subcommand) => subcommand.setName('체력').setDescription('최대 체력 순위를 확인합니다.'))
+    .addSubcommand((subcommand) => subcommand.setName('방어력').setDescription('방어력 순위를 확인합니다.'))
+    .addSubcommand((subcommand) => subcommand.setName('공격력').setDescription('공격력 순위를 확인합니다.'))
+    .addSubcommand((subcommand) => subcommand.setName('마법공격력').setDescription('마법 공격력 순위를 확인합니다.'))
+    .addSubcommand((subcommand) => subcommand.setName('마나').setDescription('최대 마나 순위를 확인합니다.'))
+    .addSubcommand((subcommand) => subcommand.setName('속도').setDescription('속도 순위를 확인합니다.'))
+    .addSubcommand((subcommand) => subcommand.setName('치명타확률').setDescription('치명타 확률 순위를 확인합니다.'))
+    .addSubcommand((subcommand) => subcommand.setName('치명타피해').setDescription('치명타 피해 순위를 확인합니다.')),
   new SlashCommandBuilder()
     .setName('파티원스텟')
     .setDescription('모험 중인 파티원 전체의 현재 스탯을 확인합니다.'),

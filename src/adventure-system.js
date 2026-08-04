@@ -31,8 +31,10 @@ const RESOURCE_BAR_SEGMENTS = 10;
 const HEALTH_BAR_FILLED = '🟥';
 const MANA_BAR_FILLED = '🟦';
 const RESOURCE_BAR_EMPTY = '⬛';
+const roundMana = (value) => Math.round(value * 10) / 10;
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const monsterAssetsDirectory = path.join(currentDirectory, '..', 'assets', 'monsters');
+const eventAssetsDirectory = path.join(currentDirectory, '..', 'assets', 'events');
 const MONSTER_IMAGE_FILES = {
   슬라임: 'slime.png',
   고블린: 'goblin.png',
@@ -220,8 +222,16 @@ class AdventureSystem {
       { action: 'stairs_yes', label: '다음 층으로 간다', style: ButtonStyle.Success },
       { action: 'stairs_no', label: '현재 층을 더 탐험한다', style: ButtonStyle.Secondary },
     ]);
+    const attachmentName = 'descending-stairs.png';
+    const attachment = new AttachmentBuilder(path.join(eventAssetsDirectory, attachmentName));
+    const embed = new EmbedBuilder()
+      .setColor(0x3498db)
+      .setTitle(`🪜 ${adventure.floor + 1}층으로 향하는 계단`)
+      .setDescription('희미한 빛이 아래층에서 새어 나옵니다. 다음 층으로 내려가겠습니까?')
+      .setImage(`attachment://${attachmentName}`);
     await channel.send({
-      content: `🪜 **${adventure.floor + 1}층으로 향하는 계단**이 있습니다. 다음 층으로 가겠습니까?`,
+      embeds: [embed],
+      files: [attachment],
       components: [row],
     });
   }
@@ -524,7 +534,7 @@ class AdventureSystem {
         const mana = battle.manaByUser[userId];
         return [
           `<@${userId}> · Lv.${stats.playerLevel}`,
-          `❤️ 체력 ${health}/${maxHealth} ${this.createResourceBar(health, maxHealth, HEALTH_BAR_FILLED)}`,
+          `❤️ 체력 ${this.createResourceBar(health, maxHealth, HEALTH_BAR_FILLED)} ${health}/${maxHealth}`,
           `🔷 마나 ${mana}/${stats.mana} ${this.createResourceBar(mana, stats.mana, MANA_BAR_FILLED)}`,
           `⚔️ 공격력 ${stats.attack}\t✨ 마법 공격력 ${stats.magicAttack}`,
           `🎯 치명타 확률 ${stats.criticalChance}%\t💥 치명타 피해 ${stats.criticalDamage}%`,
@@ -803,7 +813,7 @@ class AdventureSystem {
     const after = roundHealth(Math.min(maxHealth, before + healing));
     const manaBefore = battle.manaByUser[ownerId];
     adventure.healthByUser[targetId] = after;
-    battle.manaByUser[ownerId] -= skill.manaCost;
+    battle.manaByUser[ownerId] = roundMana(battle.manaByUser[ownerId] - skill.manaCost);
     adventure.currentActionToken = null;
     await dungeonLogger.append(adventure.id, 'TURN_ACTION', {
       floor: adventure.floor,
@@ -885,7 +895,7 @@ class AdventureSystem {
     } else {
       before = battle.manaByUser[ownerId];
       max = battle.playerStats[ownerId].mana;
-      after = Math.min(max, before + Math.max(1, Math.round(max * potion.recoveryRatio)));
+      after = roundMana(Math.min(max, before + Math.max(1, Math.round(max * potion.recoveryRatio))));
     }
     if (before >= max) {
       await interaction.reply({
@@ -952,9 +962,13 @@ class AdventureSystem {
     if (!channel) return;
     const rewardLines = [];
     const rewards = [];
+    const isTreasureMimic = battle.monster.isMimic;
     for (const userId of adventure.memberIds) {
+      const goldReward = isTreasureMimic
+        ? adventure.floor * (Math.floor(Math.random() * 21) + 10)
+        : battle.monster.goldReward;
       let equipmentDrop = null;
-      if (shouldDropEquipmentFromMonster(battle.monster.isMimic)) {
+      if (isTreasureMimic || shouldDropEquipmentFromMonster(false)) {
         const slot = equipmentSlots[Math.floor(Math.random() * equipmentSlots.length)];
         const rarity = rollEquipmentRarity(battle.monster.level);
         equipmentDrop = createEquipment({
@@ -966,7 +980,7 @@ class AdventureSystem {
       }
       await this.playerStore.addAdventureReward(
         userId,
-        battle.monster.goldReward,
+        goldReward,
         equipmentDrop,
       );
       if (equipmentDrop) this.recordAdventureEquipment(adventure, userId, equipmentDrop.id);
@@ -980,11 +994,11 @@ class AdventureSystem {
         adventure.maxHealthByUser[userId] = roundHealth(adventure.maxHealthByUser[userId] + addedHealth);
         adventure.healthByUser[userId] = roundHealth(adventure.healthByUser[userId] + addedHealth);
       }
-      const potion = rollPotionDrop('MONSTER');
+      const potion = rollPotionDrop(isTreasureMimic ? 'TREASURE' : 'MONSTER');
       if (potion) await this.playerStore.addItem(userId, potion.id, 1);
       rewards.push({
         userId,
-        gold: battle.monster.goldReward,
+        gold: goldReward,
         experience: experienceResult.gainedExperience,
         previousLevel: experienceResult.previousLevel,
         newLevel: experienceResult.newLevel,
@@ -1004,7 +1018,10 @@ class AdventureSystem {
           ].join('')
         : ` (${experienceResult.experience}/${experienceResult.requiredExperience})`;
       rewardLines.push(
-        `<@${userId}>: **${battle.monster.goldReward}골드**, **경험치 +${experienceResult.gainedExperience}**${levelUpText}${equipmentDrop ? `, ${formatEquipmentName(equipmentDrop)} (고유 Lv.${equipmentDrop.itemLevel})` : ''}${potion ? `, ${potion.name}` : ''}`,
+        [
+          `<@${userId}>: **${goldReward}골드**, **경험치 +${experienceResult.gainedExperience}**${levelUpText}${equipmentDrop ? `, ${formatEquipmentName(equipmentDrop)} (고유 Lv.${equipmentDrop.itemLevel})` : ''}${potion ? `, ${potion.name}` : ''}`,
+          `🟩 경험치 ${this.createResourceBar(experienceResult.experience, experienceResult.requiredExperience, '🟩')} ${experienceResult.experience}/${experienceResult.requiredExperience}`,
+        ].join('\n'),
       );
     }
     await dungeonLogger.append(adventure.id, 'BATTLE_VICTORY', {
@@ -1023,7 +1040,7 @@ class AdventureSystem {
     await channel.send({
       content: [
         `# 🎉 ${battle.monster.name} 처치!`,
-        '**전투 보상**',
+        isTreasureMimic ? '**보물상자 보상**' : '**전투 보상**',
         ...rewardLines,
       ].join('\n'),
       components: row ? [row] : [],
@@ -1112,8 +1129,16 @@ class AdventureSystem {
           { action: 'continue', label: '계속 탐험', style: ButtonStyle.Primary },
         ])
       : null;
+    const attachmentName = 'treasure-chest.png';
+    const attachment = new AttachmentBuilder(path.join(eventAssetsDirectory, attachmentName));
+    const embed = new EmbedBuilder()
+      .setColor(0xf1c40f)
+      .setTitle(bossChest ? '🎁 보스 보물상자' : '🎁 보물상자를 발견했습니다!')
+      .setDescription(rewardLines.join('\n'))
+      .setImage(`attachment://${attachmentName}`);
     await channel.send({
-      content: `${bossChest ? '# 🎁 보스 보물상자!' : '🎁 보물상자를 발견했습니다!'}\n${rewardLines.join('\n')}`,
+      embeds: [embed],
+      files: [attachment],
       components: row ? [row] : [],
     });
   }
@@ -1182,8 +1207,16 @@ class AdventureSystem {
     const row = this.createButtons(adventure, [
       { action: 'continue', label: '계속 탐험', style: ButtonStyle.Primary },
     ]);
+    const attachmentName = 'spike-trap.png';
+    const attachment = new AttachmentBuilder(path.join(eventAssetsDirectory, attachmentName));
+    const embed = new EmbedBuilder()
+      .setColor(0xe74c3c)
+      .setTitle('🪤 함정을 밟았습니다!')
+      .setDescription(damageLines.join('\n'))
+      .setImage(`attachment://${attachmentName}`);
     await channel.send({
-      content: `🪤 함정을 밟았습니다!\n${damageLines.join('\n')}`,
+      embeds: [embed],
+      files: [attachment],
       components: [row],
     });
   }
@@ -1204,8 +1237,16 @@ class AdventureSystem {
     const row = this.createButtons(adventure, [
       { action: 'continue', label: '계속 탐험', style: ButtonStyle.Primary },
     ]);
+    const attachmentName = 'rest-area.png';
+    const attachment = new AttachmentBuilder(path.join(eventAssetsDirectory, attachmentName));
+    const embed = new EmbedBuilder()
+      .setColor(0x2ecc71)
+      .setTitle('🏕️ 휴식 공간을 발견했습니다!')
+      .setDescription(`잃은 체력의 50%를 회복합니다.\n${recoveryLines.join('\n')}`)
+      .setImage(`attachment://${attachmentName}`);
     await channel.send({
-      content: `🏕️ 휴식 공간을 발견했습니다! 잃은 체력의 50%를 회복합니다.\n${recoveryLines.join('\n')}`,
+      embeds: [embed],
+      files: [attachment],
       components: [row],
     });
   }
@@ -1218,6 +1259,7 @@ class AdventureSystem {
     adventure.combatsWonThisFloor = 0;
     adventure.currentActionToken = null;
     this.battles.delete(adventure.id);
+    await this.playerStore.recordMaxReachedFloor(adventure.memberIds, adventure.floor);
     await dungeonLogger.append(adventure.id, 'FLOOR_CHANGED', {
       floor: adventure.floor,
       fromFloor: previousFloor,
@@ -1242,6 +1284,7 @@ class AdventureSystem {
     adventure.combatsWonThisFloor = 0;
     adventure.currentActionToken = null;
     this.battles.delete(adventure.id);
+    await this.playerStore.recordMaxReachedFloor(adventure.memberIds, adventure.floor);
     await dungeonLogger.append(adventure.id, 'FLOOR_CHANGED', {
       floor: adventure.floor,
       fromFloor: previousFloor,

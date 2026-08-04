@@ -8,7 +8,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "deploy": "node src/deploy-commands.js"
+    "deploy": "node src/deploy-commands.js",
+    "deploy:debug": "node src/deploy-debug-commands.js"
   },
   "engines": {
     "node": ">=20"

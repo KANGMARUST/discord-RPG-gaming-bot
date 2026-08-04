@@ -53,6 +53,7 @@ const choices = {
 const INVITATION_DURATION_MS = 30_000;
 const STOP_VOTE_DURATION_MS = 30_000;
 const DUEL_INVITATION_DURATION_MS = 30_000;
+const ADVENTURE_PENALTY_WARNING_MS = 3_000;
 const pendingDuels = new Map();
 const debugGiveOptions = [
   { name: '[재화] 골드', value: 'currency:gold' },
@@ -77,6 +78,25 @@ function hasPendingDuel(userId) {
 const pendingInvitations = new Map();
 const pendingInvitationByUser = new Map();
 const stopVotes = new Map();
+
+async function startAdventureAfterPenaltyWarning(adventure) {
+  const channel = await client.channels.fetch(adventure.textChannelId).catch(() => null);
+  await channel?.send([
+    '# ⚠️ 모험 페널티 안내',
+    '던전에서 **사망**하거나 `/모험중지` 없이 음성 채널을 나가면,',
+    '**이번 모험에서 획득한 장비가 모두 사라집니다.**',
+    '장착 중인 장비는 사라지지 않습니다.',
+    '',
+    '3초 후 모험을 시작합니다...',
+  ].join('\n'));
+  await new Promise((resolve) => setTimeout(resolve, ADVENTURE_PENALTY_WARNING_MS));
+  if (!adventureManager.adventures.has(adventure.id)) return false;
+  await adventureSystem.start(adventure);
+  return true;
+}
+
+adventureManager.setLeavePenaltyHandler((adventure, userId) =>
+  adventureSystem.removeDeathLoot(adventure, userId));
 
 function canStopDuringBattle(battle) {
   return !battle.partyHasTakenDamage || !battle.partyHasAttacked;
@@ -154,7 +174,7 @@ async function finishInvitation(invitationId) {
       return;
     }
 
-    await adventureSystem.start(result.adventure);
+    await startAdventureAfterPenaltyWarning(result.adventure);
 
     await invitation.message
       .edit({
@@ -235,8 +255,57 @@ function createPlayerEmbed(user, player) {
           .join('\n\n'),
         inline: false,
       },
+      {
+        name: '🗼 탑 기록',
+        value: [
+          `최대 도달 층: **${player.maxReachedFloor ?? player.checkpointFloor ?? 1}층**`,
+          `체크포인트: **${player.checkpointFloor ?? 1}층**`,
+        ].join('\n'),
+        inline: true,
+      },
     )
     .setFooter({ text: '장비를 획득하면 각 슬롯에 장착할 수 있습니다.' });
+}
+
+const rankingCategories = {
+  레벨: { title: '🏆 레벨 랭킹', label: '레벨', getValue: (player) => calculateTotalStats(player).playerLevel },
+  탑: { title: '🗼 탑 랭킹', label: '최대 도달 층', getValue: (player) => player.maxReachedFloor ?? player.checkpointFloor ?? 1, suffix: '층' },
+  체력: { title: '❤️ 체력 랭킹', label: '체력', getValue: (player) => calculateTotalStats(player).health },
+  방어력: { title: '🛡️ 방어력 랭킹', label: '방어력', getValue: (player) => calculateTotalStats(player).defense },
+  공격력: { title: '⚔️ 공격력 랭킹', label: '공격력', getValue: (player) => calculateTotalStats(player).attack },
+  마법공격력: { title: '✨ 마법 공격력 랭킹', label: '마법 공격력', getValue: (player) => calculateTotalStats(player).magicAttack },
+  마나: { title: '🔷 마나 랭킹', label: '마나', getValue: (player) => calculateTotalStats(player).mana },
+  속도: { title: '💨 속도 랭킹', label: '속도', getValue: (player) => calculateTotalStats(player).speed },
+  치명타확률: { title: '🎯 치명타 확률 랭킹', label: '치명타 확률', getValue: (player) => calculateTotalStats(player).criticalChance, suffix: '%' },
+  치명타피해: { title: '💥 치명타 피해 랭킹', label: '치명타 피해', getValue: (player) => calculateTotalStats(player).criticalDamage, suffix: '%' },
+};
+
+function formatRankingValue(value, suffix = '') {
+  const roundedValue = Math.round(value * 10) / 10;
+  return `${Number.isInteger(roundedValue) ? roundedValue : roundedValue.toFixed(1)}${suffix}`;
+}
+
+async function createRankingEmbed(categoryName) {
+  const category = rankingCategories[categoryName];
+  const rankedPlayers = (await playerStore.getAllPlayers())
+    .map((player) => ({ player, value: category.getValue(player) }))
+    .sort((left, right) => right.value - left.value || left.player.userId.localeCompare(right.player.userId))
+    .slice(0, 10);
+
+  return new EmbedBuilder()
+    .setColor(0xf1c40f)
+    .setTitle(category.title)
+    .setDescription(
+      rankedPlayers.length
+        ? rankedPlayers
+            .map(({ player, value }, index) => {
+              const medal = ['🥇', '🥈', '🥉'][index] ?? `**${index + 1}.**`;
+              return `${medal} <@${player.userId}> — **${formatRankingValue(value, category.suffix)} ${category.label}**`;
+            })
+            .join('\n')
+        : '아직 랭킹에 등록된 플레이어가 없습니다.',
+    )
+    .setFooter({ text: '장착 중인 장비의 효과가 반영된 현재 스탯 기준입니다.' });
 }
 
 function createEquipmentInventoryEmbed(user, player) {
@@ -418,6 +487,7 @@ function createHelpEmbed() {
         value: [
           '`/결투신청 상대` — 같은 음성 채널의 플레이어에게 결투 신청',
           '`/항복` — 진행 중인 결투에서 항복하고 상대방의 승리로 종료',
+          '결투 전투는 던전과 같은 턴·스킬 규칙을 사용하지만 아이템은 사용할 수 없습니다.',
         ].join('\n'),
       },
       {
@@ -425,6 +495,7 @@ function createHelpEmbed() {
         value: [
           '`/게임시작` — 가위바위보 미니게임 시작',
           '`/ping` — 봇 연결 상태와 지연 시간 확인',
+          '`/가이드북` — 처음 시작하는 플레이어를 위한 단계별 안내',
           '`/도움말` — 현재 도움말 표시',
           '`/도움말 항목:확률` — 던전의 탐험·드랍·전투 확률 확인',
           '`/도움말 아이템이름` — 포션·보유 장비·스킬의 상세 정보 확인',
@@ -441,6 +512,59 @@ function createHelpEmbed() {
       },
     )
     .setFooter({ text: '이 도움말은 명령어를 실행한 사용자에게만 표시됩니다.' });
+}
+
+function createGuidebookEmbed() {
+  return new EmbedBuilder()
+    .setColor(0x57f287)
+    .setTitle('📗 던전 게임 가이드북')
+    .setDescription('처음이라도 아래 순서대로 따라 하면 바로 모험을 시작할 수 있습니다. 모든 내용은 나에게만 보입니다.')
+    .addFields(
+      {
+        name: '1️⃣ 캐릭터 확인',
+        value: [
+          '`/내정보`로 내 레벨, 체력, 공격력 등 기본 스탯을 확인하세요.',
+          '`/장비인벤토리`에서 장비와 골드·마석을, `/아이템인벤토리`에서 포션을 확인할 수 있습니다.',
+        ].join('\n'),
+      },
+      {
+        name: '2️⃣ 장비와 스킬 준비',
+        value: [
+          '`/장비장착 아이템이름`으로 장비를 착용합니다. 장비 고유 레벨이 내 레벨보다 높으면 착용할 수 없습니다.',
+          '`/자동장착`은 착용 가능한 장비 중 좋은 장비를 자동으로 골라 줍니다.',
+          '`/스킬인벤토리` 확인 후 `/스킬장착 스킬 슬롯`으로 최대 3개 스킬을 준비하세요.',
+        ].join('\n'),
+      },
+      {
+        name: '3️⃣ 모험 시작',
+        value: [
+          '서버의 **던전입장** 음성 채널에 들어간 뒤 `/모험시작`을 사용하세요.',
+          '혼자면 바로 시작하고, 함께 있는 사람이 있으면 동행 여부를 물어봅니다. 명령어를 입력한 사람이 공대장입니다.',
+          '모험이 시작되면 전용 음성·채팅방으로 이동합니다. 체크포인트가 있으면 그곳부터 시작할 수도 있습니다.',
+        ].join('\n'),
+      },
+      {
+        name: '4️⃣ 전투 방법',
+        value: [
+          '전투 채팅에서 **내 턴**일 때만 내 행동 버튼이 보입니다. 일반 공격, 스킬 시전, 아이템 사용 중 하나를 선택하세요.',
+          '턴 순서는 속도에 따라 결정되며, 다음 5턴의 순서도 전투 메시지에서 확인할 수 있습니다.',
+          '체력이 0이 되거나 음성 채널을 나가면 모험이 끝납니다. 전투 중 얻은 미장착 장비는 사라질 수 있으니 주의하세요.',
+        ].join('\n'),
+      },
+      {
+        name: '5️⃣ 보상과 성장',
+        value: [
+          '몬스터 처치로 경험치·골드·장비·포션을 얻습니다. 높은 레벨 몬스터일수록 경험치를 더 많이 줍니다.',
+          '장비는 `/장비강화`로 강화하고, 필요 없는 장비는 `/장비분해`하여 마석으로 바꿀 수 있습니다.',
+          '`/상점`에서 골드로 포션을 사고팔거나 마석을 교환할 수 있습니다.',
+        ].join('\n'),
+      },
+      {
+        name: '💡 더 알아보기',
+        value: '`/도움말`에서 전체 명령어를, `/도움말 항목:확률`에서 드랍·탐험 확률을 확인하세요.',
+      },
+    )
+    .setFooter({ text: '막히면 /도움말 또는 /가이드북을 다시 확인해 보세요.' });
 }
 
 function createProbabilityHelpEmbed() {
@@ -568,6 +692,13 @@ async function createItemHelpEmbed(userId, itemReference) {
   return null;
 }
 
+function createPartyResourceBar(current, maximum, filledBox) {
+  const segments = 10;
+  if (!Number.isFinite(maximum) || maximum <= 0) return '⬛'.repeat(segments);
+  const filled = Math.round(Math.min(1, Math.max(0, current / maximum)) * segments);
+  return filledBox.repeat(filled) + '⬛'.repeat(segments - filled);
+}
+
 async function createPartyStatEmbeds(adventure) {
   const battle = adventureSystem.battles.get(adventure.id);
   const partyFields = await Promise.all(
@@ -580,7 +711,8 @@ async function createPartyStatEmbeds(adventure) {
       return {
         name: `<@${userId}> · Lv.${stats.playerLevel}`,
         value: [
-          `❤️ 체력 ${health}/${maxHealth}\t🔷 마나 ${mana}/${stats.mana}`,
+          `❤️ 체력 ${createPartyResourceBar(health, maxHealth, '🟥')} ${health}/${maxHealth}`,
+          `🔷 마나 ${createPartyResourceBar(mana, stats.mana, '🟦')} ${mana}/${stats.mana}`,
           `🛡️ 방어력 ${stats.defense}\t⚔️ 공격력 ${stats.attack}\t✨ 마법 공격력 ${stats.magicAttack}`,
           `💨 속도 ${stats.speed}\t🎯 치명타 ${stats.criticalChance}%\t💥 치명타 피해 ${stats.criticalDamage}%`,
         ].join('\n'),
@@ -642,10 +774,17 @@ client.on(Events.InteractionCreate, async (interaction) => {
           return;
         }
         const focusedValue = interaction.options.getFocused().toLocaleLowerCase('ko-KR');
+        const matchingOptions = debugGiveOptions.filter((option) =>
+          option.name.toLocaleLowerCase('ko-KR').includes(focusedValue),
+        );
+        const options = focusedValue
+          ? matchingOptions
+          : [
+              ...matchingOptions.filter((option) => option.value.startsWith('equipment:')),
+              ...matchingOptions.filter((option) => !option.value.startsWith('equipment:')),
+            ];
         await interaction.respond(
-          debugGiveOptions
-            .filter((option) => option.name.toLocaleLowerCase('ko-KR').includes(focusedValue))
-            .slice(0, 25),
+          options.slice(0, 25),
         );
         return;
       }
@@ -992,6 +1131,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
         return;
       }
 
+      if (interaction.commandName === '가이드북') {
+        await interaction.reply({
+          embeds: [createGuidebookEmbed()],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
       if (interaction.commandName === '파티원스텟') {
         const adventure = adventureManager.getByUser(interaction.user.id);
         if (!adventure || interaction.channelId !== adventure.textChannelId) {
@@ -1023,6 +1170,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
         await interaction.reply({
           embeds: [createPlayerEmbed(interaction.user, player)],
         });
+        return;
+      }
+
+      if (interaction.commandName === '랭킹') {
+        const categoryName = interaction.options.getSubcommand();
+        await interaction.reply({ embeds: [await createRankingEmbed(categoryName)] });
         return;
       }
 
@@ -1410,7 +1563,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             );
             return;
           }
-          await adventureSystem.start(result.adventure);
+          await startAdventureAfterPenaltyWarning(result.adventure);
           await interaction.editReply(
             `⚔️ 1인 모험을 시작했습니다! <#${result.adventure.textChannelId}> 채널에서 전투를 진행합니다.`,
           );
@@ -1607,6 +1760,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
       return;
     }
 
+    if (interaction.isButton() && interaction.customId.startsWith('pvp:')) {
+      await pvpManager.handleButton(interaction);
+      return;
+    }
+
     if (interaction.isButton() && interaction.customId.startsWith('duel_invite:')) {
       const [, duelId, choice] = interaction.customId.split(':');
       const duel = pendingDuels.get(duelId);
@@ -1644,7 +1802,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
         return;
       }
       await interaction.update({ content: `✅ <@${duel.opponentId}>님이 결투를 수락했습니다. 콜로세움을 준비합니다.`, components: [] });
-      const result = await pvpManager.start(guild, challenger, opponent);
+      const result = await pvpManager.start(guild, challenger, opponent, playerStore);
       if (!result.ok) {
         await interaction.followUp({ content: '콜로세움을 만들 수 없습니다. 봇의 채널 관리 및 멤버 이동 권한을 확인해 주세요.', flags: MessageFlags.Ephemeral });
       }

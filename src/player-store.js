@@ -66,6 +66,7 @@ function createPlayer(userId) {
     equippedSkills: ['basic_heal', null, null],
     balanceVersion: 1,
     checkpointFloor: 1,
+    maxReachedFloor: 1,
     createdAt: new Date().toISOString(),
   };
 }
@@ -117,6 +118,10 @@ class PlayerStore {
     );
     player.balanceVersion ??= defaults.balanceVersion;
     player.checkpointFloor ??= 1;
+    player.maxReachedFloor = Math.max(
+      player.checkpointFloor,
+      Math.max(1, Math.floor(player.maxReachedFloor ?? 1)),
+    );
     return player;
   }
 
@@ -142,6 +147,13 @@ class PlayerStore {
     const player = this.migratePlayer(this.players[userId]);
     await this.save();
     return player;
+  }
+
+  async getAllPlayers() {
+    await this.ready;
+    const players = Object.values(this.players).map((player) => this.migratePlayer(player));
+    await this.save();
+    return players;
   }
 
   async equipItem(userId, itemName) {
@@ -521,6 +533,19 @@ class PlayerStore {
       checkpointFloor: player.checkpointFloor,
       updated: player.checkpointFloor > previousFloor,
     };
+  }
+
+  async recordMaxReachedFloor(userIds, floor) {
+    await this.ready;
+    const normalizedFloor = Math.max(1, Math.floor(floor));
+
+    for (const userId of userIds) {
+      if (!this.players[userId]) this.players[userId] = createPlayer(userId);
+      const player = this.migratePlayer(this.players[userId]);
+      player.maxReachedFloor = Math.max(player.maxReachedFloor, normalizedFloor);
+    }
+
+    await this.save();
   }
 
   async resetAllPlayers() {

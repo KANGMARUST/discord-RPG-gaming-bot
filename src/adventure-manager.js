@@ -68,6 +68,11 @@ class AdventureManager {
   constructor() {
     this.adventures = new Map();
     this.userAdventures = new Map();
+    this.leavePenaltyHandler = null;
+  }
+
+  setLeavePenaltyHandler(handler) {
+    this.leavePenaltyHandler = handler;
   }
 
   getByUser(userId) {
@@ -159,7 +164,7 @@ class AdventureManager {
       .join('\n');
     await textChannel
       .send(
-        `# 1층 모험 시작\n${partyList}\n\n이 채널에서 턴 전투와 아이템 사용을 진행하게 됩니다.`,
+        `# 1층 던전 입장\n${partyList}\n\n잠시 후 모험 규칙을 안내하고 탐험을 시작합니다.`,
       )
       .catch((error) => console.error('모험 시작 메시지 전송에 실패했습니다.', error));
 
@@ -245,12 +250,16 @@ class AdventureManager {
     if (!adventure) return false;
 
     const wasLeader = adventure.leaderId === userId;
+    const lostEquipment = reason === 'VOICE_CHANNEL_LEFT' && this.leavePenaltyHandler
+      ? await this.leavePenaltyHandler(adventure, userId)
+      : [];
     await dungeonLogger.append(adventure.id, 'MEMBER_REMOVED', {
       floor: adventure.floor,
       userId,
       reason,
       health: adventure.healthByUser[userId] ?? 0,
       wasLeader,
+      lostEquipment: lostEquipment.map((item) => item.id),
     });
     this.userAdventures.delete(userId);
     adventure.memberIds = adventure.memberIds.filter((id) => id !== userId);
@@ -273,8 +282,11 @@ class AdventureManager {
     ]);
     if (textChannel) {
       const leaderMessage = wasLeader ? ` 새로운 공대장은 <@${adventure.leaderId}>님입니다.` : '';
+      const penaltyMessage = reason === 'VOICE_CHANNEL_LEFT'
+        ? ` 사망과 동일한 페널티로 이번 모험에서 획득한 장비 **${lostEquipment.length}개**를 잃었습니다.`
+        : '';
       await textChannel
-        .send(`🚪 <@${userId}>님이 모험에서 이탈했습니다.${leaderMessage}`)
+        .send(`🚪 <@${userId}>님이 모험에서 이탈했습니다.${penaltyMessage}${leaderMessage}`)
         .catch(() => {});
     }
     return true;

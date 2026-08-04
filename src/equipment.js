@@ -58,7 +58,7 @@ export const subOptionPool = [
   { stat: 'magicAttack', label: '마법 공격력', min: 5.2, max: 15, operation: 'MULTIPLIER', decimals: 1 },
   { stat: 'defense', label: '방어력', min: 6.6, max: 16.9, operation: 'MULTIPLIER', decimals: 1 },
   { stat: 'health', label: '체력', min: 5.2, max: 15, operation: 'MULTIPLIER', decimals: 1 },
-  { stat: 'mana', label: '마나', min: 5.2, max: 15, operation: 'MULTIPLIER', decimals: 1 },
+  { stat: 'mana', label: '마나', min: 5.2, max: 15, operation: 'FLAT', decimals: 1 },
   { stat: 'speed', label: '속도', min: 2, max: 11, operation: 'FLAT', decimals: 0 },
 ];
 
@@ -191,7 +191,8 @@ export function shouldDropEquipmentFromMonster(isMimic, random = Math.random) {
 }
 
 export function formatEquipmentName(item) {
-  return `${item.locked ? '🔒 ' : ''}[${item.rarity}] ${item.name} +${item.enhancement}`;
+  const enhancementStars = '⭐'.repeat(Math.max(0, Math.floor(item.enhancement ?? 0)));
+  return `${item.locked ? '🔒 ' : ''}[${item.rarity}] ${item.name}${enhancementStars ? ` ${enhancementStars}` : ''}`;
 }
 
 export function formatEquipmentDetails(item) {
