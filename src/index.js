@@ -30,7 +30,15 @@ import { AdventureSystem } from './adventure-system.js';
 import { pvpManager } from './pvp-manager.js';
 import { getPotionDescription, potionCatalog } from './items.js';
 import { getRequiredExperience } from './leveling.js';
-import { formatSkill, getSkill, skillCatalog, skillRarities } from './skills.js';
+import {
+  describeSkillEffect,
+  formatSkill,
+  getRecommendedStats,
+  getSkill,
+  getSkillCostText,
+  skillCatalog,
+  skillRarities,
+} from './skills.js';
 import { getUnlockedCheckpointFloors } from './checkpoints.js';
 import { DUNGEON_REGIONS, createMonsterSkillSet } from './monster-catalog.js';
 
@@ -548,12 +556,35 @@ function createItemInventoryEmbed(user, player) {
     .setFooter({ text: '이곳의 아이템은 던전 전투에서 사용할 수 있습니다.' });
 }
 
-function createSkillInventoryEmbed(user, player) {
-  const ownedSkills = player.skillInventory
-    .map((skillId) => getSkill(skillId))
-    .filter(Boolean)
-    .map((skill) => `**${formatSkill(skill)}**`)
-    .join('\n\n');
+function splitSkillLines(lines, maximumLength = 1_000) {
+  const chunks = [];
+  let current = '';
+  for (const line of lines) {
+    if (current && current.length + line.length + 2 > maximumLength) {
+      chunks.push(current);
+      current = line;
+    } else {
+      current = current ? `${current}\n\n${line}` : line;
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
+
+function formatSkillCatalogLine(skill, marker = '') {
+  const roles = skill.roleTags?.join('·') ?? '범용';
+  const recommendedStats = getRecommendedStats(skill).join('·') || '자유 선택';
+  const soloRule = skill.roleTags?.includes('솔로')
+    ? skill.requiresSolo
+      ? ' · 혼자일 때만 사용'
+      : ' · 파티 사용 시 효과 50%'
+    : '';
+  return `${marker} **[${skill.rarity}] ${skill.name}** · ${getSkillCostText(skill)}\n` +
+    `└ ${describeSkillEffect(skill)}\n` +
+    `└ 추천 역할: ${roles} · 추천 스탯: ${recommendedStats}${soloRule}`;
+}
+
+function createSkillInventoryEmbeds(user, player) {
   const equippedSkillFields = player.equippedSkills
     .map((skillId, index) => {
       const skill = skillId ? getSkill(skillId) : null;
@@ -566,49 +597,74 @@ function createSkillInventoryEmbed(user, player) {
   const skillFragmentText = skillRarities
     .map((rarity) => `**${rarity}**: ${player.skillFragments?.[rarity] ?? 0}개`)
     .join('\n');
-  return new EmbedBuilder()
+  const embeds = [new EmbedBuilder()
     .setColor(0x8e44ad)
     .setTitle(`📖 ${user.displayName}님의 스킬북`)
     .addFields(
       ...equippedSkillFields,
       { name: '🧩 보유 스킬 조각', value: skillFragmentText, inline: true },
-      { name: '현재 보유 중인 스킬', value: ownedSkills || '보유한 스킬이 없습니다.', inline: false },
     )
-    .setFooter({ text: '같은 등급 조각 10개는 /스킬제작 등급으로 해당 등급의 새 스킬을 제작할 수 있습니다.' });
+    .setFooter({ text: '같은 등급 조각 10개는 /스킬제작 등급으로 해당 등급의 새 스킬을 제작할 수 있습니다.' })];
+  const ownedSkills = player.skillInventory.map(getSkill).filter(Boolean);
+  for (const rarity of skillRarities) {
+    const lines = ownedSkills
+      .filter((skill) => skill.rarity === rarity)
+      .map((skill) => formatSkillCatalogLine(skill, '✅'));
+    if (lines.length === 0) continue;
+    const chunks = splitSkillLines(lines);
+    embeds.push(new EmbedBuilder()
+      .setColor(0x8e44ad)
+      .setTitle(`📖 보유 ${rarity} 스킬 · ${lines.length}개`)
+      .addFields(chunks.map((value, index) => ({
+        name: chunks.length > 1 ? `${rarity} 스킬 ${index + 1}/${chunks.length}` : `${rarity} 스킬`,
+        value,
+      }))));
+  }
+  if (ownedSkills.length === 0) embeds[0].setDescription('보유한 스킬이 없습니다.');
+  return embeds;
 }
 
-function createSkillCatalogEmbed(user, player) {
+function createSkillCatalogEmbeds(user, player) {
   const rarityOrder = { 일반: 1, 고급: 2, 레어: 3, 전설: 4 };
   const ownedIds = new Set(player.skillInventory);
   const skills = Object.values(skillCatalog).sort((left, right) =>
     rarityOrder[left.rarity] - rarityOrder[right.rarity] || left.name.localeCompare(right.name, 'ko-KR'));
-  const formatLine = (skill, owned) => {
-    const effectByType = {
-      ATTACK: `마법공격력 × ${skill.magicAttackCoefficient} 피해`,
-      HEAL: `마법공격력 × ${skill.magicAttackCoefficient} 회복`,
-      ATTACK_BUFF: `공격·마공 +마법공격력 × ${skill.magicAttackCoefficient} · ${skill.duration}턴`,
-      DEFENSE_BUFF: `방어 +마법공격력 × ${skill.magicAttackCoefficient} · ${skill.duration}턴`,
-      TAUNT: `적 공격 대상을 시전자로 고정 · ${skill.duration} 적 턴`,
-    };
-    return `${owned ? '✅' : '🔒'} **[${skill.rarity}] ${skill.name}**\n└ 마나 ${skill.manaCost} · ${effectByType[skill.type] ?? '효과 정보 없음'}`;
-  };
   const ownedSkills = skills.filter((skill) => ownedIds.has(skill.id));
   const unownedSkills = skills.filter((skill) => !ownedIds.has(skill.id));
-  return new EmbedBuilder()
+  const embeds = [new EmbedBuilder()
     .setColor(0x6c5ce7)
     .setTitle(`📚 ${user.displayName}님의 스킬도감`)
-    .setDescription(`전체 **${skills.length}개** · 보유 **${ownedSkills.length}개** · 미보유 **${unownedSkills.length}개**`)
-    .addFields(
-      {
-        name: '✅ 가지고 있는 스킬',
-        value: ownedSkills.map((skill) => formatLine(skill, true)).join('\n\n') || '보유한 스킬이 없습니다.',
-      },
-      {
-        name: '🔒 가지고 있지 않은 스킬',
-        value: unownedSkills.map((skill) => formatLine(skill, false)).join('\n\n') || '모든 스킬을 보유하고 있습니다!',
-      },
-    )
-    .setFooter({ text: '스킬을 획득하면 미보유 목록에서 보유 목록으로 자동 이동합니다.' });
+    .setDescription([
+      `전체 **${skills.length}개** · 보유 **${ownedSkills.length}개** · 미보유 **${unownedSkills.length}개**`,
+      '스킬 3개 조합이 플레이 역할을 결정합니다. 역할과 추천 스탯을 보고 장비 성장 방향을 선택하세요.',
+      '솔로 스킬은 혼자일 때 100% 성능이며 파티에서는 50%로 감소합니다. `고독한 늑대`는 혼자일 때만 사용할 수 있습니다.',
+    ].join('\n'))
+    .setFooter({ text: '스킬을 획득하면 미보유 목록에서 보유 목록으로 자동 이동합니다.' })];
+  for (const rarity of skillRarities) {
+    const raritySkills = skills.filter((skill) => skill.rarity === rarity);
+    const embed = new EmbedBuilder()
+      .setColor(0x6c5ce7)
+      .setTitle(`📚 ${rarity} 스킬 · ${raritySkills.length}개`);
+    for (const [owned, label, marker] of [
+      [true, '✅ 가지고 있는 스킬', '✅'],
+      [false, '🔒 가지고 있지 않은 스킬', '🔒'],
+    ]) {
+      const lines = raritySkills
+        .filter((skill) => ownedIds.has(skill.id) === owned)
+        .map((skill) => formatSkillCatalogLine(skill, marker));
+      const chunks = splitSkillLines(lines);
+      if (chunks.length === 0) {
+        embed.addFields({ name: label, value: owned ? '이 등급의 보유 스킬이 없습니다.' : '이 등급의 모든 스킬을 보유했습니다!' });
+      } else {
+        embed.addFields(chunks.map((value, index) => ({
+          name: chunks.length > 1 ? `${label} ${index + 1}/${chunks.length}` : label,
+          value,
+        })));
+      }
+    }
+    embeds.push(embed);
+  }
+  return embeds;
 }
 
 function createShopPayload(user, player) {
@@ -711,8 +767,10 @@ function createHelpEmbed() {
           '`/스킬장착 스킬 슬롯` — 보유 스킬을 지정한 1~3번 슬롯에 장착',
           '`/스킬장착해제 슬롯` — 지정 슬롯을 비움(스킬은 스킬북에 유지)',
           '`/도움말 아이템이름` — 선택한 스킬의 등급·마나·계수·효과 확인',
-          '스킬은 최대 3개까지 장착하며 모험 중에는 장착 상태를 변경할 수 없습니다.',
-          '전투에서 **스킬** 버튼을 누르면 현재 장착한 스킬만 표시되고, 시전 시 마나를 소비합니다.',
+          '총 50종의 스킬 중 최대 3개를 조합하며, 선택한 스킬과 투자 스탯에 따라 탱커·딜러·힐러·버퍼 역할이 정해집니다.',
+          '검술 등 무마나 스킬은 공격력 계수를 사용하고 재사용 대기시간이 있으며, 주문은 마법 공격력과 마나를 사용합니다.',
+          '솔로 스킬은 혼자일 때 100%, 파티에서는 50% 성능입니다. `고독한 늑대`는 혼자일 때만 사용할 수 있습니다.',
+          '모험 중에는 장착 상태를 변경할 수 없습니다.',
           '스킬 조각은 몬스터·보스·보물상자에서 획득하며, 수량은 `/스킬북`에서 확인합니다.',
         ].join('\n'),
       },
@@ -779,6 +837,8 @@ function createGuidebookEmbed() {
           '`/자동장착`은 착용 가능한 장비 중 좋은 장비를 자동으로 골라 줍니다.',
           '`/스킬도감`에서 전체 스킬을 보고, `/스킬북`에서 보유 스킬과 장착 상태를 확인하세요.',
           '`/스킬장착 스킬 슬롯`으로 최대 3개 스킬을 준비하세요.',
+          '도감의 **추천 역할**과 **추천 스탯**을 참고하세요. 탱커는 방어력·체력, 물리 딜러는 공격력·치명타, 힐러·버퍼는 마법 공격력·마나가 핵심입니다.',
+          '솔로 스킬은 혼자일 때 강하지만 파티에서는 효과가 절반이므로, 파티에서는 도발·광역힐·보호막·버프를 나눠 장착하는 편이 강합니다.',
         ].join('\n'),
       },
       {
@@ -905,32 +965,37 @@ function createBuffHelpEmbed() {
   return new EmbedBuilder()
     .setColor(0x57f287)
     .setTitle('⬆️ 버프 도움말')
-    .setDescription('현재 플레이어가 사용할 수 있는 강화 효과입니다. 버프 수치는 시전 순간의 마법 공격력을 기준으로 계산됩니다.')
+    .setDescription('스킬 3개를 조합해 파티 역할을 만드는 강화 효과입니다. 상세 수치는 `/스킬도감`에서 확인할 수 있습니다.')
     .addFields(
       {
-        name: '✨ 마력 증폭 · 공격 버프',
+        name: '⚔️ 공격·마법 공격 버프',
         value: [
-          '대상: 자신 또는 파티원 1명',
-          '효과: 시전자의 마법 공격력 × **0.35**만큼 대상의 공격력과 마법 공격력 증가',
-          '지속: 대상 플레이어의 행동 **3회**',
+          '**마력 증폭·격려의 노래·검사의 호흡·마검 동조·전장의 군신** 등이 해당합니다.',
+          '합연산과 퍼센트 버프가 있으며 공격·마법 공격 퍼센트 증가는 합계 **40%**가 상한입니다.',
         ].join('\n'),
       },
       {
-        name: '🛡️ 수호 결계 · 방어 버프',
+        name: '🛡️ 탱킹·생존 버프',
         value: [
-          '대상: 자신 또는 파티원 1명',
-          '효과: 시전자의 마법 공격력 × **0.45**만큼 대상의 방어력 증가',
-          '지속: 대상 플레이어의 행동 **3회**',
+          '**수호 결계**는 방어력을, **철벽 자세·대신 막기·불굴의 맹세**는 받는 피해를 줄입니다.',
+          '**마력 장막·신성 방벽·위기 방벽·천상의 성역**의 보호막은 체력보다 먼저 피해를 흡수합니다.',
+          '**재생의 씨앗·불굴의 재생**은 대상의 턴 시작마다 체력을 회복합니다.',
+        ].join('\n'),
+      },
+      {
+        name: '💨 행동·치명타·종합 버프',
+        value: [
+          '**바람의 축복·생존자의 발걸음**은 속도와 다음 턴 순서를 즉시 바꿉니다. 속도 버프 합계 상한은 **30%**입니다.',
+          '**전투 집중**은 치명타 확률을 높이고, **결집의 깃발·고독한 늑대**는 여러 스탯을 함께 강화합니다.',
         ].join('\n'),
       },
       {
         name: '📌 적용 규칙',
         value: [
-          '증가량은 퍼센트가 아닌 스탯 **합연산**이며 소수 첫째 자리까지 표시됩니다.',
-          '같은 종류의 버프를 다시 사용하면 수치와 지속시간이 새로운 효과로 갱신됩니다.',
+          '같은 계열은 중첩하지 않고 더 강한 수치를 유지하면서 지속시간을 갱신합니다.',
           '자신에게 사용한 경우 시전한 턴은 지속시간에서 차감하지 않습니다.',
           '현재 버프와 남은 턴은 전투 상태 및 `/파티원스텟`에서 확인할 수 있습니다.',
-          '현재 적이 사용하는 별도의 버프는 없으며, 추가될 경우 적 상태에 표시됩니다.',
+          '솔로 태그 스킬은 파티에서 효과가 50%로 감소합니다.',
         ].join('\n'),
       },
     )
@@ -954,24 +1019,26 @@ function createDebuffHelpEmbed() {
         ].join('\n'),
       },
       {
-        name: '🐌 둔화 · 플레이어 디버프',
+        name: '🕸️ 플레이어가 적에게 거는 약화',
         value: [
-          '효과: 플레이어 속도 **5% 감소**',
-          '지속: 해당 플레이어의 턴 **3회**',
-          '속도가 바뀌는 즉시 행동 게이지와 다음 턴 순서가 다시 계산됩니다.',
+          '**약화의 표식·쇠약의 저주**: 적 공격력 감소',
+          '**방어구 가르기·원소 노출·종말의 낙인**: 방어·마법 방어 또는 받는 피해 증가',
+          '**쇠약의 저주·시간 왜곡**: 적 속도 감소 및 행동 게이지 지연',
+          '적 공격 감소 상한 **35%**, 방어 감소 **40%**, 받는 피해 증가 **30%**입니다.',
         ].join('\n'),
       },
       {
-        name: '☠️ 부식 · 플레이어 지속 피해',
+        name: '🐌 몬스터가 거는 둔화',
         value: [
-          '효과: 자신의 턴 시작마다 일반 몬스터 공격력 × **0.20** 피해',
+          '플레이어 속도를 감소시키며 행동 게이지와 다음 턴 순서가 즉시 다시 계산됩니다.',
           '지속: 해당 플레이어의 턴 **3회**',
         ].join('\n'),
       },
       {
-        name: '💀 저주 · 플레이어 지속 피해',
+        name: '☠️ 부식·저주 · 플레이어 지속 피해',
         value: [
-          '효과: 자신의 턴 시작마다 보스 공격력 × **0.30** 피해',
+          '자신의 턴 시작마다 피해를 받습니다. 일반 부식은 적 공격력 × **0.20**, 보스 저주는 × **0.30**입니다.',
+          '보호막과 피해 감소가 지속 피해에도 적용됩니다.',
           '지속: 해당 플레이어의 턴 **3회**',
         ].join('\n'),
       },
@@ -1631,7 +1698,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       if (interaction.commandName === '스킬북') {
         const player = await playerStore.getOrCreate(interaction.user.id);
         await interaction.reply({
-          embeds: [createSkillInventoryEmbed(interaction.user, player)],
+          embeds: createSkillInventoryEmbeds(interaction.user, player),
           flags: MessageFlags.Ephemeral,
         });
         return;
@@ -1640,7 +1707,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       if (interaction.commandName === '스킬도감') {
         const player = await playerStore.getOrCreate(interaction.user.id);
         await interaction.reply({
-          embeds: [createSkillCatalogEmbed(interaction.user, player)],
+          embeds: createSkillCatalogEmbeds(interaction.user, player),
           flags: MessageFlags.Ephemeral,
         });
         return;

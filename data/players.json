@@ -275,50 +275,56 @@
   "788944111096430602": {
     "userId": "788944111096430602",
     "stats": {
-      "playerLevel": 27,
-      "health": 278,
-      "defense": 57,
-      "attack": 88,
-      "magicAttack": 88,
-      "mana": 258,
-      "speed": 36,
+      "playerLevel": 31,
+      "health": 310,
+      "defense": 65,
+      "attack": 100,
+      "magicAttack": 100,
+      "mana": 290,
+      "speed": 40,
       "criticalChance": 5,
       "criticalDamage": 150
     },
     "equipment": {
       "머리": {
-        "id": "3e87cb9c-43c9-47f2-9e58-82c10c22776c",
-        "name": "빛나는 모자",
-        "itemLevel": 24,
-        "rarity": "레어",
+        "id": "56cd3f1b-eff9-47c8-b58a-8575116e20b8",
+        "name": "전설적인 모자",
+        "itemLevel": 28,
+        "rarity": "전설",
         "slot": "머리",
-        "enhancement": 3,
+        "enhancement": 4,
         "mainOptions": [
           {
             "stat": "mana",
             "label": "마나",
-            "baseValue": 56.8,
-            "value": 90.9
+            "baseValue": 63.2,
+            "value": 113.8
           }
         ],
         "subOptions": [
           {
             "stat": "attack",
             "label": "공격력",
-            "value": 7.7,
+            "value": 14.2,
             "operation": "MULTIPLIER"
-          },
-          {
-            "stat": "criticalDamage",
-            "label": "치명타 피해",
-            "value": 13,
-            "operation": "PERCENT_POINT"
           },
           {
             "stat": "speed",
             "label": "속도",
-            "value": 3,
+            "value": 8,
             "operation": "FLAT"
+          },
+          {
+            "stat": "criticalDamage",
+            "label": "치명타 피해",
+            "value": 14.4,
+            "operation": "PERCENT_POINT"
+          },
+          {
+            "stat": "magicAttack",
+            "label": "마법 공격력",
+            "value": 13.6,
+            "operation": "MULTIPLIER"
           }
         ],
         "locked": false
@@ -410,41 +416,47 @@
         "locked": false
       },
       "신발": {
-        "id": "fd42503c-d8c0-466b-8d5d-4ce953403ced",
-        "name": "빛나는 신발",
-        "itemLevel": 7,
-        "rarity": "레어",
+        "id": "dc2ab7bb-354a-488d-950e-da70d7084160",
+        "name": "전설적인 신발",
+        "itemLevel": 29,
+        "rarity": "전설",
         "slot": "신발",
-        "enhancement": 3,
+        "enhancement": 4,
         "mainOptions": [
           {
             "stat": "speed",
             "label": "속도",
-            "baseValue": 7.4,
-            "value": 11.8
+            "baseValue": 16.2,
+            "value": 29.2
           }
         ],
         "subOptions": [
           {
-            "stat": "speed",
-            "label": "속도",
-            "value": 10,
-            "operation": "FLAT"
-          },
-          {
-            "stat": "attack",
-            "label": "공격력",
-            "value": 12,
+            "stat": "health",
+            "label": "체력",
+            "value": 7.6,
             "operation": "MULTIPLIER"
           },
           {
-            "stat": "criticalChance",
-            "label": "치명타 확률",
-            "value": 10.1,
+            "stat": "magicAttack",
+            "label": "마법 공격력",
+            "value": 10.8,
+            "operation": "MULTIPLIER"
+          },
+          {
+            "stat": "defense",
+            "label": "방어력",
+            "value": 11.8,
+            "operation": "MULTIPLIER"
+          },
+          {
+            "stat": "criticalDamage",
+            "label": "치명타 피해",
+            "value": 11.2,
             "operation": "PERCENT_POINT"
           }
         ],
-        "locked": true
+        "locked": false
       },
       "무기": {
         "id": "238a7c5c-e6a7-431d-a234-c1e2634969fb",
@@ -498,60 +510,6 @@
     },
     "equipmentInventory": {
       "equipment": [
-        {
-          "id": "0eedc8c6-dd87-4f8d-8725-d18e739a1143",
-          "name": "평범한 철 장화",
-          "itemLevel": 17,
-          "rarity": "고급",
-          "slot": "신발",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "speed",
-              "label": "속도",
-              "baseValue": 11.4,
-              "value": 11.4
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "8d0e42a3-4606-486f-a2b8-bd446e03b94f",
-          "name": "평범한 철 장화",
-          "itemLevel": 17,
-          "rarity": "고급",
-          "slot": "신발",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "speed",
-              "label": "속도",
-              "baseValue": 11.4,
-              "value": 11.4
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "468bf174-cc81-4453-a57e-76d0bee9b325",
-          "name": "평범한 철 상의",
-          "itemLevel": 24,
-          "rarity": "고급",
-          "slot": "상의",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "defense",
-              "label": "방어력",
-              "baseValue": 14.2,
-              "value": 14.2
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
         {
           "id": "fb3d63e2-f020-429a-b372-906f6c729723",
           "name": "빛나는 신발",
@@ -644,42 +602,6 @@
           "locked": false
         },
         {
-          "id": "5aa186d6-6664-4580-aff7-1d0d7125b90a",
-          "name": "평범한 철 하의",
-          "itemLevel": 25,
-          "rarity": "고급",
-          "slot": "하의",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "health",
-              "label": "체력",
-              "baseValue": 146,
-              "value": 146
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "83d5fd05-9e90-4b9b-ab34-220e58614f36",
-          "name": "평범한 철 장화",
-          "itemLevel": 20,
-          "rarity": "고급",
-          "slot": "신발",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "speed",
-              "label": "속도",
-              "baseValue": 12.6,
-              "value": 12.6
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
           "id": "1201f313-b000-4193-912b-96e0f79bc80f",
           "name": "빛나는 하의",
           "itemLevel": 25,
@@ -735,42 +657,6 @@
           "locked": false
         },
         {
-          "id": "dd363234-2e6d-41dc-8051-9ea9224c3ed6",
-          "name": "낡은 가죽 모자",
-          "itemLevel": 21,
-          "rarity": "일반",
-          "slot": "머리",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "mana",
-              "label": "마나",
-              "baseValue": 52,
-              "value": 52
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "fde4718b-fe24-44c4-9bca-09fc47a47aa0",
-          "name": "평범한 철 장화",
-          "itemLevel": 21,
-          "rarity": "고급",
-          "slot": "신발",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "speed",
-              "label": "속도",
-              "baseValue": 13,
-              "value": 13
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
           "id": "9bd1dab0-6ff6-4143-b98e-9eb197624574",
           "name": "전설적인 상의",
           "itemLevel": 23,
@@ -786,243 +672,6 @@
             }
           ],
           "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "0f7f28b6-0407-4f4e-b36d-9d2ed064e3ca",
-          "name": "낡은 가죽 하의",
-          "itemLevel": 23,
-          "rarity": "일반",
-          "slot": "하의",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "health",
-              "label": "체력",
-              "baseValue": 138,
-              "value": 138
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "c7c8df24-9a77-4cfe-ac33-4ff091c6e3b4",
-          "name": "평범한 철 상의",
-          "itemLevel": 25,
-          "rarity": "고급",
-          "slot": "상의",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "defense",
-              "label": "방어력",
-              "baseValue": 14.6,
-              "value": 14.6
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "853e6da6-6bdc-4bc0-9de9-ddad7c58720e",
-          "name": "평범한 철검",
-          "itemLevel": 9,
-          "rarity": "고급",
-          "slot": "무기",
-          "enhancement": 2,
-          "mainOptions": [
-            {
-              "stat": "attack",
-              "label": "공격력",
-              "baseValue": 16.4,
-              "value": 23
-            },
-            {
-              "stat": "magicAttack",
-              "label": "마법 공격력",
-              "baseValue": 16.4,
-              "value": 23
-            }
-          ],
-          "subOptions": [
-            {
-              "stat": "health",
-              "label": "체력",
-              "value": 11.3,
-              "operation": "MULTIPLIER"
-            },
-            {
-              "stat": "criticalDamage",
-              "label": "치명타 피해",
-              "value": 12.6,
-              "operation": "PERCENT_POINT"
-            }
-          ],
-          "locked": false
-        },
-        {
-          "id": "7e604c48-1e26-4b01-8bff-df3e6fb54de3",
-          "name": "낡은 가죽 장화",
-          "itemLevel": 24,
-          "rarity": "일반",
-          "slot": "신발",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "speed",
-              "label": "속도",
-              "baseValue": 14.2,
-              "value": 14.2
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "718eef2b-1c5e-4286-b1ea-3c6bf1706cbe",
-          "name": "평범한 철 하의",
-          "itemLevel": 25,
-          "rarity": "고급",
-          "slot": "하의",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "health",
-              "label": "체력",
-              "baseValue": 146,
-              "value": 146
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "f77b8ed7-eace-4d9d-bc50-65cab5b54a9f",
-          "name": "평범한 철검",
-          "itemLevel": 29,
-          "rarity": "고급",
-          "slot": "무기",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "attack",
-              "label": "공격력",
-              "baseValue": 32.4,
-              "value": 32.4
-            },
-            {
-              "stat": "magicAttack",
-              "label": "마법 공격력",
-              "baseValue": 32.4,
-              "value": 32.4
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "dc2ab7bb-354a-488d-950e-da70d7084160",
-          "name": "전설적인 신발",
-          "itemLevel": 29,
-          "rarity": "전설",
-          "slot": "신발",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "speed",
-              "label": "속도",
-              "baseValue": 16.2,
-              "value": 16.2
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "dcfd1aa4-f81a-43e9-9ef2-4f9c09e30681",
-          "name": "평범한 철 하의",
-          "itemLevel": 10,
-          "rarity": "고급",
-          "slot": "하의",
-          "enhancement": 2,
-          "mainOptions": [
-            {
-              "stat": "health",
-              "label": "체력",
-              "baseValue": 86,
-              "value": 120.4
-            }
-          ],
-          "subOptions": [
-            {
-              "stat": "attack",
-              "label": "공격력",
-              "value": 12.5,
-              "operation": "MULTIPLIER"
-            },
-            {
-              "stat": "criticalChance",
-              "label": "치명타 확률",
-              "value": 5.5,
-              "operation": "PERCENT_POINT"
-            }
-          ],
-          "locked": false
-        },
-        {
-          "id": "84aa46cb-c6d8-4011-93f9-77a896e681d4",
-          "name": "평범한 철검",
-          "itemLevel": 26,
-          "rarity": "고급",
-          "slot": "무기",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "attack",
-              "label": "공격력",
-              "baseValue": 30,
-              "value": 30
-            },
-            {
-              "stat": "magicAttack",
-              "label": "마법 공격력",
-              "baseValue": 30,
-              "value": 30
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "b23dc369-bcb2-4dd8-aaa4-de16bbb4e5dc",
-          "name": "평범한 철 하의",
-          "itemLevel": 23,
-          "rarity": "고급",
-          "slot": "하의",
-          "enhancement": 2,
-          "mainOptions": [
-            {
-              "stat": "health",
-              "label": "체력",
-              "baseValue": 138,
-              "value": 193.2
-            }
-          ],
-          "subOptions": [
-            {
-              "stat": "criticalChance",
-              "label": "치명타 확률",
-              "value": 6.3,
-              "operation": "PERCENT_POINT"
-            },
-            {
-              "stat": "mana",
-              "label": "마나",
-              "value": 12.4,
-              "operation": "FLAT"
-            }
-          ],
           "locked": false
         },
         {
@@ -1063,42 +712,6 @@
           "locked": false
         },
         {
-          "id": "56cd3f1b-eff9-47c8-b58a-8575116e20b8",
-          "name": "전설적인 모자",
-          "itemLevel": 28,
-          "rarity": "전설",
-          "slot": "머리",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "mana",
-              "label": "마나",
-              "baseValue": 63.2,
-              "value": 63.2
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "35341af0-806d-4938-8fc8-3637b7af390b",
-          "name": "평범한 철 상의",
-          "itemLevel": 29,
-          "rarity": "고급",
-          "slot": "상의",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "defense",
-              "label": "방어력",
-              "baseValue": 16.2,
-              "value": 16.2
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
           "id": "3bebf9cd-223e-47c9-a59d-e770c5597eda",
           "name": "빛나는 모자",
           "itemLevel": 27,
@@ -1135,84 +748,200 @@
           "locked": false
         },
         {
-          "id": "68277750-e53a-4a6b-8122-153bd9138335",
-          "name": "평범한 철검",
-          "itemLevel": 27,
-          "rarity": "고급",
-          "slot": "무기",
+          "id": "de320dcc-3339-40c2-8ad5-a3e5edd924a1",
+          "name": "빛나는 상의",
+          "itemLevel": 31,
+          "rarity": "레어",
+          "slot": "상의",
           "enhancement": 0,
           "mainOptions": [
             {
-              "stat": "attack",
-              "label": "공격력",
-              "baseValue": 30.8,
-              "value": 30.8
-            },
-            {
-              "stat": "magicAttack",
-              "label": "마법 공격력",
-              "baseValue": 30.8,
-              "value": 30.8
+              "stat": "defense",
+              "label": "방어력",
+              "baseValue": 17,
+              "value": 17
             }
           ],
           "subOptions": [],
           "locked": false
         },
         {
-          "id": "2d435d74-a63d-4f12-8181-4cbe8eff2431",
-          "name": "평범한 철 모자",
-          "itemLevel": 27,
-          "rarity": "고급",
-          "slot": "머리",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "mana",
-              "label": "마나",
-              "baseValue": 61.6,
-              "value": 61.6
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "a2c285cb-606f-4e63-8593-03c14bc670d4",
-          "name": "평범한 철 장화",
-          "itemLevel": 28,
-          "rarity": "고급",
+          "id": "e822a162-283a-4f09-be28-462e9be75eaa",
+          "name": "전설적인 신발",
+          "itemLevel": 33,
+          "rarity": "전설",
           "slot": "신발",
           "enhancement": 0,
           "mainOptions": [
             {
               "stat": "speed",
               "label": "속도",
-              "baseValue": 15.8,
-              "value": 15.8
+              "baseValue": 17.8,
+              "value": 17.8
             }
           ],
           "subOptions": [],
           "locked": false
         },
         {
-          "id": "7eb41d72-7183-413a-a10a-690f05b1b035",
-          "name": "평범한 철검",
-          "itemLevel": 30,
-          "rarity": "고급",
-          "slot": "무기",
+          "id": "9bd9637d-d563-4d3a-b788-7c7979624111",
+          "name": "빛나는 신발",
+          "itemLevel": 33,
+          "rarity": "레어",
+          "slot": "신발",
           "enhancement": 0,
           "mainOptions": [
             {
-              "stat": "attack",
-              "label": "공격력",
-              "baseValue": 33.2,
-              "value": 33.2
+              "stat": "speed",
+              "label": "속도",
+              "baseValue": 17.8,
+              "value": 17.8
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        {
+          "id": "161eefaf-c491-41d6-9555-ec049e1d0544",
+          "name": "빛나는 하의",
+          "itemLevel": 35,
+          "rarity": "레어",
+          "slot": "하의",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "health",
+              "label": "체력",
+              "baseValue": 186,
+              "value": 186
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        {
+          "id": "fd42503c-d8c0-466b-8d5d-4ce953403ced",
+          "name": "빛나는 신발",
+          "itemLevel": 7,
+          "rarity": "레어",
+          "slot": "신발",
+          "enhancement": 3,
+          "mainOptions": [
+            {
+              "stat": "speed",
+              "label": "속도",
+              "baseValue": 7.4,
+              "value": 11.8
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "speed",
+              "label": "속도",
+              "value": 10,
+              "operation": "FLAT"
             },
             {
-              "stat": "magicAttack",
-              "label": "마법 공격력",
-              "baseValue": 33.2,
-              "value": 33.2
+              "stat": "attack",
+              "label": "공격력",
+              "value": 12,
+              "operation": "MULTIPLIER"
+            },
+            {
+              "stat": "criticalChance",
+              "label": "치명타 확률",
+              "value": 10.1,
+              "operation": "PERCENT_POINT"
+            }
+          ],
+          "locked": true
+        },
+        {
+          "id": "3e87cb9c-43c9-47f2-9e58-82c10c22776c",
+          "name": "빛나는 모자",
+          "itemLevel": 24,
+          "rarity": "레어",
+          "slot": "머리",
+          "enhancement": 3,
+          "mainOptions": [
+            {
+              "stat": "mana",
+              "label": "마나",
+              "baseValue": 56.8,
+              "value": 90.9
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "value": 7.7,
+              "operation": "MULTIPLIER"
+            },
+            {
+              "stat": "criticalDamage",
+              "label": "치명타 피해",
+              "value": 13,
+              "operation": "PERCENT_POINT"
+            },
+            {
+              "stat": "speed",
+              "label": "속도",
+              "value": 3,
+              "operation": "FLAT"
+            }
+          ],
+          "locked": false
+        },
+        {
+          "id": "6a95f27c-7f1a-454c-8ac5-5e42e8a31402",
+          "name": "빛나는 모자",
+          "itemLevel": 38,
+          "rarity": "레어",
+          "slot": "머리",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "mana",
+              "label": "마나",
+              "baseValue": 79.2,
+              "value": 79.2
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        {
+          "id": "70f29ee1-8a71-4143-97c5-a51bde71c9a9",
+          "name": "빛나는 모자",
+          "itemLevel": 40,
+          "rarity": "레어",
+          "slot": "머리",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "mana",
+              "label": "마나",
+              "baseValue": 82.4,
+              "value": 82.4
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        {
+          "id": "df497cb8-a0c9-4863-add6-7aa5ba0c527d",
+          "name": "낡은 가죽 모자",
+          "itemLevel": 44,
+          "rarity": "일반",
+          "slot": "머리",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "mana",
+              "label": "마나",
+              "baseValue": 88.8,
+              "value": 88.8
             }
           ],
           "subOptions": [],
@@ -1220,40 +949,10 @@
         }
       ],
       "materials": {
-        "마석": 12
+        "마석": 42
       }
     },
     "itemInventory": [
-      {
-        "id": "common_mana_potion",
-        "name": "일반마나포션",
-        "description": "최대 마나의 5% 회복",
-        "quantity": 20
-      },
-      {
-        "id": "common_health_potion",
-        "name": "일반체력포션",
-        "description": "최대 체력의 5% 회복",
-        "quantity": 34
-      },
-      {
-        "id": "advanced_health_potion",
-        "name": "고급체력포션",
-        "description": "최대 체력의 10% 회복",
-        "quantity": 9
-      },
-      {
-        "id": "advanced_mana_potion",
-        "name": "고급마나포션",
-        "description": "최대 마나의 10% 회복",
-        "quantity": 11
-      },
-      {
-        "id": "rare_mana_potion",
-        "name": "레어마나포션",
-        "description": "최대 마나의 25% 회복",
-        "quantity": 7
-      },
       {
         "id": "legendary_mana_potion",
         "name": "전설마나포션",
@@ -1261,22 +960,22 @@
         "quantity": 2
       },
       {
-        "id": "rare_health_potion",
-        "name": "레어체력포션",
-        "description": "최대 체력의 25% 회복",
-        "quantity": 1
-      },
-      {
         "id": "legendary_health_potion",
         "name": "전설체력포션",
         "description": "최대 체력의 50% 회복",
-        "quantity": 17
+        "quantity": 24
+      },
+      {
+        "id": "advanced_mana_potion",
+        "name": "고급마나포션",
+        "description": "최대 마나의 10% 회복",
+        "quantity": 2
       }
     ],
-    "gold": 25216,
+    "gold": 23742,
     "createdAt": "2026-08-03T09:16:38.849Z",
     "balanceVersion": 1,
-    "experience": 3001,
+    "experience": 3871,
     "skillInventory": [
       "basic_heal",
       "magic_bolt"
@@ -1286,8 +985,8 @@
       null,
       null
     ],
-    "checkpointFloor": 31,
-    "maxReachedFloor": 31
+    "checkpointFloor": 41,
+    "maxReachedFloor": 45
   },
   "680673101855588402": {
     "userId": "680673101855588402",
@@ -3447,13 +3146,13 @@
   "923095437752287264": {
     "userId": "923095437752287264",
     "stats": {
-      "playerLevel": 10,
-      "health": 142,
-      "defense": 23,
-      "attack": 37,
-      "magicAttack": 37,
-      "mana": 122,
-      "speed": 19,
+      "playerLevel": 13,
+      "health": 166,
+      "defense": 29,
+      "attack": 46,
+      "magicAttack": 46,
+      "mana": 146,
+      "speed": 22,
       "criticalChance": 5,
       "criticalDamage": 150
     },
@@ -3464,13 +3163,13 @@
         "itemLevel": 7,
         "rarity": "레어",
         "slot": "머리",
-        "enhancement": 1,
+        "enhancement": 3,
         "mainOptions": [
           {
             "stat": "mana",
             "label": "마나",
             "baseValue": 29.6,
-            "value": 35.5
+            "value": 47.4
           }
         ],
         "subOptions": [
@@ -3478,6 +3177,18 @@
             "stat": "health",
             "label": "체력",
             "value": 6.5,
+            "operation": "MULTIPLIER"
+          },
+          {
+            "stat": "speed",
+            "label": "속도",
+            "value": 8,
+            "operation": "FLAT"
+          },
+          {
+            "stat": "attack",
+            "label": "공격력",
+            "value": 12.2,
             "operation": "MULTIPLIER"
           }
         ],
@@ -3532,13 +3243,13 @@
         "itemLevel": 8,
         "rarity": "레어",
         "slot": "하의",
-        "enhancement": 1,
+        "enhancement": 3,
         "mainOptions": [
           {
             "stat": "health",
             "label": "체력",
             "baseValue": 78,
-            "value": 93.6
+            "value": 124.8
           }
         ],
         "subOptions": [
@@ -3546,6 +3257,18 @@
             "stat": "health",
             "label": "체력",
             "value": 8.5,
+            "operation": "MULTIPLIER"
+          },
+          {
+            "stat": "criticalDamage",
+            "label": "치명타 피해",
+            "value": 15.5,
+            "operation": "PERCENT_POINT"
+          },
+          {
+            "stat": "magicAttack",
+            "label": "마법 공격력",
+            "value": 13.1,
             "operation": "MULTIPLIER"
           }
         ],
@@ -3620,106 +3343,39 @@
       }
     },
     "equipmentInventory": {
-      "equipment": [
-        {
-          "id": "9c2d8f01-0f48-44ab-98ac-4fb78fe1f4bb",
-          "name": "낡은 가죽 상의",
-          "itemLevel": 6,
-          "rarity": "일반",
-          "slot": "상의",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "defense",
-              "label": "방어력",
-              "baseValue": 7,
-              "value": 7
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "bd46d12e-523c-40c9-b39a-e56aa3ffdf06",
-          "name": "낡은 가죽 상의",
-          "itemLevel": 7,
-          "rarity": "일반",
-          "slot": "상의",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "defense",
-              "label": "방어력",
-              "baseValue": 7.4,
-              "value": 7.4
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        },
-        {
-          "id": "b170199f-be84-4301-826c-227558b45055",
-          "name": "낡은 가죽 상의",
-          "itemLevel": 8,
-          "rarity": "일반",
-          "slot": "상의",
-          "enhancement": 0,
-          "mainOptions": [
-            {
-              "stat": "defense",
-              "label": "방어력",
-              "baseValue": 7.8,
-              "value": 7.8
-            }
-          ],
-          "subOptions": [],
-          "locked": false
-        }
-      ],
+      "equipment": [],
       "materials": {
-        "마석": 18
+        "마석": 43
       }
     },
     "itemInventory": [
       {
-        "id": "common_health_potion",
-        "name": "일반체력포션",
-        "description": "최대 체력의 5% 회복",
-        "quantity": 7
-      },
-      {
         "id": "common_mana_potion",
         "name": "일반마나포션",
         "description": "최대 마나의 5% 회복",
-        "quantity": 8
+        "quantity": 12
+      },
+      {
+        "id": "common_health_potion",
+        "name": "일반체력포션",
+        "description": "최대 체력의 5% 회복",
+        "quantity": 2
+      },
+      {
+        "id": "legendary_health_potion",
+        "name": "전설체력포션",
+        "description": "최대 체력의 50% 회복",
+        "quantity": 5
       },
       {
         "id": "rare_health_potion",
         "name": "레어체력포션",
         "description": "최대 체력의 25% 회복",
-        "quantity": 3
-      },
-      {
-        "id": "legendary_mana_potion",
-        "name": "전설마나포션",
-        "description": "최대 마나의 50% 회복",
-        "quantity": 2
-      },
-      {
-        "id": "advanced_health_potion",
-        "name": "고급체력포션",
-        "description": "최대 체력의 10% 회복",
-        "quantity": 1
-      },
-      {
-        "id": "advanced_mana_potion",
-        "name": "고급마나포션",
-        "description": "최대 마나의 10% 회복",
-        "quantity": 2
+        "quantity": 11
       }
     ],
-    "gold": 5974,
-    "experience": 1319,
+    "gold": 3124,
+    "experience": 1022,
     "skillInventory": [
       "basic_heal",
       "magic_bolt"
@@ -3730,9 +3386,9 @@
       null
     ],
     "balanceVersion": 1,
-    "checkpointFloor": 1,
+    "checkpointFloor": 11,
     "createdAt": "2026-08-03T14:50:27.858Z",
-    "maxReachedFloor": 1
+    "maxReachedFloor": 14
   },
   "687540191841615908": {
     "userId": "687540191841615908",
