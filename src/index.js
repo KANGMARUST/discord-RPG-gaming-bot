@@ -31,6 +31,8 @@ import { pvpManager } from './pvp-manager.js';
 import { getPotionDescription, potionCatalog } from './items.js';
 import { getRequiredExperience } from './leveling.js';
 import { formatSkill, getSkill, skillCatalog } from './skills.js';
+import { getUnlockedCheckpointFloors } from './checkpoints.js';
+import { DUNGEON_REGIONS, createMonsterSkillSet } from './monster-catalog.js';
 
 if (!process.env.DISCORD_TOKEN) {
   console.error('.env 파일에 DISCORD_TOKEN을 입력해 주세요.');
@@ -40,9 +42,11 @@ if (!process.env.DISCORD_TOKEN) {
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
 });
+const BOT_DISPLAY_NAME = '라파엘(Rafael)';
 const adventureSystem = new AdventureSystem(client, adventureManager, playerStore);
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const enhancementImagePath = path.join(currentDirectory, '..', 'assets', 'ui', 'equipment-enhancement.png');
+const monsterAssetsDirectory = path.join(currentDirectory, '..', 'assets', 'monsters');
 
 const choices = {
   rock: { label: '바위', emoji: '✊', beats: 'scissors' },
@@ -61,6 +65,10 @@ const debugGiveOptions = [
   ...Object.values(potionCatalog).map((potion) => ({
     name: `[포션] [${potion.rarity}] ${potion.name}`,
     value: `potion:${potion.id}`,
+  })),
+  ...Object.values(skillCatalog).map((skill) => ({
+    name: `[스킬] [${skill.rarity}] ${skill.name}`,
+    value: `skill:${skill.id}`,
   })),
   ...['일반', '고급', '레어', '전설'].flatMap((rarity) =>
     equipmentSlots.map((slot) => ({
@@ -84,8 +92,8 @@ async function startAdventureAfterPenaltyWarning(adventure) {
   await channel?.send([
     '# ⚠️ 모험 페널티 안내',
     '던전에서 **사망**하거나 `/모험중지` 없이 음성 채널을 나가면,',
-    '**이번 모험에서 획득한 장비가 모두 사라집니다.**',
-    '장착 중인 장비는 사라지지 않습니다.',
+    '**이번 모험에서 획득한 장비와 골드가 모두 사라집니다.**',
+    '장착 중인 장비와 모험 시작 전부터 보유한 골드는 사라지지 않습니다.',
     '',
     '3초 후 모험을 시작합니다...',
   ].join('\n'));
@@ -96,7 +104,7 @@ async function startAdventureAfterPenaltyWarning(adventure) {
 }
 
 adventureManager.setLeavePenaltyHandler((adventure, userId) =>
-  adventureSystem.removeDeathLoot(adventure, userId));
+  adventureSystem.removeAdventureDeathRewards(adventure, userId));
 
 function canStopDuringBattle(battle) {
   return !battle.partyHasTakenDamage || !battle.partyHasAttacked;
@@ -259,12 +267,201 @@ function createPlayerEmbed(user, player) {
         name: '🗼 탑 기록',
         value: [
           `최대 도달 층: **${player.maxReachedFloor ?? player.checkpointFloor ?? 1}층**`,
-          `체크포인트: **${player.checkpointFloor ?? 1}층**`,
+          `최고 체크포인트: **${player.checkpointFloor ?? 1}층**`,
+          `시작 가능 층: **${getUnlockedCheckpointFloors(player.checkpointFloor).map((floor) => `${floor}층`).join(', ')}**`,
         ].join('\n'),
         inline: true,
       },
     )
     .setFooter({ text: '장비를 획득하면 각 슬롯에 장착할 수 있습니다.' });
+}
+
+function createDicoBotEasterEggEmbed(user) {
+  return new EmbedBuilder()
+    .setColor(0xf1c40f)
+    .setTitle('✨ 디코봇 · 천상의 관리자')
+    .setDescription('```신의 영역에 도달한 정체불명의 던전 관리자입니다.```')
+    .setThumbnail(user.displayAvatarURL())
+    .addFields(
+      {
+        name: '📊 신성 스탯',
+        value: [
+          '플레이어 레벨: **Lv.1000**',
+          '경험치: **측정 불가**',
+          '체력: **99,999**',
+          '방어력: **9,999**',
+          '공격력: **12,345**',
+          '마법 공격력: **12,345**',
+          '마나: **99,999**',
+          '속도: **777**',
+          '치명타 확률: **100%**',
+          '치명타 피해: **999%**',
+        ].join('\n'),
+        inline: true,
+      },
+      {
+        name: '👑 착용 장비 · 신화',
+        value: [
+          '**[머리]** 라파엘의 성광 왕관 ★★★★★★★★★★\n└ 마나 +30,000 · 치명타 확률 +100%',
+          '**[상의]** 종말을 거스르는 성갑 ★★★★★★★★★★\n└ 방어력 +9,000 · 체력 +50,000',
+          '**[하의]** 천공의 심판 각반 ★★★★★★★★★★\n└ 체력 +49,000 · 속도 +300',
+          '**[신발]** 공간을 가르는 성화 ★★★★★★★★★★\n└ 속도 +467 · 방어력 +4,000',
+          '**[무기]** 창세의 성검 아우렐리아 ★★★★★★★★★★\n└ 공격력 +12,000 · 마법 공격력 +12,000',
+        ].join('\n\n'),
+        inline: false,
+      },
+      {
+        name: '🗼 탑 기록',
+        value: '최대 도달 층: **???층**\n최고 체크포인트: **신의 영역**',
+        inline: true,
+      },
+    )
+    .setFooter({ text: '이스터에그 발견! 이 장비는 플레이어가 획득할 수 없습니다.' });
+}
+
+function isDicoBotEasterEggTarget(interaction, target) {
+  if (target.id === client.user?.id) return true;
+  if (!target.bot) return false;
+  const member = interaction.options.getMember('플레이어');
+  const names = [target.username, target.globalName, member?.displayName]
+    .filter(Boolean)
+    .map((name) => name.replaceAll(' ', '').toLocaleLowerCase('ko-KR'));
+  return names.includes('디코봇');
+}
+
+const monsterCatalogEntries = [
+  ...DUNGEON_REGIONS.flatMap((region) => [
+    {
+      id: `normal:${region.id}`,
+      name: region.normal.name,
+      type: 'NORMAL',
+      region,
+      minFloor: region.minFloor,
+      maxFloor: region.maxFloor,
+      image: region.normal.image,
+    },
+    {
+      id: `boss:${region.id}`,
+      name: region.boss.name,
+      type: 'BOSS',
+      region,
+      minFloor: region.maxFloor,
+      maxFloor: region.maxFloor,
+      image: region.boss.image,
+    },
+  ]),
+  {
+    id: 'mimic',
+    name: '미믹',
+    type: 'MIMIC',
+    region: DUNGEON_REGIONS[0],
+    minFloor: 1,
+    maxFloor: 100,
+    image: 'mimic.png',
+  },
+];
+
+function calculateCatalogMonsterStats(level, type) {
+  const isBoss = type === 'BOSS';
+  const isMimic = type === 'MIMIC';
+  const healthMultiplier = isBoss ? 1.8 : isMimic ? 1.25 : 1;
+  const combatMultiplier = isBoss || isMimic ? 1.25 : 1;
+  return {
+    health: Math.round((30 + level * 15) * healthMultiplier),
+    attack: Math.round((12 + level * 4) * combatMultiplier),
+    defense: Math.round((2 + level * 1.2) * combatMultiplier),
+    magicDefense: Math.round((1 + level * 1.2) * combatMultiplier),
+    speed: Math.round((7 + level) * combatMultiplier),
+  };
+}
+
+function formatCatalogStatRange(entry, statKey) {
+  const first = calculateCatalogMonsterStats(entry.minFloor, entry.type)[statKey];
+  const last = calculateCatalogMonsterStats(entry.maxFloor, entry.type)[statKey];
+  return first === last ? String(first) : `${first} ~ ${last}`;
+}
+
+function getCatalogMonsterSkills(entry) {
+  return createMonsterSkillSet(entry.region, {
+    isBoss: entry.type === 'BOSS',
+    isMimic: entry.type === 'MIMIC',
+  });
+}
+
+function formatCatalogMonsterSkill(skill, totalWeight) {
+  const typeText = {
+    SINGLE_ATTACK: '단일 공격',
+    PARTY_ATTACK: '파티 전체 공격',
+    SELF_HEAL: '자신 회복',
+    DRAIN_ATTACK: '흡혈 공격',
+  }[skill.type] ?? '특수 기술';
+  const details = [typeText];
+  if (skill.powerCoefficient) details.push(`공격력 × ${skill.powerCoefficient}`);
+  if (skill.criticalChanceBonus) details.push(`치명타 확률 +${skill.criticalChanceBonus}%`);
+  if (skill.maxHealthCoefficient) details.push(`최대 체력의 ${Math.round(skill.maxHealthCoefficient * 100)}% 회복`);
+  if (skill.lifeStealRatio) details.push(`실제 피해의 ${Math.round(skill.lifeStealRatio * 100)}% 흡혈`);
+  if (skill.statusEffect?.type === 'SLOW') {
+    details.push(`둔화 ${skill.statusEffect.speedReductionPercent}% · ${skill.statusEffect.duration}턴`);
+  }
+  if (skill.statusEffect?.type === 'DOT') {
+    details.push(`${skill.statusEffect.name} · ${skill.statusEffect.duration}턴 지속 피해`);
+  }
+  const chance = Math.round(((skill.weight ?? 1) / totalWeight) * 100);
+  return `**${skill.name}**\n└ ${details.join(' · ')} · 선택 ${chance}%`;
+}
+
+function createMonsterCatalogListEmbed() {
+  const lines = DUNGEON_REGIONS.map((region) =>
+    `**${region.minFloor}~${region.maxFloor}층 · ${region.regionName}**\n${region.normal.name} · ${region.boss.name} (${region.maxFloor}층 보스)`,
+  );
+  lines.push('**특수 사건 · 1~100층**\n미믹 (보물상자에서 출현 가능)');
+  return new EmbedBuilder()
+    .setColor(0x5865f2)
+    .setTitle('📚 던전 적도감')
+    .setDescription(lines.join('\n\n'))
+    .setFooter({ text: '/적도감 적이름으로 체력·스탯·시전 스킬을 자세히 확인할 수 있습니다.' });
+}
+
+function createMonsterCatalogDetailPayload(entry) {
+  const skills = getCatalogMonsterSkills(entry);
+  const totalWeight = skills.reduce((total, skill) => total + (skill.weight ?? 1), 0);
+  const floorText = entry.type === 'MIMIC'
+    ? '특수 사건 · 1~100층'
+    : entry.type === 'BOSS'
+      ? `${entry.minFloor}층 보스`
+      : `${entry.minFloor}~${entry.maxFloor}층`;
+  const attachmentName = `catalog-${entry.id.replace(':', '-')}.png`;
+  const attachment = new AttachmentBuilder(path.join(monsterAssetsDirectory, entry.image), {
+    name: attachmentName,
+  });
+  const typeLabel = entry.type === 'BOSS' ? '👑 보스' : entry.type === 'MIMIC' ? '🎁 특수 적' : '👾 일반 적';
+  const embed = new EmbedBuilder()
+    .setColor(entry.type === 'BOSS' ? 0x9b111e : entry.type === 'MIMIC' ? 0xf1c40f : 0xe67e22)
+    .setTitle(`${typeLabel} · ${entry.name}`)
+    .setDescription(`서식: **${floorText}**${entry.type === 'MIMIC' ? '' : ` · ${entry.region.regionName}`}`)
+    .setImage(`attachment://${attachmentName}`)
+    .addFields(
+      {
+        name: '📊 기본 스탯 · 1인 파티 기준',
+        value: [
+          `레벨: **${entry.minFloor === entry.maxFloor ? entry.minFloor : `${entry.minFloor} ~ ${entry.maxFloor}`}**`,
+          `체력: **${formatCatalogStatRange(entry, 'health')}**`,
+          `공격력: **${formatCatalogStatRange(entry, 'attack')}**`,
+          `방어력: **${formatCatalogStatRange(entry, 'defense')}**`,
+          `마법 방어력: **${formatCatalogStatRange(entry, 'magicDefense')}**`,
+          `속도: **${formatCatalogStatRange(entry, 'speed')}**`,
+          '치명타 확률: **5%** · 치명타 피해: **150%**',
+        ].join('\n'),
+        inline: true,
+      },
+      {
+        name: `✨ 시전 스킬 (${skills.length}개)`,
+        value: skills.map((skill) => formatCatalogMonsterSkill(skill, totalWeight)).join('\n\n'),
+        inline: false,
+      },
+    )
+    .setFooter({ text: '실제 전투에서는 파티 인원에 따라 적의 체력·공격력·방어력·속도가 추가로 상승합니다.' });
+  return { embeds: [embed], files: [attachment] };
 }
 
 const rankingCategories = {
@@ -356,20 +553,57 @@ function createSkillInventoryEmbed(user, player) {
     .filter(Boolean)
     .map((skill) => `**${formatSkill(skill)}**`)
     .join('\n\n');
-  const equippedSkills = player.equippedSkills
+  const equippedSkillFields = player.equippedSkills
     .map((skillId, index) => {
       const skill = skillId ? getSkill(skillId) : null;
-      return `**${index + 1}번 슬롯:** ${skill ? `[${skill.rarity}] ${skill.name}` : '비어 있음'}`;
-    })
-    .join('\n');
+      return {
+        name: `스킬 ${index + 1}`,
+        value: skill ? `**[${skill.rarity}] ${skill.name}**` : '*비어 있음*',
+        inline: true,
+      };
+    });
   return new EmbedBuilder()
     .setColor(0x8e44ad)
-    .setTitle(`📚 ${user.displayName}님의 스킬 인벤토리`)
+    .setTitle(`📖 ${user.displayName}님의 스킬북`)
     .addFields(
-      { name: '장착 스킬', value: equippedSkills },
-      { name: '보유 스킬', value: ownedSkills || '보유한 스킬이 없습니다.' },
+      ...equippedSkillFields,
+      { name: '현재 보유 중인 스킬', value: ownedSkills || '보유한 스킬이 없습니다.', inline: false },
     )
-    .setFooter({ text: '/스킬장착으로 최대 3개까지 장착하고 /스킬해제로 슬롯을 비울 수 있습니다.' });
+    .setFooter({ text: '/스킬장착으로 최대 3개까지 장착하고 /스킬장착해제로 슬롯을 비울 수 있습니다.' });
+}
+
+function createSkillCatalogEmbed(user, player) {
+  const rarityOrder = { 일반: 1, 고급: 2, 레어: 3, 전설: 4 };
+  const ownedIds = new Set(player.skillInventory);
+  const skills = Object.values(skillCatalog).sort((left, right) =>
+    rarityOrder[left.rarity] - rarityOrder[right.rarity] || left.name.localeCompare(right.name, 'ko-KR'));
+  const formatLine = (skill, owned) => {
+    const effectByType = {
+      ATTACK: `마법공격력 × ${skill.magicAttackCoefficient} 피해`,
+      HEAL: `마법공격력 × ${skill.magicAttackCoefficient} 회복`,
+      ATTACK_BUFF: `공격·마공 +마법공격력 × ${skill.magicAttackCoefficient} · ${skill.duration}턴`,
+      DEFENSE_BUFF: `방어 +마법공격력 × ${skill.magicAttackCoefficient} · ${skill.duration}턴`,
+      TAUNT: `적 공격 대상을 시전자로 고정 · ${skill.duration} 적 턴`,
+    };
+    return `${owned ? '✅' : '🔒'} **[${skill.rarity}] ${skill.name}**\n└ 마나 ${skill.manaCost} · ${effectByType[skill.type] ?? '효과 정보 없음'}`;
+  };
+  const ownedSkills = skills.filter((skill) => ownedIds.has(skill.id));
+  const unownedSkills = skills.filter((skill) => !ownedIds.has(skill.id));
+  return new EmbedBuilder()
+    .setColor(0x6c5ce7)
+    .setTitle(`📚 ${user.displayName}님의 스킬도감`)
+    .setDescription(`전체 **${skills.length}개** · 보유 **${ownedSkills.length}개** · 미보유 **${unownedSkills.length}개**`)
+    .addFields(
+      {
+        name: '✅ 가지고 있는 스킬',
+        value: ownedSkills.map((skill) => formatLine(skill, true)).join('\n\n') || '보유한 스킬이 없습니다.',
+      },
+      {
+        name: '🔒 가지고 있지 않은 스킬',
+        value: unownedSkills.map((skill) => formatLine(skill, false)).join('\n\n') || '모든 스킬을 보유하고 있습니다!',
+      },
+    )
+    .setFooter({ text: '스킬을 획득하면 미보유 목록에서 보유 목록으로 자동 이동합니다.' });
 }
 
 function createShopPayload(user, player) {
@@ -439,7 +673,7 @@ function createShopPayload(user, player) {
 function createHelpEmbed() {
   return new EmbedBuilder()
     .setColor(0x5865f2)
-    .setTitle('📖 던전 게임 도움말')
+    .setTitle(`📖 ${BOT_DISPLAY_NAME} 도움말`)
     .setDescription('명령어는 `/`를 입력한 뒤 선택해서 사용할 수 있습니다.')
     .addFields(
       {
@@ -455,10 +689,6 @@ function createHelpEmbed() {
         value: [
           '`/장비인벤토리` — 보유 장비, 마석, 골드 확인',
           '`/아이템인벤토리` — 보유 포션 등 소비 아이템 확인',
-          '`/스킬인벤토리` — 보유 스킬과 최대 3개의 장착 슬롯 확인',
-          '`/스킬장착 스킬 슬롯` — 보유 스킬을 1~3번 슬롯에 장착',
-          '`/스킬해제 슬롯` — 지정 슬롯의 스킬 장착 해제(스킬은 인벤토리에 유지)',
-          '스킬 장착과 해제는 모험 중에는 변경할 수 없습니다.',
           '`/장비장착 아이템이름` — 플레이어 레벨 이하의 고유 레벨 장비 장착',
           '`/자동장착` — 내 레벨 이하 장비만 대상으로 고유 레벨 → 등급 순 자동 장착',
           '`/장비강화 아이템이름` — 마석을 사용하여 인벤토리 또는 장착 중인 장비 강화',
@@ -468,18 +698,33 @@ function createHelpEmbed() {
         ].join('\n'),
       },
       {
+        name: '✨ 스킬',
+        value: [
+          '`/스킬북` — 장착 슬롯 1~3과 현재 보유한 스킬 확인',
+          '`/스킬도감` — 전체 스킬을 보유·미보유 목록으로 나누어 확인',
+          '`/스킬장착 스킬 슬롯` — 보유 스킬을 지정한 1~3번 슬롯에 장착',
+          '`/스킬장착해제 슬롯` — 지정 슬롯을 비움(스킬은 스킬북에 유지)',
+          '`/도움말 아이템이름` — 선택한 스킬의 등급·마나·계수·효과 확인',
+          '스킬은 최대 3개까지 장착하며 모험 중에는 장착 상태를 변경할 수 없습니다.',
+          '전투에서 **스킬** 버튼을 누르면 현재 장착한 스킬만 표시되고, 시전 시 마나를 소비합니다.',
+        ].join('\n'),
+      },
+      {
         name: '🏪 상점',
         value: '`/상점` — 포션 구매·판매 또는 500골드로 마석 1개 교환',
       },
       {
         name: '⚔️ 던전',
         value: [
-          '`/모험시작` — 던전입장 음성 채널에서 모험 또는 공대 모집 시작 (공대장 체크포인트 사용 가능)',
+          '`/모험시작` — 던전입장 음성 채널에서 모험 또는 공대 모집 시작 (공대장이 해금된 체크포인트 선택)',
           '`/모험중지` — 전투 중에는 파티의 공격·피격이 모두 발생하기 전까지만 1인 종료/파티 중지 투표',
+          '`/적도감 적이름` — 적의 서식 층수와 스탯·시전 스킬 확인',
           '전투에서는 자신의 턴에 일반 공격, 장착 스킬, 아이템 사용 버튼을 선택합니다.',
-          '전투 파티 상세에는 체력·마나 바, 다음 5턴 순서, 파티 스탯이 표시됩니다.',
-          '모험 기록은 적·파티 스탯과 전투 과정을 자동 저장하며 최근 10개까지만 유지됩니다.',
+          '일반 몬스터와 미믹도 여러 기술을 사용하며, 보스는 단일·광역·치명타·상태이상·회복 기술을 사용합니다.',
+          '망자·혈맹·공허·마계·신살자·종말 계열 적은 실제로 준 피해의 일부를 흡수해 체력을 회복합니다.',
+          '전투 파티 상세에는 체력·마나 바, 다음 5턴 순서와 파티 스탯이 표시됩니다.',
           '관전자는 모험 채팅과 음성방을 볼 수 있지만 입장·채팅·명령·전투 조작은 할 수 없습니다.',
+          '5층 단위 보스를 처치하면 다음 구간 체크포인트가 생존 파티원 전원에게 자동 저장됩니다.',
         ].join('\n'),
       },
       {
@@ -498,16 +743,9 @@ function createHelpEmbed() {
           '`/가이드북` — 처음 시작하는 플레이어를 위한 단계별 안내',
           '`/도움말` — 현재 도움말 표시',
           '`/도움말 항목:확률` — 던전의 탐험·드랍·전투 확률 확인',
+          '`/도움말 항목:버프` — 버프 정보 확인',
+          '`/도움말 항목:디버프` — 디버프 정보 확인',
           '`/도움말 아이템이름` — 포션·보유 장비·스킬의 상세 정보 확인',
-        ].join('\n'),
-      },
-      {
-        name: '🛡️ 관리자',
-        value: [
-          '`/전체초기화 확인:전체초기화` — 모든 플레이어 데이터를 최초 상태로 초기화',
-          '`/give 플레이어 아이템 수량` — 디버그용 포션, 장비, 골드 또는 마석 지급',
-          '`/디버그 모험 다음층이동` — 현재 모험을 강제로 다음 층으로 이동',
-          '`/디버그 모험 킬` — 현재 전투 중인 몬스터를 즉시 처치하고 정상 보상 지급',
         ].join('\n'),
       },
     )
@@ -517,7 +755,7 @@ function createHelpEmbed() {
 function createGuidebookEmbed() {
   return new EmbedBuilder()
     .setColor(0x57f287)
-    .setTitle('📗 던전 게임 가이드북')
+    .setTitle(`📗 ${BOT_DISPLAY_NAME} 가이드북`)
     .setDescription('처음이라도 아래 순서대로 따라 하면 바로 모험을 시작할 수 있습니다. 모든 내용은 나에게만 보입니다.')
     .addFields(
       {
@@ -532,7 +770,8 @@ function createGuidebookEmbed() {
         value: [
           '`/장비장착 아이템이름`으로 장비를 착용합니다. 장비 고유 레벨이 내 레벨보다 높으면 착용할 수 없습니다.',
           '`/자동장착`은 착용 가능한 장비 중 좋은 장비를 자동으로 골라 줍니다.',
-          '`/스킬인벤토리` 확인 후 `/스킬장착 스킬 슬롯`으로 최대 3개 스킬을 준비하세요.',
+          '`/스킬도감`에서 전체 스킬을 보고, `/스킬북`에서 보유 스킬과 장착 상태를 확인하세요.',
+          '`/스킬장착 스킬 슬롯`으로 최대 3개 스킬을 준비하세요.',
         ].join('\n'),
       },
       {
@@ -540,14 +779,18 @@ function createGuidebookEmbed() {
         value: [
           '서버의 **던전입장** 음성 채널에 들어간 뒤 `/모험시작`을 사용하세요.',
           '혼자면 바로 시작하고, 함께 있는 사람이 있으면 동행 여부를 물어봅니다. 명령어를 입력한 사람이 공대장입니다.',
-          '모험이 시작되면 전용 음성·채팅방으로 이동합니다. 체크포인트가 있으면 그곳부터 시작할 수도 있습니다.',
+          '모험이 시작되면 전용 음성·채팅방으로 이동합니다. 공대장은 1층과 해금한 모든 체크포인트 중 시작 층을 선택할 수 있습니다.',
+          '5층 단위 보스를 처치하면 다음 층 체크포인트가 현재 파티원 전원에게 자동 저장됩니다.',
         ].join('\n'),
       },
       {
         name: '4️⃣ 전투 방법',
         value: [
           '전투 채팅에서 **내 턴**일 때만 내 행동 버튼이 보입니다. 일반 공격, 스킬 시전, 아이템 사용 중 하나를 선택하세요.',
+          '협동 전투에서는 마력 증폭·수호 결계로 원하는 파티원을 강화하고, 수호자의 도발로 적의 공격을 대신 받아낼 수 있습니다.',
+          '파티원 스탯과 적 상태에서 버프·디버프의 남은 턴을 확인하세요.',
           '턴 순서는 속도에 따라 결정되며, 다음 5턴의 순서도 전투 메시지에서 확인할 수 있습니다.',
+          '적의 둔화는 속도와 턴 순서를 낮추며, 저주·부식은 자신의 턴이 시작될 때 3턴 동안 지속 피해를 줍니다.',
           '체력이 0이 되거나 음성 채널을 나가면 모험이 끝납니다. 전투 중 얻은 미장착 장비는 사라질 수 있으니 주의하세요.',
         ].join('\n'),
       },
@@ -592,6 +835,7 @@ function createProbabilityHelpEmbed() {
       {
         name: '✨ 특수 이벤트',
         value: [
+          '특수 이벤트를 발견하면 신비한 문 앞에서 들어갈지 선택합니다.',
           '보물상자: **50%** · 함정: **30%** · 휴식: **20%**',
           '보물상자 발견 시: 일반 상자 **90%** / 미믹 전투 **10%**',
           '휴식은 잃은 체력의 50%를 회복합니다.',
@@ -622,12 +866,106 @@ function createProbabilityHelpEmbed() {
         value: [
           '피해량 변동: 계산된 피해의 **90~110%**',
           '치명타: 공격자 자신의 치명타 확률을 따름',
-          '다인 파티에서 적의 공격 대상: 살아 있는 파티원 중 균등 확률',
+          '다인 파티에서 적의 공격 대상: 살아 있는 파티원 중 균등 확률 (도발 중에는 시전자로 고정)',
+          '일반 적 스킬: 기본기 **65%** / 강습 **20%** / 상태이상 공격 **15%**',
+          '흡혈 일반 적: 기본기 **50%** / 강습 **20%** / 상태이상 **15%** / 흡혈 **15%**',
+          '미믹 스킬: 탐욕의 이빨 **70%** / 황금 포식 **30%**',
+          '보스(체력 감소 후): 광역기 **30%** / 처형 **30%** / 재앙 **15%** / 상태이상 **15%** / 회복 **10%**',
+          '흡혈 보스(체력 감소 후): 광역기 **25%** / 처형 **25%** / 재앙 **15%** / 상태이상 **15%** / 회복 **10%** / 흡혈 **10%**',
+          '보스가 최대 체력이면 회복 기술을 제외하고 나머지 가중치로 다시 계산합니다.',
+          '상태이상 공격 선택 시 둔화 또는 지속 피해가 **100% 적용**되며 3번의 자기 턴 동안 유지됩니다.',
+          '흡혈 대상: 11~20층, 71~75층, 86~100층 계열 적 · 일반 적은 실제 피해의 **35%**, 보스는 **40%** 회복',
           '명중·회피 확률은 현재 적용하지 않습니다.',
         ].join('\n'),
       },
     )
     .setFooter({ text: '이 확률 정보는 명령어를 실행한 사용자에게만 표시됩니다.' });
+}
+
+function createBuffHelpEmbed() {
+  return new EmbedBuilder()
+    .setColor(0x57f287)
+    .setTitle('⬆️ 버프 도움말')
+    .setDescription('현재 플레이어가 사용할 수 있는 강화 효과입니다. 버프 수치는 시전 순간의 마법 공격력을 기준으로 계산됩니다.')
+    .addFields(
+      {
+        name: '✨ 마력 증폭 · 공격 버프',
+        value: [
+          '대상: 자신 또는 파티원 1명',
+          '효과: 시전자의 마법 공격력 × **0.35**만큼 대상의 공격력과 마법 공격력 증가',
+          '지속: 대상 플레이어의 행동 **3회**',
+        ].join('\n'),
+      },
+      {
+        name: '🛡️ 수호 결계 · 방어 버프',
+        value: [
+          '대상: 자신 또는 파티원 1명',
+          '효과: 시전자의 마법 공격력 × **0.45**만큼 대상의 방어력 증가',
+          '지속: 대상 플레이어의 행동 **3회**',
+        ].join('\n'),
+      },
+      {
+        name: '📌 적용 규칙',
+        value: [
+          '증가량은 퍼센트가 아닌 스탯 **합연산**이며 소수 첫째 자리까지 표시됩니다.',
+          '같은 종류의 버프를 다시 사용하면 수치와 지속시간이 새로운 효과로 갱신됩니다.',
+          '자신에게 사용한 경우 시전한 턴은 지속시간에서 차감하지 않습니다.',
+          '현재 버프와 남은 턴은 전투 상태 및 `/파티원스텟`에서 확인할 수 있습니다.',
+          '현재 적이 사용하는 별도의 버프는 없으며, 추가될 경우 적 상태에 표시됩니다.',
+        ].join('\n'),
+      },
+    )
+    .setFooter({ text: '/도움말 항목:디버프에서 약화 효과도 확인할 수 있습니다.' });
+}
+
+function createDebuffHelpEmbed() {
+  return new EmbedBuilder()
+    .setColor(0xed4245)
+    .setTitle('⬇️ 디버프 도움말')
+    .setDescription('플레이어나 적에게 적용되는 약화 효과입니다. 남은 턴은 효과가 적용되는 대상의 행동을 기준으로 계산됩니다.')
+    .addFields(
+      {
+        name: '🛡️ 수호자의 도발 · 적 디버프',
+        value: [
+          '대상: 적 1명',
+          '효과: 적의 공격 대상을 도발 시전자로 고정',
+          '지속: 적의 행동 **3회**',
+          '도발 중에는 적이 광역 공격과 회복기를 사용하지 않고 단일 공격만 사용합니다.',
+          '시전자가 쓰러지거나 파티에서 이탈하면 즉시 해제됩니다.',
+        ].join('\n'),
+      },
+      {
+        name: '🐌 둔화 · 플레이어 디버프',
+        value: [
+          '효과: 플레이어 속도 **5% 감소**',
+          '지속: 해당 플레이어의 턴 **3회**',
+          '속도가 바뀌는 즉시 행동 게이지와 다음 턴 순서가 다시 계산됩니다.',
+        ].join('\n'),
+      },
+      {
+        name: '☠️ 부식 · 플레이어 지속 피해',
+        value: [
+          '효과: 자신의 턴 시작마다 일반 몬스터 공격력 × **0.20** 피해',
+          '지속: 해당 플레이어의 턴 **3회**',
+        ].join('\n'),
+      },
+      {
+        name: '💀 저주 · 플레이어 지속 피해',
+        value: [
+          '효과: 자신의 턴 시작마다 보스 공격력 × **0.30** 피해',
+          '지속: 해당 플레이어의 턴 **3회**',
+        ].join('\n'),
+      },
+      {
+        name: '📌 적용 규칙',
+        value: [
+          '같은 종류의 디버프가 다시 걸리면 효과와 지속시간이 갱신됩니다.',
+          '플레이어 디버프는 파티 상태에, 도발은 적 상태에 표시됩니다.',
+          '현재 디버프와 남은 턴은 전투 상태 및 `/파티원스텟`에서 확인할 수 있습니다.',
+        ].join('\n'),
+      },
+    )
+    .setFooter({ text: '/도움말 항목:버프에서 강화 효과도 확인할 수 있습니다.' });
 }
 
 async function createItemHelpEmbed(userId, itemReference) {
@@ -704,23 +1042,46 @@ async function createPartyStatEmbeds(adventure) {
   const partyFields = await Promise.all(
     adventure.memberIds.map(async (userId) => {
       const player = await playerStore.getOrCreate(userId);
-      const stats = battle?.playerStats[userId] ?? calculateTotalStats(player);
+      const baseStats = battle?.playerStats[userId] ?? calculateTotalStats(player);
+      const stats = battle?.playerStats[userId]
+        ? adventureSystem.getEffectivePlayerStats(battle, userId)
+        : baseStats;
       const health = adventure.healthByUser[userId];
       const maxHealth = adventure.maxHealthByUser[userId];
-      const mana = battle?.manaByUser[userId] ?? stats.mana;
+      const mana = battle?.manaByUser[userId] ?? adventure.manaByUser?.[userId] ?? stats.mana;
+      const currentSpeed = battle?.actors.find((actor) => actor.type === 'PLAYER' && actor.userId === userId)?.speed
+        ?? stats.speed;
+      const statusEffects = battle?.statusEffectsByUser?.[userId] ?? [];
+      const buffs = battle ? adventureSystem.getPlayerBuffs(battle, userId) : [];
       return {
         name: `<@${userId}> · Lv.${stats.playerLevel}`,
         value: [
           `❤️ 체력 ${createPartyResourceBar(health, maxHealth, '🟥')} ${health}/${maxHealth}`,
           `🔷 마나 ${createPartyResourceBar(mana, stats.mana, '🟦')} ${mana}/${stats.mana}`,
           `🛡️ 방어력 ${stats.defense}\t⚔️ 공격력 ${stats.attack}\t✨ 마법 공격력 ${stats.magicAttack}`,
-          `💨 속도 ${stats.speed}\t🎯 치명타 ${stats.criticalChance}%\t💥 치명타 피해 ${stats.criticalDamage}%`,
+          `💨 속도 ${currentSpeed}${currentSpeed !== baseStats.speed ? ` (기본 ${baseStats.speed})` : ''}\t🎯 치명타 ${stats.criticalChance}%\t💥 치명타 피해 ${stats.criticalDamage}%`,
+          `⬆️ 버프: ${buffs.length > 0 ? buffs.map((buff) => adventureSystem.formatPlayerBuff(buff)).join(', ') : '없음'}`,
+          `⬇️ 디버프: ${statusEffects.length > 0 ? statusEffects.map((effect) => `${effect.name}(${effect.remainingTurns}턴)`).join(', ') : '없음'}`,
         ].join('\n'),
         inline: false,
       };
     }),
   );
   const embeds = [];
+  if (battle) {
+    const monsterBuffs = battle.monsterBuffs ?? [];
+    const monsterDebuffs = battle.monsterDebuffs ?? [];
+    embeds.push(
+      new EmbedBuilder()
+        .setColor(0xe74c3c)
+        .setTitle(`👹 Lv.${battle.monster.level} ${battle.monster.name} 상태`)
+        .setDescription([
+          `❤️ 체력 ${createPartyResourceBar(battle.monster.health, battle.monster.maxHealth, '🟥')} ${battle.monster.health}/${battle.monster.maxHealth}`,
+          `⬆️ 버프: ${monsterBuffs.length > 0 ? monsterBuffs.map((buff) => `${buff.name}(${buff.remainingTurns}턴)`).join(', ') : '없음'}`,
+          `⬇️ 디버프: ${monsterDebuffs.length > 0 ? monsterDebuffs.map((debuff) => adventureSystem.formatMonsterDebuff(debuff)).join(', ') : '없음'}`,
+        ].join('\n')),
+    );
+  }
   for (let index = 0; index < partyFields.length; index += 25) {
     const page = Math.floor(index / 25) + 1;
     const pageCount = Math.ceil(partyFields.length / 25);
@@ -734,7 +1095,15 @@ async function createPartyStatEmbeds(adventure) {
   return embeds;
 }
 
-client.once(Events.ClientReady, (readyClient) => {
+client.once(Events.ClientReady, async (readyClient) => {
+  if (readyClient.user.username !== BOT_DISPLAY_NAME) {
+    try {
+      await readyClient.user.setUsername(BOT_DISPLAY_NAME);
+      console.log(`봇 이름을 ${BOT_DISPLAY_NAME}(으)로 변경했습니다.`);
+    } catch (error) {
+      console.error(`봇 이름을 ${BOT_DISPLAY_NAME}(으)로 변경하지 못했습니다.`, error);
+    }
+  }
   console.log(`${readyClient.user.tag}(으)로 로그인했습니다.`);
 });
 
@@ -805,7 +1174,24 @@ client.on(Events.InteractionCreate, async (interaction) => {
         return;
       }
 
-      if (interaction.commandName === '스킬해제') {
+      if (interaction.commandName === '적도감') {
+        const focusedValue = interaction.options.getFocused().toLocaleLowerCase('ko-KR');
+        const choices = monsterCatalogEntries
+          .filter((entry) =>
+            `${entry.name} ${entry.region.regionName} ${entry.minFloor} ${entry.maxFloor}`
+              .toLocaleLowerCase('ko-KR')
+              .includes(focusedValue),
+          )
+          .slice(0, 25)
+          .map((entry) => ({
+            name: `${entry.type === 'BOSS' ? '[보스]' : entry.type === 'MIMIC' ? '[특수]' : '[일반]'} ${entry.name} · ${entry.type === 'MIMIC' ? '특수 사건' : `${entry.minFloor}~${entry.maxFloor}층`}`.slice(0, 100),
+            value: entry.id,
+          }));
+        await interaction.respond(choices);
+        return;
+      }
+
+      if (interaction.commandName === '스킬장착해제') {
         if (adventureManager.getByUser(interaction.user.id)) {
           await interaction.reply({
             content: '모험 중에는 스킬 장착을 해제할 수 없습니다.',
@@ -970,6 +1356,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
           const potion = potionCatalog[first];
           await playerStore.addItem(target.id, potion.id, quantity);
           itemText = `[${potion.rarity}] ${potion.name} ${quantity.toLocaleString('ko-KR')}개`;
+        } else if (type === 'skill') {
+          const result = await playerStore.learnSkill(target.id, first);
+          itemText = `[${result.skill.rarity}] ${result.skill.name}`;
         } else if (type === 'currency') {
           await playerStore.addDebugResources(target.id, { gold: quantity });
           itemText = `골드 ${quantity.toLocaleString('ko-KR')}`;
@@ -1120,12 +1509,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
           });
           return;
         }
+        const helpTopic = interaction.options.getString('항목');
+        const helpEmbedByTopic = {
+          확률: createProbabilityHelpEmbed,
+          버프: createBuffHelpEmbed,
+          디버프: createDebuffHelpEmbed,
+        };
+        const createSelectedHelpEmbed = helpEmbedByTopic[helpTopic] ?? createHelpEmbed;
         await interaction.reply({
-          embeds: [
-            interaction.options.getString('항목') === '확률'
-              ? createProbabilityHelpEmbed()
-              : createHelpEmbed(),
-          ],
+          embeds: [createSelectedHelpEmbed()],
           flags: MessageFlags.Ephemeral,
         });
         return;
@@ -1181,6 +1573,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       if (interaction.commandName === '정보') {
         const target = interaction.options.getUser('플레이어', true);
+        if (isDicoBotEasterEggTarget(interaction, target)) {
+          await interaction.reply({ embeds: [createDicoBotEasterEggEmbed(target)] });
+          return;
+        }
         if (target.bot) {
           await interaction.reply({
             content: '봇 계정의 던전 정보는 확인할 수 없습니다.',
@@ -1213,10 +1609,45 @@ client.on(Events.InteractionCreate, async (interaction) => {
         return;
       }
 
-      if (interaction.commandName === '스킬인벤토리') {
+      if (interaction.commandName === '스킬북') {
         const player = await playerStore.getOrCreate(interaction.user.id);
         await interaction.reply({
           embeds: [createSkillInventoryEmbed(interaction.user, player)],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '스킬도감') {
+        const player = await playerStore.getOrCreate(interaction.user.id);
+        await interaction.reply({
+          embeds: [createSkillCatalogEmbed(interaction.user, player)],
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+
+      if (interaction.commandName === '적도감') {
+        const monsterReference = interaction.options.getString('적이름');
+        if (!monsterReference) {
+          await interaction.reply({
+            embeds: [createMonsterCatalogListEmbed()],
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        const entry = monsterCatalogEntries.find(
+          (candidate) => candidate.id === monsterReference || candidate.name === monsterReference,
+        );
+        if (!entry) {
+          await interaction.reply({
+            content: '해당 적을 찾지 못했습니다. 자동완성 목록에서 선택해 주세요.',
+            flags: MessageFlags.Ephemeral,
+          });
+          return;
+        }
+        await interaction.reply({
+          ...createMonsterCatalogDetailPayload(entry),
           flags: MessageFlags.Ephemeral,
         });
         return;
@@ -1752,6 +2183,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     if (interaction.isButton() && interaction.customId.startsWith('skill:')) {
       await adventureSystem.handleSkillButton(interaction);
+      return;
+    }
+
+    if (interaction.isStringSelectMenu() && interaction.customId.startsWith('checkpoint_select:')) {
+      await adventureSystem.handleCheckpointSelect(interaction);
       return;
     }
 

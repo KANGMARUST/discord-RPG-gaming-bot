@@ -11,7 +11,7 @@ import {
 } from './equipment.js';
 import { getPotion, getPotionDescription } from './items.js';
 import { grantExperienceToPlayer } from './leveling.js';
-import { getSkill, MAX_EQUIPPED_SKILLS } from './skills.js';
+import { getSkill, MAX_EQUIPPED_SKILLS, STARTER_SKILL_IDS } from './skills.js';
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const dataDirectory = path.join(currentDirectory, '..', 'data');
@@ -62,8 +62,8 @@ function createPlayer(userId) {
     itemInventory: [],
     gold: 0,
     experience: 0,
-    skillInventory: ['basic_heal'],
-    equippedSkills: ['basic_heal', null, null],
+    skillInventory: [...STARTER_SKILL_IDS],
+    equippedSkills: ['magic_bolt', 'basic_heal', null],
     balanceVersion: 1,
     checkpointFloor: 1,
     maxReachedFloor: 1,
@@ -111,6 +111,9 @@ class PlayerStore {
     player.gold ??= 0;
     player.experience ??= 0;
     player.skillInventory ??= [...defaults.skillInventory];
+    for (const skillId of STARTER_SKILL_IDS) {
+      if (!player.skillInventory.includes(skillId)) player.skillInventory.push(skillId);
+    }
     player.equippedSkills ??= [...defaults.equippedSkills];
     player.equippedSkills = Array.from(
       { length: MAX_EQUIPPED_SKILLS },
@@ -409,6 +412,15 @@ class PlayerStore {
     return player;
   }
 
+  async removeGold(userId, amount) {
+    const player = await this.getOrCreate(userId);
+    const requested = Math.max(0, Math.floor(amount));
+    const removed = Math.min(player.gold, requested);
+    player.gold -= removed;
+    await this.save();
+    return { removed, gold: player.gold };
+  }
+
   async removeInventoryEquipmentByIds(userId, equipmentIds) {
     const player = await this.getOrCreate(userId);
     const idSet = new Set(equipmentIds);
@@ -533,6 +545,26 @@ class PlayerStore {
       checkpointFloor: player.checkpointFloor,
       updated: player.checkpointFloor > previousFloor,
     };
+  }
+
+  async unlockCheckpointForUsers(userIds, floor) {
+    await this.ready;
+    const normalizedFloor = Math.max(1, Math.floor(floor));
+    const results = [];
+    for (const userId of [...new Set(userIds)]) {
+      if (!this.players[userId]) this.players[userId] = createPlayer(userId);
+      const player = this.migratePlayer(this.players[userId]);
+      const previousFloor = player.checkpointFloor;
+      player.checkpointFloor = Math.max(player.checkpointFloor, normalizedFloor);
+      results.push({
+        userId,
+        previousFloor,
+        checkpointFloor: player.checkpointFloor,
+        updated: player.checkpointFloor > previousFloor,
+      });
+    }
+    await this.save();
+    return results;
   }
 
   async recordMaxReachedFloor(userIds, floor) {

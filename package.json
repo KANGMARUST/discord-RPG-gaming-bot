@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Discord에서 즐기는 버튼 기반 게임 봇",
+  "description": "Discord에서 즐기는 라파엘(Rafael) 던전 RPG 봇",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

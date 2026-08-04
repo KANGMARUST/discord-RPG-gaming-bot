@@ -250,21 +250,23 @@ class AdventureManager {
     if (!adventure) return false;
 
     const wasLeader = adventure.leaderId === userId;
-    const lostEquipment = reason === 'VOICE_CHANNEL_LEFT' && this.leavePenaltyHandler
+    const lostRewards = reason === 'VOICE_CHANNEL_LEFT' && this.leavePenaltyHandler
       ? await this.leavePenaltyHandler(adventure, userId)
-      : [];
+      : { equipment: [], gold: 0 };
     await dungeonLogger.append(adventure.id, 'MEMBER_REMOVED', {
       floor: adventure.floor,
       userId,
       reason,
       health: adventure.healthByUser[userId] ?? 0,
       wasLeader,
-      lostEquipment: lostEquipment.map((item) => item.id),
+      lostEquipment: lostRewards.equipment.map((item) => item.id),
+      lostGold: lostRewards.gold,
     });
     this.userAdventures.delete(userId);
     adventure.memberIds = adventure.memberIds.filter((id) => id !== userId);
     delete adventure.healthByUser[userId];
     delete adventure.maxHealthByUser[userId];
+    delete adventure.manaByUser?.[userId];
 
     if (adventure.memberIds.length === 0) return this.end(client, adventure.id, reason);
     if (wasLeader) adventure.leaderId = adventure.memberIds[0];
@@ -283,7 +285,7 @@ class AdventureManager {
     if (textChannel) {
       const leaderMessage = wasLeader ? ` 새로운 공대장은 <@${adventure.leaderId}>님입니다.` : '';
       const penaltyMessage = reason === 'VOICE_CHANNEL_LEFT'
-        ? ` 사망과 동일한 페널티로 이번 모험에서 획득한 장비 **${lostEquipment.length}개**를 잃었습니다.`
+        ? ` 사망과 동일한 페널티로 이번 모험 보상 장비 **${lostRewards.equipment.length}개**, 골드 **${lostRewards.gold}G**를 잃었습니다.`
         : '';
       await textChannel
         .send(`🚪 <@${userId}>님이 모험에서 이탈했습니다.${penaltyMessage}${leaderMessage}`)

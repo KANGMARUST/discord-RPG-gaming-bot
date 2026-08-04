@@ -8,6 +8,7 @@ import {
   ButtonStyle,
   EmbedBuilder,
   MessageFlags,
+  StringSelectMenuBuilder,
 } from 'discord.js';
 import {
   calculateTotalStats,
@@ -20,10 +21,11 @@ import {
 } from './equipment.js';
 import { getPotion, rollPotionDrop } from './items.js';
 import { LEVEL_STAT_GROWTH } from './leveling.js';
-import { calculateSkillHealing, getSkill } from './skills.js';
-import { getDungeonRegion } from './monster-catalog.js';
+import { calculateSkillAttackPower, calculateSkillHealing, getSkill } from './skills.js';
+import { createMonsterSkillSet, getDungeonRegion } from './monster-catalog.js';
 import { dungeonLogger } from './dungeon-logger.js';
 import { roundHealth } from './adventure-manager.js';
+import { getCheckpointFloorAfterBoss, getUnlockedCheckpointFloors } from './checkpoints.js';
 
 const TURN_SEPARATOR = '# ============================================================';
 const BATTLE_ACTION_DELAY_MS = 1_000;
@@ -103,7 +105,7 @@ class AdventureSystem {
     return embed;
   }
 
-  createMonsterTurnVisual(monster) {
+  createMonsterTurnVisual(monster, skill) {
     const imageFile = monster.imageFile
       ?? MONSTER_IMAGE_FILES[monster.name]
       ?? MONSTER_IMAGE_FILES['던전 수호자'];
@@ -114,7 +116,7 @@ class AdventureSystem {
     const embed = new EmbedBuilder()
       .setColor(0xe74c3c)
       .setTitle(`🔴 Lv.${monster.level} ${monster.name}의 턴`)
-      .setDescription(`「${monster.skillName}」을(를) 시전합니다.`)
+      .setDescription(`「${skill.name}」을(를) 시전합니다.`)
       .setThumbnail(`attachment://${attachmentName}`);
     return { embed, attachment };
   }
@@ -166,21 +168,30 @@ class AdventureSystem {
     adventure.acquiredEquipmentIdsByUser ??= Object.fromEntries(
       adventure.memberIds.map((userId) => [userId, []]),
     );
+    adventure.acquiredGoldByUser ??= Object.fromEntries(
+      adventure.memberIds.map((userId) => [userId, 0]),
+    );
     const players = {};
+    adventure.manaByUser ??= {};
     for (const userId of adventure.memberIds) {
       const player = await this.playerStore.getOrCreate(userId);
+      const totalStats = calculateTotalStats(player);
+      const savedMana = adventure.manaByUser[userId];
+      adventure.manaByUser[userId] = roundMana(
+        Math.min(totalStats.mana, Math.max(0, savedMana ?? totalStats.mana)),
+      );
       players[userId] = {
         playerLevel: player.stats.playerLevel,
         experience: player.experience,
-        totalStats: calculateTotalStats(player),
+        totalStats,
         equipment: structuredClone(player.equipment),
         equippedSkills: [...player.equippedSkills],
       };
     }
     await dungeonLogger.start(adventure, players);
     const leader = await this.playerStore.getOrCreate(adventure.leaderId);
-    if (leader.checkpointFloor > 1) {
-      adventure.pendingCheckpointFloor = leader.checkpointFloor;
+    adventure.availableCheckpointFloors = getUnlockedCheckpointFloors(leader.checkpointFloor);
+    if (adventure.availableCheckpointFloors.length > 1) {
       await this.askToUseCheckpoint(adventure);
       return;
     }
@@ -194,13 +205,24 @@ class AdventureSystem {
   async askToUseCheckpoint(adventure) {
     const channel = this.getTextChannel(adventure);
     if (!channel) return;
-    const floor = adventure.pendingCheckpointFloor;
-    const row = this.createButtons(adventure, [
-      { action: 'checkpoint_yes', label: `${floor}층에서 시작`, style: ButtonStyle.Success },
-      { action: 'checkpoint_no', label: '1층에서 시작', style: ButtonStyle.Secondary },
-    ]);
+    const floors = adventure.availableCheckpointFloors ?? [1];
+    adventure.currentActionToken = randomUUID();
+    const select = new StringSelectMenuBuilder()
+      .setCustomId(`checkpoint_select:${adventure.id}:${adventure.currentActionToken}`)
+      .setPlaceholder('시작할 체크포인트를 선택하세요')
+      .addOptions(floors.map((floor) => ({
+        label: `${floor}층에서 시작`,
+        value: String(floor),
+        description: floor === 1 ? '처음부터 모험을 시작합니다.' : `${floor - 1}층 보스 처치 체크포인트`,
+        emoji: floor === 1 ? '🏰' : '🚩',
+      })));
+    const row = new ActionRowBuilder().addComponents(select);
     await channel.send({
-      content: `🚩 공대장에게 **${floor}층 체크포인트**가 있습니다. 파티 전체가 체크포인트로 이동할까요?`,
+      content: [
+        `# 🚩 공대장 <@${adventure.leaderId}>님의 체크포인트`,
+        `해금된 시작 층: **${floors.map((floor) => `${floor}층`).join(', ')}**`,
+        '공대장이 이번 모험을 시작할 층을 선택해 주세요.',
+      ].join('\n'),
       components: [row],
     });
   }
@@ -263,7 +285,7 @@ class AdventureSystem {
       return;
     }
     if (event === 'SPECIAL') {
-      await this.resolveSpecialEvent(adventure);
+      await this.showSpecialDoor(adventure);
       return;
     }
     await this.showEnemyEncounter(adventure, false);
@@ -306,6 +328,7 @@ class AdventureSystem {
     const maxHealth = Math.round(
       (30 + level * 15) * rarityMultiplier * partyHealthMultiplier,
     );
+    const skills = createMonsterSkillSet(region, { isBoss, isMimic });
     return {
       level,
       isMimic,
@@ -322,7 +345,8 @@ class AdventureSystem {
       criticalChance: 5,
       criticalDamage: 150,
       goldReward: Math.round((15 + level * 10) * (isBoss ? 3 : rarityMultiplier)),
-      skillName: isMimic ? '탐욕의 이빨' : isBoss ? region.boss.skillName : region.normal.skillName,
+      skills,
+      skillName: skills[0].name,
     };
   }
 
@@ -352,11 +376,14 @@ class AdventureSystem {
 
   async startBattle(adventure, isMimic = false, isBoss = false) {
     const playerStats = {};
-    const manaByUser = {};
+    adventure.manaByUser ??= {};
+    const manaByUser = adventure.manaByUser;
     for (const userId of adventure.memberIds) {
       const player = await this.playerStore.getOrCreate(userId);
       playerStats[userId] = calculateTotalStats(player);
-      manaByUser[userId] = playerStats[userId].mana;
+      manaByUser[userId] = roundMana(
+        Math.min(playerStats[userId].mana, Math.max(0, manaByUser[userId] ?? playerStats[userId].mana)),
+      );
     }
 
     const monster = this.createMonster(adventure.floor, isMimic, adventure.memberIds.length, isBoss);
@@ -365,14 +392,18 @@ class AdventureSystem {
         key: `PLAYER:${userId}`,
         type: 'PLAYER',
         userId,
+        baseSpeed: playerStats[userId].speed,
         speed: playerStats[userId].speed,
         nextActionAt: this.getBaseActionValue(playerStats[userId].speed),
+        turnCount: 0,
       })),
       {
         key: 'ENEMY',
         type: 'ENEMY',
+        baseSpeed: monster.speed,
         speed: monster.speed,
         nextActionAt: this.getBaseActionValue(monster.speed),
+        turnCount: 0,
       },
     ];
 
@@ -381,6 +412,10 @@ class AdventureSystem {
       monster,
       playerStats,
       manaByUser,
+      statusEffectsByUser: Object.fromEntries(adventure.memberIds.map((userId) => [userId, []])),
+      playerBuffsByUser: Object.fromEntries(adventure.memberIds.map((userId) => [userId, []])),
+      monsterBuffs: [],
+      monsterDebuffs: [],
       actors,
       currentTime: 0,
       actionCount: 0,
@@ -423,7 +458,9 @@ class AdventureSystem {
   }
 
   completeActorTurn(adventure, battle, actor) {
+    if (actor.type === 'PLAYER') this.advancePlayerBuffDurations(battle, actor.userId);
     actor.nextActionAt += this.getBaseActionValue(actor.speed);
+    actor.turnCount = (actor.turnCount ?? 0) + 1;
     battle.actionCount += 1;
     return this.getCurrentActor(adventure, battle);
   }
@@ -451,70 +488,366 @@ class AdventureSystem {
     return preview;
   }
 
+  selectMonsterSkill(monster, random = Math.random, { forceSingleTarget = false } = {}) {
+    const availableSkills = monster.skills.filter((skill) => {
+      if (skill.type === 'SELF_HEAL' && monster.health >= monster.maxHealth) return false;
+      if (forceSingleTarget && !['SINGLE_ATTACK', 'DRAIN_ATTACK'].includes(skill.type)) return false;
+      return true;
+    });
+    const skills = availableSkills.length > 0 ? availableSkills : monster.skills;
+    const totalWeight = skills.reduce((total, skill) => total + (skill.weight ?? 1), 0);
+    let roll = random() * totalWeight;
+    for (const skill of skills) {
+      roll -= skill.weight ?? 1;
+      if (roll < 0) return skill;
+    }
+    return skills.at(-1);
+  }
+
+  getPlayerStatusEffects(battle, userId) {
+    battle.statusEffectsByUser ??= {};
+    battle.statusEffectsByUser[userId] ??= [];
+    return battle.statusEffectsByUser[userId];
+  }
+
+  getPlayerBuffs(battle, userId) {
+    battle.playerBuffsByUser ??= {};
+    battle.playerBuffsByUser[userId] ??= [];
+    return battle.playerBuffsByUser[userId];
+  }
+
+  getEffectivePlayerStats(battle, userId) {
+    const baseStats = battle.playerStats[userId];
+    if (!baseStats) return null;
+    const stats = { ...baseStats };
+    for (const buff of this.getPlayerBuffs(battle, userId)) {
+      if (buff.type === 'ATTACK_BUFF') {
+        stats.attack += buff.amount;
+        stats.magicAttack += buff.amount;
+      } else if (buff.type === 'DEFENSE_BUFF') {
+        stats.defense += buff.amount;
+      }
+    }
+    stats.attack = roundHealth(stats.attack);
+    stats.magicAttack = roundHealth(stats.magicAttack);
+    stats.defense = roundHealth(stats.defense);
+    return stats;
+  }
+
+  advancePlayerBuffDurations(battle, userId) {
+    const buffs = this.getPlayerBuffs(battle, userId);
+    for (const buff of buffs) {
+      if (buff.skipNextDecrement) buff.skipNextDecrement = false;
+      else buff.remainingTurns -= 1;
+    }
+    battle.playerBuffsByUser[userId] = buffs.filter((buff) => buff.remainingTurns > 0);
+  }
+
+  getActiveTaunt(adventure, battle) {
+    battle.monsterDebuffs ??= [];
+    battle.monsterDebuffs = battle.monsterDebuffs.filter((debuff) =>
+      debuff.remainingTurns > 0 &&
+      (debuff.type !== 'TAUNT' || (
+        adventure.memberIds.includes(debuff.sourceUserId) &&
+        (adventure.healthByUser[debuff.sourceUserId] ?? 0) > 0
+      )),
+    );
+    return battle.monsterDebuffs.find((debuff) => debuff.type === 'TAUNT') ?? null;
+  }
+
+  advanceMonsterDebuffDurations(adventure, battle) {
+    for (const debuff of battle.monsterDebuffs ?? []) debuff.remainingTurns -= 1;
+    return this.getActiveTaunt(adventure, battle);
+  }
+
+  formatPlayerBuff(buff) {
+    const amount = Number(buff.amount ?? 0).toLocaleString('ko-KR');
+    if (buff.type === 'ATTACK_BUFF') return `${buff.name}(공격·마공 +${amount}, ${buff.remainingTurns}턴)`;
+    return `${buff.name}(방어 +${amount}, ${buff.remainingTurns}턴)`;
+  }
+
+  formatMonsterDebuff(debuff) {
+    if (debuff.type === 'TAUNT') {
+      return `${debuff.name} → <@${debuff.sourceUserId}> (${debuff.remainingTurns}턴)`;
+    }
+    return `${debuff.name}(${debuff.remainingTurns}턴)`;
+  }
+
+  updatePlayerSpeedFromStatuses(battle, userId) {
+    const actor = battle.actors.find((candidate) => candidate.type === 'PLAYER' && candidate.userId === userId);
+    if (!actor) return;
+    const baseSpeed = actor.baseSpeed ?? battle.playerStats[userId]?.speed ?? actor.speed;
+    const reductionPercent = this.getPlayerStatusEffects(battle, userId)
+      .filter((effect) => effect.type === 'SLOW')
+      .reduce((total, effect) => total + effect.speedReductionPercent, 0);
+    const newSpeed = Math.max(1, Math.round(baseSpeed * (1 - Math.min(50, reductionPercent) / 100) * 10) / 10);
+    const oldSpeed = Math.max(1, actor.speed);
+    if (newSpeed !== oldSpeed && actor.nextActionAt > battle.currentTime) {
+      const remainingActionValue = actor.nextActionAt - battle.currentTime;
+      actor.nextActionAt = battle.currentTime + remainingActionValue * (oldSpeed / newSpeed);
+    }
+    actor.speed = newSpeed;
+  }
+
+  applyMonsterStatusEffect(battle, userId, skill) {
+    const template = skill.statusEffect;
+    if (!template) return null;
+    const effects = this.getPlayerStatusEffects(battle, userId);
+    const status = {
+      ...template,
+      sourceSkillId: skill.id,
+      sourceSkillName: skill.name,
+      remainingTurns: template.duration,
+    };
+    if (status.type === 'DOT') {
+      status.damage = Math.max(1, Math.round(battle.monster.attack * status.damageCoefficient));
+    }
+    const existing = effects.find((effect) => effect.type === status.type);
+    if (existing) Object.assign(existing, status);
+    else effects.push(status);
+    if (status.type === 'SLOW') this.updatePlayerSpeedFromStatuses(battle, userId);
+    return existing ?? status;
+  }
+
+  formatMonsterStatusEffect(status) {
+    if (status.type === 'SLOW') {
+      return `🐌 **${status.name}**: 속도가 **${status.speedReductionPercent}% 감소**합니다. (${status.remainingTurns}턴 남음)`;
+    }
+    return `☠️ **${status.name}**: 자신의 턴이 시작될 때 **${status.damage} 피해**를 받습니다. (${status.remainingTurns}턴 남음)`;
+  }
+
+  async processPlayerTurnStart(adventure, battle, actor) {
+    const turnKey = `${actor.key}:${actor.turnCount ?? 0}`;
+    if (battle.processedPlayerTurnKey === turnKey) return true;
+    battle.processedPlayerTurnKey = turnKey;
+    const effects = this.getPlayerStatusEffects(battle, actor.userId);
+    if (effects.length === 0) return true;
+
+    for (const effect of effects.filter((candidate) => candidate.type === 'DOT')) {
+      const healthBefore = adventure.healthByUser[actor.userId];
+      const healthAfter = roundHealth(healthBefore - effect.damage);
+      const remainingTurnsAfter = Math.max(0, effect.remainingTurns - 1);
+      const lostRewards = healthAfter === 0
+        ? await this.removeAdventureDeathRewards(adventure, actor.userId)
+        : { equipment: [], gold: 0 };
+      await dungeonLogger.append(adventure.id, 'STATUS_TICK', {
+        floor: adventure.floor,
+        turn: battle.actionCount + 1,
+        userId: actor.userId,
+        statusType: effect.type,
+        statusName: effect.name,
+        sourceSkillId: effect.sourceSkillId,
+        damage: effect.damage,
+        healthBefore,
+        healthAfter,
+        remainingTurnsAfter,
+        lostEquipment: lostRewards.equipment.map((item) => item.id),
+        lostGold: lostRewards.gold,
+      });
+      await this.getTextChannel(adventure)?.send([
+        `## ☠️ <@${actor.userId}>님의 턴 시작 · ${effect.name}`,
+        `# 💥 ${effect.damage} 지속 피해`,
+        `남은 체력: **${healthAfter}/${adventure.maxHealthByUser[actor.userId]}**`,
+        remainingTurnsAfter > 0 ? `남은 지속시간: **${remainingTurnsAfter}턴**` : `**${effect.name} 효과가 종료됩니다.**`,
+        lostRewards.equipment.length > 0 || lostRewards.gold > 0
+          ? `☠️ 사망하여 이번 모험 보상 장비 **${lostRewards.equipment.length}개**, 골드 **${lostRewards.gold}G**를 잃었습니다.`
+          : null,
+      ].filter(Boolean).join('\n'));
+      battle.partyHasTakenDamage = true;
+      await this.adventureManager.damage(this.client, actor.userId, effect.damage);
+      if (!this.adventureManager.adventures.has(adventure.id)) {
+        this.cleanup(adventure.id);
+        return false;
+      }
+      if (!adventure.memberIds.includes(actor.userId)) return false;
+    }
+
+    for (const effect of effects) effect.remainingTurns -= 1;
+    const expiredEffects = effects.filter((effect) => effect.remainingTurns <= 0);
+    battle.statusEffectsByUser[actor.userId] = effects.filter((effect) => effect.remainingTurns > 0);
+    if (expiredEffects.some((effect) => effect.type === 'SLOW')) {
+      this.updatePlayerSpeedFromStatuses(battle, actor.userId);
+    }
+    if (expiredEffects.length > 0) {
+      await this.getTextChannel(adventure)?.send(
+        `✨ <@${actor.userId}>님의 ${expiredEffects.map((effect) => `**${effect.name}**`).join(', ')} 상태가 해제되었습니다.`,
+      );
+    }
+    return true;
+  }
+
   async resolveEnemyTurns(adventure, battle) {
     let actor = this.getCurrentActor(adventure, battle);
     while (actor?.type === 'ENEMY' && adventure.memberIds.length > 0) {
-      const targets = adventure.memberIds.filter(
+      const livingTargets = adventure.memberIds.filter(
         (userId) => (adventure.healthByUser[userId] ?? 0) > 0,
       );
-      if (targets.length === 0) return;
-      const targetId = targets[Math.floor(Math.random() * targets.length)];
-      const targetStats = battle.playerStats[targetId];
-      const result = this.calculateDamage(
-        battle.monster.attack,
-        targetStats.defense,
-        battle.monster.level,
-        battle.monster.criticalChance,
-        battle.monster.criticalDamage,
+      if (livingTargets.length === 0) return;
+      const activeTaunt = this.getActiveTaunt(adventure, battle);
+      const skill = this.selectMonsterSkill(
+        battle.monster,
+        Math.random,
+        { forceSingleTarget: Boolean(activeTaunt) },
       );
-      if (result.damage > 0) battle.partyHasTakenDamage = true;
-      const expectedHealth = roundHealth(adventure.healthByUser[targetId] - result.damage);
-      const lostEquipment = expectedHealth === 0
-        ? await this.removeDeathLoot(adventure, targetId)
-        : [];
       const channel = this.getTextChannel(adventure);
-      const visual = this.createMonsterTurnVisual(battle.monster);
-      await dungeonLogger.append(adventure.id, 'TURN_ACTION', {
-        floor: adventure.floor,
-        turn: battle.actionCount + 1,
-        actorType: 'ENEMY',
-        actorId: 'ENEMY',
-        actorName: battle.monster.name,
-        action: battle.monster.skillName,
-        targetId,
-        damage: result.damage,
-        critical: result.critical,
-        targetHealthBefore: adventure.healthByUser[targetId],
-        targetHealthAfter: expectedHealth,
-        lostEquipment: lostEquipment.map((item) => ({
-          id: item.id,
-          name: item.name,
-          itemLevel: item.itemLevel,
-          rarity: item.rarity,
-          enhancement: item.enhancement,
-        })),
-      });
-      await channel?.send({
-        content: [
-          TURN_SEPARATOR,
-          `## 🔴 ${battle.monster.name}의 턴`,
-          `### 👹 「${battle.monster.skillName}」 시전`,
-          `# 💥 ${result.damage} 피해${result.critical ? ' · 치명타!' : ''}`,
-          `<@${targetId}> 공격받음`,
-          `남은 체력: **${expectedHealth}/${adventure.maxHealthByUser[targetId]}**`,
-          lostEquipment.length > 0
-            ? `☠️ 사망하여 이번 모험에서 획득한 장비 **${lostEquipment.length}개**를 잃었습니다.`
+      const visual = this.createMonsterTurnVisual(battle.monster, skill);
+      const tauntStatusAfterTurn = activeTaunt
+        ? activeTaunt.remainingTurns > 1
+          ? `🛡️ 도발 대상: <@${activeTaunt.sourceUserId}> · **${activeTaunt.remainingTurns - 1}턴 남음**`
+          : '✨ **도발 효과가 종료됩니다.**'
+        : null;
+
+      if (skill.type === 'SELF_HEAL') {
+        const healthBefore = battle.monster.health;
+        const healAmount = Math.max(1, Math.round(battle.monster.maxHealth * skill.maxHealthCoefficient));
+        battle.monster.health = Math.min(battle.monster.maxHealth, healthBefore + healAmount);
+        const recovered = battle.monster.health - healthBefore;
+        await dungeonLogger.append(adventure.id, 'TURN_ACTION', {
+          floor: adventure.floor,
+          turn: battle.actionCount + 1,
+          actorType: 'ENEMY',
+          actorId: 'ENEMY',
+          actorName: battle.monster.name,
+          action: skill.name,
+          skillId: skill.id,
+          skillType: skill.type,
+          healing: recovered,
+          monsterHealthBefore: healthBefore,
+          monsterHealthAfter: battle.monster.health,
+          activeTaunt: activeTaunt ? { ...activeTaunt } : null,
+        });
+        await channel?.send({
+          content: [
+            TURN_SEPARATOR,
+            `## 🔴 ${battle.monster.name}의 턴`,
+            `### 👹 「${skill.name}」 시전`,
+            `# 💚 체력 ${recovered} 회복`,
+            `적의 체력: **${battle.monster.health}/${battle.monster.maxHealth}**`,
+            tauntStatusAfterTurn,
+            TURN_SEPARATOR,
+          ].filter(Boolean).join('\n'),
+          embeds: [visual.embed],
+          files: [visual.attachment],
+        });
+      } else {
+        const targetIds = activeTaunt
+          ? [activeTaunt.sourceUserId]
+          : skill.type === 'PARTY_ATTACK'
+          ? [...livingTargets]
+          : [livingTargets[Math.floor(Math.random() * livingTargets.length)]];
+        const results = [];
+        for (const targetId of targetIds) {
+          const targetStats = this.getEffectivePlayerStats(battle, targetId);
+          const result = this.calculateDamage(
+            battle.monster.attack * skill.powerCoefficient,
+            targetStats.defense,
+            battle.monster.level,
+            battle.monster.criticalChance + (skill.criticalChanceBonus ?? 0),
+            battle.monster.criticalDamage,
+          );
+          const healthBefore = adventure.healthByUser[targetId];
+          const expectedHealth = roundHealth(healthBefore - result.damage);
+          const lostRewards = expectedHealth === 0
+            ? await this.removeAdventureDeathRewards(adventure, targetId)
+            : { equipment: [], gold: 0 };
+          const appliedStatus = expectedHealth > 0
+            ? this.applyMonsterStatusEffect(battle, targetId, skill)
+            : null;
+          results.push({
+            targetId,
+            targetDefense: targetStats.defense,
+            damage: result.damage,
+            effectiveDamage: Math.min(result.damage, healthBefore),
+            critical: result.critical,
+            healthBefore,
+            healthAfter: expectedHealth,
+            maxHealth: adventure.maxHealthByUser[targetId],
+            lostRewards,
+            appliedStatus,
+          });
+        }
+        if (results.some((result) => result.damage > 0)) battle.partyHasTakenDamage = true;
+        let lifeSteal = null;
+        if (skill.type === 'DRAIN_ATTACK') {
+          const monsterHealthBefore = battle.monster.health;
+          const absorbedDamage = results.reduce((total, result) => total + result.effectiveDamage, 0);
+          const requestedHealing = Math.max(1, Math.round(absorbedDamage * skill.lifeStealRatio));
+          battle.monster.health = Math.min(battle.monster.maxHealth, monsterHealthBefore + requestedHealing);
+          lifeSteal = {
+            ratio: skill.lifeStealRatio,
+            absorbedDamage,
+            healing: battle.monster.health - monsterHealthBefore,
+            monsterHealthBefore,
+            monsterHealthAfter: battle.monster.health,
+          };
+        }
+        await dungeonLogger.append(adventure.id, 'TURN_ACTION', {
+          floor: adventure.floor,
+          turn: battle.actionCount + 1,
+          actorType: 'ENEMY',
+          actorId: 'ENEMY',
+          actorName: battle.monster.name,
+          action: skill.name,
+          skillId: skill.id,
+          skillType: skill.type,
+          powerCoefficient: skill.powerCoefficient,
+          activeTaunt: activeTaunt ? { ...activeTaunt } : null,
+          lifeSteal,
+          targets: results.map((result) => ({
+            targetId: result.targetId,
+            targetDefense: result.targetDefense,
+            damage: result.damage,
+            critical: result.critical,
+            targetHealthBefore: result.healthBefore,
+            targetHealthAfter: result.healthAfter,
+            appliedStatus: result.appliedStatus ? { ...result.appliedStatus } : null,
+            lostEquipment: result.lostRewards.equipment.map((item) => ({
+              id: item.id,
+              name: item.name,
+              itemLevel: item.itemLevel,
+              rarity: item.rarity,
+              enhancement: item.enhancement,
+            })),
+            lostGold: result.lostRewards.gold,
+          })),
+        });
+        const damageLines = results.flatMap((result) => [
+          `${skill.type === 'PARTY_ATTACK' ? '💥' : '# 💥'} <@${result.targetId}> **${result.damage} 피해**${result.critical ? ' · 치명타!' : ''}`,
+          `남은 체력: **${result.healthAfter}/${result.maxHealth}**`,
+          result.lostRewards.equipment.length > 0 || result.lostRewards.gold > 0
+            ? `☠️ 사망하여 이번 모험 보상 장비 **${result.lostRewards.equipment.length}개**, 골드 **${result.lostRewards.gold}G**를 잃었습니다.`
             : null,
-          TURN_SEPARATOR,
-        ].filter(Boolean).join('\n'),
-        embeds: [visual.embed],
-        files: [visual.attachment],
-      });
-      const health = await this.adventureManager.damage(this.client, targetId, result.damage);
-      if (!this.adventureManager.adventures.has(adventure.id)) {
-        this.cleanup(adventure.id);
-        return;
+          result.appliedStatus ? this.formatMonsterStatusEffect(result.appliedStatus) : null,
+        ].filter(Boolean));
+        const lifeStealLine = lifeSteal
+          ? `🩸 실제 피해의 **${Math.round(lifeSteal.ratio * 100)}%**를 흡수해 체력 **${lifeSteal.healing}** 회복 (${lifeSteal.monsterHealthBefore} → ${lifeSteal.monsterHealthAfter}/${battle.monster.maxHealth})`
+          : null;
+        await channel?.send({
+          content: [
+            TURN_SEPARATOR,
+            `## 🔴 ${battle.monster.name}의 턴`,
+            `### 👹 「${skill.name}」 시전`,
+            skill.type === 'PARTY_ATTACK' ? '# 🌋 파티 전체 공격' : null,
+            ...damageLines,
+            lifeStealLine,
+            tauntStatusAfterTurn,
+            TURN_SEPARATOR,
+          ].filter(Boolean).join('\n'),
+          embeds: [visual.embed],
+          files: [visual.attachment],
+        });
+
+        for (const result of results) {
+          await this.adventureManager.damage(this.client, result.targetId, result.damage);
+          if (!this.adventureManager.adventures.has(adventure.id)) {
+            this.cleanup(adventure.id);
+            return;
+          }
+        }
       }
+
+      this.advanceMonsterDebuffDurations(adventure, battle);
+
       await this.waitAfterBattleAction();
       if (
         !this.adventureManager.adventures.has(adventure.id) ||
@@ -528,19 +861,30 @@ class AdventureSystem {
     const actor = this.getCurrentActor(adventure, battle);
     const partyStatus = adventure.memberIds
       .map((userId) => {
-        const stats = battle.playerStats[userId];
+        const stats = this.getEffectivePlayerStats(battle, userId);
         const health = adventure.healthByUser[userId];
         const maxHealth = adventure.maxHealthByUser[userId];
         const mana = battle.manaByUser[userId];
+        const statusEffects = this.getPlayerStatusEffects(battle, userId);
+        const buffs = this.getPlayerBuffs(battle, userId);
         return [
           `<@${userId}> · Lv.${stats.playerLevel}`,
           `❤️ 체력 ${this.createResourceBar(health, maxHealth, HEALTH_BAR_FILLED)} ${health}/${maxHealth}`,
-          `🔷 마나 ${mana}/${stats.mana} ${this.createResourceBar(mana, stats.mana, MANA_BAR_FILLED)}`,
+          `🔷 마나 ${this.createResourceBar(mana, stats.mana, MANA_BAR_FILLED)} ${mana}/${stats.mana}`,
           `⚔️ 공격력 ${stats.attack}\t✨ 마법 공격력 ${stats.magicAttack}`,
           `🎯 치명타 확률 ${stats.criticalChance}%\t💥 치명타 피해 ${stats.criticalDamage}%`,
+          `⬆️ 버프: ${buffs.length > 0 ? buffs.map((buff) => this.formatPlayerBuff(buff)).join(', ') : '없음'}`,
+          `⬇️ 디버프: ${statusEffects.length > 0 ? statusEffects.map((effect) => `${effect.name}(${effect.remainingTurns}턴)`).join(', ') : '없음'}`,
         ].join('\n');
       })
       .join('\n');
+    const monsterBuffs = battle.monsterBuffs ?? [];
+    const monsterDebuffs = battle.monsterDebuffs ?? [];
+    const monsterStatus = [
+      `👹 Lv.${battle.monster.level} ${battle.monster.name} · 체력 ${battle.monster.health}/${battle.monster.maxHealth}`,
+      `⬆️ 버프: ${monsterBuffs.length > 0 ? monsterBuffs.map((buff) => `${buff.name}(${buff.remainingTurns}턴)`).join(', ') : '없음'}`,
+      `⬇️ 디버프: ${monsterDebuffs.length > 0 ? monsterDebuffs.map((debuff) => this.formatMonsterDebuff(debuff)).join(', ') : '없음'}`,
+    ].join('\n');
     const upcomingOrder = this.getFutureTurnPreview(adventure, battle, 5)
       .map((nextActor, index) => {
         const name = nextActor.type === 'PLAYER' ? `<@${nextActor.userId}>` : battle.monster.name;
@@ -553,6 +897,8 @@ class AdventureSystem {
       battle.actionCount === 0 ? battle.encounterMessage : null,
       '**파티 상태**',
       partyStatus,
+      '**적 상태**',
+      monsterStatus,
       `**다음 5턴** ${upcomingOrder}`,
       TURN_SEPARATOR,
     ].filter(Boolean).join('\n');
@@ -570,8 +916,21 @@ class AdventureSystem {
 
   async sendBattleState(adventure, battle) {
     const channel = this.getTextChannel(adventure);
-    const actor = this.getCurrentActor(adventure, battle);
+    let actor = this.getCurrentActor(adventure, battle);
     if (!channel || actor?.type !== 'PLAYER') return;
+    const canAct = await this.processPlayerTurnStart(adventure, battle, actor);
+    if (!canAct) {
+      if (!this.adventureManager.adventures.has(adventure.id)) return;
+      await this.resolveEnemyTurns(adventure, battle);
+      if (this.adventureManager.adventures.has(adventure.id)) await this.sendBattleState(adventure, battle);
+      return;
+    }
+    actor = this.getCurrentActor(adventure, battle);
+    if (actor?.type !== 'PLAYER') {
+      await this.resolveEnemyTurns(adventure, battle);
+      if (this.adventureManager.adventures.has(adventure.id)) await this.sendBattleState(adventure, battle);
+      return;
+    }
     const row = this.createButtons(
       adventure,
       [
@@ -656,7 +1015,15 @@ class AdventureSystem {
           new ButtonBuilder()
             .setCustomId(`skill:${adventure.currentActionToken}:${skill.id}:${actor.userId}`)
             .setLabel(`${skill.name} · 마나 ${skill.manaCost}`)
-            .setStyle(ButtonStyle.Primary),
+            .setStyle(
+              skill.type === 'ATTACK'
+                ? ButtonStyle.Danger
+                : skill.type === 'HEAL'
+                  ? ButtonStyle.Success
+                  : skill.type === 'TAUNT'
+                    ? ButtonStyle.Secondary
+                    : ButtonStyle.Primary,
+            ),
         ),
       );
       await interaction.reply({
@@ -667,7 +1034,7 @@ class AdventureSystem {
       return;
     }
 
-    const stats = battle.playerStats[actor.userId];
+    const stats = this.getEffectivePlayerStats(battle, actor.userId);
     const result = this.calculateDamage(
       stats.attack,
       battle.monster.defense,
@@ -686,6 +1053,7 @@ class AdventureSystem {
       actorId: actor.userId,
       action: 'NORMAL_ATTACK',
       targetId: 'ENEMY',
+      attack: stats.attack,
       damage: result.damage,
       critical: result.critical,
       monsterHealthBefore,
@@ -751,6 +1119,17 @@ class AdventureSystem {
       return true;
     }
 
+    if (skill.type === 'ATTACK' && skill.targetType === 'ENEMY') {
+      return this.executeAttackSkill(interaction, adventure, battle, actor, skill);
+    }
+    if (skill.type === 'TAUNT' && skill.targetType === 'ENEMY') {
+      return this.executeTauntSkill(interaction, adventure, battle, actor, skill);
+    }
+    if (!['HEAL', 'ATTACK_BUFF', 'DEFENSE_BUFF'].includes(skill.type) || skill.targetType !== 'ALLY') {
+      await interaction.reply({ content: '아직 사용할 수 없는 스킬 유형입니다.', flags: MessageFlags.Ephemeral });
+      return true;
+    }
+
     const guild = this.client.guilds.cache.get(adventure.guildId);
     const rows = [];
     for (let index = 0; index < adventure.memberIds.length; index += 5) {
@@ -761,7 +1140,7 @@ class AdventureSystem {
             return new ButtonBuilder()
               .setCustomId(`skill_target:${token}:${skillId}:${targetId}:${ownerId}`)
               .setLabel(targetId === ownerId ? `${targetName} (나)` : targetName)
-              .setStyle(ButtonStyle.Success);
+              .setStyle(skill.type === 'HEAL' ? ButtonStyle.Success : ButtonStyle.Primary);
           }),
         ),
       );
@@ -770,6 +1149,193 @@ class AdventureSystem {
       content: `「${skill.name}」을(를) 사용할 대상을 선택하세요.`,
       components: rows,
     });
+    return true;
+  }
+
+  async executeAttackSkill(interaction, adventure, battle, actor, skill) {
+    const ownerId = actor.userId;
+    const stats = this.getEffectivePlayerStats(battle, ownerId);
+    const attackPower = calculateSkillAttackPower(skill, stats.magicAttack);
+    const result = this.calculateDamage(
+      attackPower,
+      battle.monster.magicDefense,
+      stats.playerLevel,
+      stats.criticalChance,
+      stats.criticalDamage,
+    );
+    const monsterHealthBefore = battle.monster.health;
+    const manaBefore = battle.manaByUser[ownerId];
+    battle.monster.health = Math.max(0, battle.monster.health - result.damage);
+    battle.manaByUser[ownerId] = roundMana(manaBefore - skill.manaCost);
+    battle.partyHasAttacked = true;
+    adventure.currentActionToken = null;
+
+    await dungeonLogger.append(adventure.id, 'TURN_ACTION', {
+      floor: adventure.floor,
+      turn: battle.actionCount + 1,
+      actorType: 'PLAYER',
+      actorId: ownerId,
+      action: 'ATTACK_SKILL',
+      skillId: skill.id,
+      skillName: skill.name,
+      targetId: 'ENEMY',
+      magicAttack: stats.magicAttack,
+      coefficient: skill.magicAttackCoefficient,
+      attackPower,
+      damage: result.damage,
+      critical: result.critical,
+      monsterHealthBefore,
+      monsterHealthAfter: battle.monster.health,
+      manaBefore,
+      manaAfter: battle.manaByUser[ownerId],
+    });
+    await battle.turnMessage?.edit({
+      content: [
+        TURN_SEPARATOR,
+        `## 🟢 <@${ownerId}>님의 턴`,
+        `### ✨ 「${skill.name}」 시전`,
+        `# 💥 ${result.damage} 마법 피해${result.critical ? ' · 치명타!' : ''}`,
+        `${battle.monster.name} 공격받음`,
+        `적의 남은 체력: **${battle.monster.health}/${battle.monster.maxHealth}**`,
+        `소모 마나: **${skill.manaCost}** · 남은 마나: **${battle.manaByUser[ownerId]}**`,
+        TURN_SEPARATOR,
+      ].join('\n'),
+      components: [],
+    });
+    await interaction.update({ content: `${skill.name} 시전을 완료했습니다.`, components: [] });
+
+    await this.waitAfterBattleAction();
+    if (
+      !this.adventureManager.adventures.has(adventure.id) ||
+      this.battles.get(adventure.id) !== battle
+    ) return true;
+    if (battle.monster.health === 0) {
+      await this.finishBattleVictory(adventure, battle);
+      return true;
+    }
+    this.completeActorTurn(adventure, battle, actor);
+    await this.resolveEnemyTurns(adventure, battle);
+    if (this.adventureManager.adventures.has(adventure.id)) await this.sendBattleState(adventure, battle);
+    return true;
+  }
+
+  async executeTauntSkill(interaction, adventure, battle, actor, skill) {
+    const ownerId = actor.userId;
+    const manaBefore = battle.manaByUser[ownerId];
+    const taunt = {
+      id: skill.id,
+      type: 'TAUNT',
+      name: skill.name,
+      sourceUserId: ownerId,
+      remainingTurns: skill.duration,
+    };
+    battle.monsterDebuffs ??= [];
+    const existing = battle.monsterDebuffs.find((debuff) => debuff.type === 'TAUNT');
+    if (existing) Object.assign(existing, taunt);
+    else battle.monsterDebuffs.push(taunt);
+    battle.manaByUser[ownerId] = roundMana(manaBefore - skill.manaCost);
+    adventure.currentActionToken = null;
+
+    await dungeonLogger.append(adventure.id, 'TURN_ACTION', {
+      floor: adventure.floor,
+      turn: battle.actionCount + 1,
+      actorType: 'PLAYER',
+      actorId: ownerId,
+      action: 'TAUNT_SKILL',
+      skillId: skill.id,
+      skillName: skill.name,
+      targetId: 'ENEMY',
+      duration: skill.duration,
+      manaBefore,
+      manaAfter: battle.manaByUser[ownerId],
+    });
+    await battle.turnMessage?.edit({
+      content: [
+        TURN_SEPARATOR,
+        `## 🟢 <@${ownerId}>님의 턴`,
+        `### 🛡️ 「${skill.name}」 시전`,
+        `👹 ${battle.monster.name}에게 **도발**을 부여했습니다.`,
+        `적은 <@${ownerId}>만 공격합니다. · **${skill.duration} 적 턴 남음**`,
+        `소모 마나: **${skill.manaCost}** · 남은 마나: **${battle.manaByUser[ownerId]}**`,
+        TURN_SEPARATOR,
+      ].join('\n'),
+      components: [],
+    });
+    await interaction.update({ content: `${skill.name} 시전을 완료했습니다.`, components: [] });
+
+    await this.waitAfterBattleAction();
+    if (
+      !this.adventureManager.adventures.has(adventure.id) ||
+      this.battles.get(adventure.id) !== battle
+    ) return true;
+    this.completeActorTurn(adventure, battle, actor);
+    await this.resolveEnemyTurns(adventure, battle);
+    if (this.adventureManager.adventures.has(adventure.id)) await this.sendBattleState(adventure, battle);
+    return true;
+  }
+
+  async executeAllyBuffSkill(interaction, adventure, battle, actor, skill, targetId) {
+    const ownerId = actor.userId;
+    const casterStats = this.getEffectivePlayerStats(battle, ownerId);
+    const amount = roundHealth(Math.max(1, casterStats.magicAttack * skill.magicAttackCoefficient));
+    const buffs = this.getPlayerBuffs(battle, targetId);
+    const appliedBuff = {
+      id: skill.id,
+      type: skill.type,
+      name: skill.name,
+      sourceUserId: ownerId,
+      amount,
+      remainingTurns: skill.duration,
+      skipNextDecrement: targetId === ownerId,
+    };
+    const existing = buffs.find((buff) => buff.type === skill.type);
+    if (existing) Object.assign(existing, appliedBuff);
+    else buffs.push(appliedBuff);
+    const manaBefore = battle.manaByUser[ownerId];
+    battle.manaByUser[ownerId] = roundMana(manaBefore - skill.manaCost);
+    adventure.currentActionToken = null;
+    const statLabel = skill.type === 'ATTACK_BUFF'
+      ? `공격력·마법 공격력 **+${amount}**`
+      : `방어력 **+${amount}**`;
+
+    await dungeonLogger.append(adventure.id, 'TURN_ACTION', {
+      floor: adventure.floor,
+      turn: battle.actionCount + 1,
+      actorType: 'PLAYER',
+      actorId: ownerId,
+      action: 'ALLY_BUFF_SKILL',
+      skillId: skill.id,
+      skillName: skill.name,
+      targetId,
+      buffType: skill.type,
+      buffAmount: amount,
+      duration: skill.duration,
+      casterMagicAttack: casterStats.magicAttack,
+      manaBefore,
+      manaAfter: battle.manaByUser[ownerId],
+    });
+    await battle.turnMessage?.edit({
+      content: [
+        TURN_SEPARATOR,
+        `## 🟢 <@${ownerId}>님의 턴`,
+        `### ✨ 「${skill.name}」 시전`,
+        `<@${targetId}>에게 ${statLabel} 버프를 부여했습니다.`,
+        `지속시간: **${skill.duration}턴**`,
+        `소모 마나: **${skill.manaCost}** · 남은 마나: **${battle.manaByUser[ownerId]}**`,
+        TURN_SEPARATOR,
+      ].join('\n'),
+      components: [],
+    });
+    await interaction.update({ content: `${skill.name} 시전을 완료했습니다.`, components: [] });
+
+    await this.waitAfterBattleAction();
+    if (
+      !this.adventureManager.adventures.has(adventure.id) ||
+      this.battles.get(adventure.id) !== battle
+    ) return true;
+    this.completeActorTurn(adventure, battle, actor);
+    await this.resolveEnemyTurns(adventure, battle);
+    if (this.adventureManager.adventures.has(adventure.id)) await this.sendBattleState(adventure, battle);
     return true;
   }
 
@@ -793,7 +1359,9 @@ class AdventureSystem {
       actor?.userId !== ownerId ||
       !adventure.memberIds.includes(targetId) ||
       !player.equippedSkills.includes(skillId) ||
-      !skill
+      !skill ||
+      !['HEAL', 'ATTACK_BUFF', 'DEFENSE_BUFF'].includes(skill.type) ||
+      skill.targetType !== 'ALLY'
     ) {
       await interaction.reply({ content: '이미 지나간 턴이거나 올바르지 않은 대상입니다.', flags: MessageFlags.Ephemeral });
       return true;
@@ -802,6 +1370,9 @@ class AdventureSystem {
       await interaction.reply({ content: '스킬 시전에 필요한 마나가 부족합니다.', flags: MessageFlags.Ephemeral });
       return true;
     }
+    if (['ATTACK_BUFF', 'DEFENSE_BUFF'].includes(skill.type)) {
+      return this.executeAllyBuffSkill(interaction, adventure, battle, actor, skill, targetId);
+    }
     const before = adventure.healthByUser[targetId];
     const maxHealth = adventure.maxHealthByUser[targetId];
     if (before >= maxHealth) {
@@ -809,7 +1380,7 @@ class AdventureSystem {
       return true;
     }
 
-    const healing = calculateSkillHealing(skill, battle.playerStats[ownerId].magicAttack);
+    const healing = calculateSkillHealing(skill, this.getEffectivePlayerStats(battle, ownerId).magicAttack);
     const after = roundHealth(Math.min(maxHealth, before + healing));
     const manaBefore = battle.manaByUser[ownerId];
     adventure.healthByUser[targetId] = after;
@@ -983,6 +1554,7 @@ class AdventureSystem {
         goldReward,
         equipmentDrop,
       );
+      this.recordAdventureGold(adventure, userId, goldReward);
       if (equipmentDrop) this.recordAdventureEquipment(adventure, userId, equipmentDrop.id);
       const experienceResult = await this.playerStore.grantMonsterExperience(
         userId,
@@ -991,8 +1563,10 @@ class AdventureSystem {
       );
       if (experienceResult.levelsGained > 0) {
         const addedHealth = LEVEL_STAT_GROWTH.health * experienceResult.levelsGained;
+        const addedMana = LEVEL_STAT_GROWTH.mana * experienceResult.levelsGained;
         adventure.maxHealthByUser[userId] = roundHealth(adventure.maxHealthByUser[userId] + addedHealth);
         adventure.healthByUser[userId] = roundHealth(adventure.healthByUser[userId] + addedHealth);
+        adventure.manaByUser[userId] = roundMana((adventure.manaByUser[userId] ?? 0) + addedMana);
       }
       const potion = rollPotionDrop(isTreasureMimic ? 'TREASURE' : 'MONSTER');
       if (potion) await this.playerStore.addItem(userId, potion.id, 1);
@@ -1049,7 +1623,10 @@ class AdventureSystem {
       adventure.bossDefeated = true;
       await this.rewardTreasure(adventure, { showContinue: false, bossChest: true });
       if (adventure.floor >= 100) await this.askToCompleteDungeon(adventure);
-      else await this.askToSaveBossCheckpoint(adventure);
+      else {
+        await this.saveBossCheckpointForParty(adventure);
+        await this.moveToNextFloor(adventure);
+      }
     }
   }
 
@@ -1063,11 +1640,27 @@ class AdventureSystem {
     adventure.acquiredEquipmentIdsByUser[userId].push(equipmentId);
   }
 
+  recordAdventureGold(adventure, userId, gold) {
+    adventure.acquiredGoldByUser ??= {};
+    adventure.acquiredGoldByUser[userId] = (adventure.acquiredGoldByUser[userId] ?? 0) + Math.max(0, Math.floor(gold));
+  }
+
   async removeDeathLoot(adventure, userId) {
     const equipmentIds = adventure.acquiredEquipmentIdsByUser?.[userId] ?? [];
     if (equipmentIds.length === 0) return [];
     adventure.acquiredEquipmentIdsByUser[userId] = [];
     return this.playerStore.removeInventoryEquipmentByIds(userId, equipmentIds);
+  }
+
+  async removeAdventureDeathRewards(adventure, userId) {
+    const equipment = await this.removeDeathLoot(adventure, userId);
+    const goldToRemove = adventure.acquiredGoldByUser?.[userId] ?? 0;
+    adventure.acquiredGoldByUser ??= {};
+    adventure.acquiredGoldByUser[userId] = 0;
+    const goldResult = goldToRemove > 0
+      ? await this.playerStore.removeGold(userId, goldToRemove)
+      : { removed: 0 };
+    return { equipment, gold: goldResult.removed };
   }
 
   async resolveSpecialEvent(adventure) {
@@ -1087,6 +1680,30 @@ class AdventureSystem {
     await this.triggerRest(adventure);
   }
 
+  async showSpecialDoor(adventure) {
+    const channel = this.getTextChannel(adventure);
+    if (!channel) return;
+    const row = this.createButtons(adventure, [
+      { action: 'special_enter', label: '갈까?', style: ButtonStyle.Primary },
+      { action: 'special_leave', label: '돌아가기', style: ButtonStyle.Secondary },
+    ]);
+    const attachmentName = 'mysterious-door.png';
+    const attachment = new AttachmentBuilder(path.join(eventAssetsDirectory, attachmentName));
+    const embed = new EmbedBuilder()
+      .setColor(0x8e44ad)
+      .setTitle('🚪 신비한 문을 발견했습니다')
+      .setDescription('문 너머에서 알 수 없는 기운이 흘러나옵니다. 안으로 들어가 볼까요?')
+      .setImage(`attachment://${attachmentName}`);
+    await dungeonLogger.append(adventure.id, 'SPECIAL_DOOR_FOUND', {
+      floor: adventure.floor,
+    });
+    await channel.send({
+      embeds: [embed],
+      files: [attachment],
+      components: [row],
+    });
+  }
+
   async rewardTreasure(adventure, { showContinue = true, bossChest = false } = {}) {
     const channel = this.getTextChannel(adventure);
     if (!channel) return;
@@ -1104,6 +1721,7 @@ class AdventureSystem {
         slot,
       });
       await this.playerStore.addAdventureReward(userId, gold, item);
+      this.recordAdventureGold(adventure, userId, gold);
       this.recordAdventureEquipment(adventure, userId, item.id);
       const potion = rollPotionDrop('TREASURE');
       if (potion) await this.playerStore.addItem(userId, potion.id, 1);
@@ -1143,18 +1761,30 @@ class AdventureSystem {
     });
   }
 
-  async askToSaveBossCheckpoint(adventure) {
+  async saveBossCheckpointForParty(adventure) {
     const channel = this.getTextChannel(adventure);
-    if (!channel) return;
-    const nextFloor = adventure.floor + 1;
-    const row = this.createButtons(adventure, [
-      { action: 'boss_checkpoint_yes', label: `체크포인트 저장 (${nextFloor}층)`, style: ButtonStyle.Success },
-      { action: 'boss_checkpoint_no', label: '저장하지 않고 이동', style: ButtonStyle.Secondary },
-    ]);
-    await channel.send({
-      content: `🚩 보스를 처치해 **${nextFloor}층 체크포인트**를 기록할 수 있습니다. 공대장이 저장할까요?`,
-      components: [row],
+    const checkpointFloor = getCheckpointFloorAfterBoss(adventure.floor);
+    if (!channel || !checkpointFloor) return [];
+    const results = await this.playerStore.unlockCheckpointForUsers(
+      adventure.memberIds,
+      checkpointFloor,
+    );
+    const unlockedFloors = getUnlockedCheckpointFloors(checkpointFloor);
+    await dungeonLogger.append(adventure.id, 'CHECKPOINT_SAVED', {
+      floor: adventure.floor,
+      checkpointFloor,
+      userIds: [...adventure.memberIds],
+      results,
+      automatic: true,
     });
+    await channel.send({
+      content: [
+        `# 🚩 ${checkpointFloor}층 체크포인트 자동 저장`,
+        `${adventure.memberIds.map((userId) => `<@${userId}>`).join(' ')} 파티원 전원에게 저장했습니다.`,
+        `이제 모험 시작 시 **${unlockedFloors.map((floor) => `${floor}층`).join(', ')}** 중에서 선택할 수 있습니다.`,
+      ].join('\n'),
+    });
+    return results;
   }
 
   async askToCompleteDungeon(adventure) {
@@ -1182,24 +1812,27 @@ class AdventureSystem {
       const damage = Math.max(1, roundHealth(maxHealth * 0.1));
       const healthBefore = adventure.healthByUser[userId];
       const willDie = adventure.healthByUser[userId] - damage <= 0;
-      const lostEquipment = willDie ? await this.removeDeathLoot(adventure, userId) : [];
+      const lostRewards = willDie
+        ? await this.removeAdventureDeathRewards(adventure, userId)
+        : { equipment: [], gold: 0 };
       await dungeonLogger.append(adventure.id, 'TRAP_DAMAGE', {
         floor: adventure.floor,
         userId,
         damage,
         healthBefore,
         healthAfter: roundHealth(healthBefore - damage),
-        lostEquipment: lostEquipment.map((item) => ({
+        lostEquipment: lostRewards.equipment.map((item) => ({
           id: item.id,
           name: item.name,
           itemLevel: item.itemLevel,
           rarity: item.rarity,
           enhancement: item.enhancement,
         })),
+        lostGold: lostRewards.gold,
       });
       const health = await this.adventureManager.damage(this.client, userId, damage);
       damageLines.push(
-        `<@${userId}>: **-${damage}**, 체력 ${health ?? 0}/${maxHealth}${lostEquipment.length > 0 ? ` · ☠️ 모험 장비 ${lostEquipment.length}개 소실` : ''}`,
+        `<@${userId}>: **-${damage}**, 체력 ${health ?? 0}/${maxHealth}${lostRewards.equipment.length > 0 || lostRewards.gold > 0 ? ` · ☠️ 모험 장비 ${lostRewards.equipment.length}개 · 골드 ${lostRewards.gold}G 소실` : ''}`,
       );
     }
     if (!this.adventureManager.adventures.has(adventure.id)) return;
@@ -1317,6 +1950,45 @@ class AdventureSystem {
     }
   }
 
+  async handleCheckpointSelect(interaction) {
+    if (!interaction.customId.startsWith('checkpoint_select:')) return false;
+    const [, adventureId, token] = interaction.customId.split(':');
+    const adventure = this.adventureManager.adventures.get(adventureId);
+    if (!adventure || interaction.channelId !== adventure.textChannelId) {
+      await interaction.reply({ content: '이미 종료된 모험입니다.', flags: MessageFlags.Ephemeral });
+      return true;
+    }
+    if (interaction.user.id !== adventure.leaderId) {
+      await interaction.reply({ content: '체크포인트 시작 층은 공대장만 선택할 수 있습니다.', flags: MessageFlags.Ephemeral });
+      return true;
+    }
+    if (token !== adventure.currentActionToken) {
+      await interaction.reply({ content: '이미 처리된 체크포인트 선택입니다.', flags: MessageFlags.Ephemeral });
+      return true;
+    }
+    const selectedFloor = Number(interaction.values[0]);
+    const availableFloors = adventure.availableCheckpointFloors ?? [1];
+    if (!availableFloors.includes(selectedFloor)) {
+      await interaction.reply({ content: '해금하지 않은 체크포인트입니다.', flags: MessageFlags.Ephemeral });
+      return true;
+    }
+
+    adventure.currentActionToken = null;
+    await dungeonLogger.append(adventure.id, 'CHECKPOINT_SELECTED', {
+      floor: adventure.floor,
+      userId: interaction.user.id,
+      selectedFloor,
+      availableFloors,
+    });
+    await interaction.update({
+      content: `🚩 <@${adventure.leaderId}>님이 **${selectedFloor}층** 시작을 선택했습니다.`,
+      components: [],
+    });
+    if (selectedFloor === 1) await this.beginNextStep(adventure);
+    else await this.moveToFloor(adventure, selectedFloor, interaction.channel);
+    return true;
+  }
+
   async handleButton(interaction) {
     if (!interaction.customId.startsWith('dungeon:')) return false;
     const [, adventureId, token, action, ownerId] = interaction.customId.split(':');
@@ -1363,34 +2035,17 @@ class AdventureSystem {
         content: `🪜 **${adventure.floor + 1}층으로 이동 중입니다...**`,
         components: [],
       });
+    } else if (action === 'special_enter') {
+      await interaction.update({
+        content: [
+          '# 🚶 신비한 문으로 걸어갑니다...',
+          '희미한 빛을 따라 조심스럽게 문 너머로 들어갑니다.',
+        ].join('\n'),
+        components: [],
+      });
     } else {
       await interaction.update({ components: [] });
     }
-    if (action === 'checkpoint_yes') {
-      const floor = adventure.pendingCheckpointFloor;
-      adventure.pendingCheckpointFloor = null;
-      await this.moveToFloor(adventure, floor, interaction.channel);
-    }
-    if (action === 'checkpoint_no') {
-      adventure.pendingCheckpointFloor = null;
-      await this.beginNextStep(adventure);
-    }
-    if (action === 'boss_checkpoint_yes') {
-      const result = await this.playerStore.unlockCheckpoint(
-        adventure.leaderId,
-        adventure.floor + 1,
-      );
-      await dungeonLogger.append(adventure.id, 'CHECKPOINT_SAVED', {
-        floor: adventure.floor,
-        userId: adventure.leaderId,
-        checkpointFloor: result.checkpointFloor,
-      });
-      await this.getTextChannel(adventure)?.send(
-        `🚩 공대장 <@${adventure.leaderId}>님의 체크포인트를 **${result.checkpointFloor}층**으로 저장했습니다.`,
-      );
-      await this.moveToNextFloor(adventure);
-    }
-    if (action === 'boss_checkpoint_no') await this.moveToNextFloor(adventure);
     if (action === 'dungeon_complete') {
       this.cleanup(adventure.id);
       await this.adventureManager.end(this.client, adventure.id, 'DUNGEON_CLEARED');
@@ -1400,6 +2055,13 @@ class AdventureSystem {
       adventure.stairsAvailable = false;
       await this.resolveExplorationRoll(adventure, false);
     }
+    if (action === 'special_enter') {
+      await this.waitAfterBattleAction();
+      if (this.adventureManager.adventures.has(adventure.id)) {
+        await this.resolveSpecialEvent(adventure);
+      }
+    }
+    if (action === 'special_leave') await this.resolveExplorationRoll(adventure, false);
     if (action === 'continue') await this.beginNextStep(adventure);
     return true;
   }

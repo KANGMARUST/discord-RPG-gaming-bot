@@ -6,12 +6,16 @@ export const commands = [
     .setDescription('처음 시작하는 플레이어를 위한 던전 게임 안내입니다.'),
   new SlashCommandBuilder()
     .setName('도움말')
-    .setDescription('명령어 또는 게임 확률 정보를 확인합니다.')
+    .setDescription('명령어와 확률, 버프, 디버프 정보를 확인합니다.')
     .addStringOption((option) =>
       option
         .setName('항목')
         .setDescription('확인할 도움말 항목')
-        .addChoices({ name: '확률 정보', value: '확률' }),
+        .addChoices(
+          { name: '확률 정보', value: '확률' },
+          { name: '버프 종류', value: '버프' },
+          { name: '디버프 종류', value: '디버프' },
+        ),
     )
     .addStringOption((option) =>
       option
@@ -57,8 +61,20 @@ export const commands = [
     .setName('아이템인벤토리')
     .setDescription('던전에서 사용할 수 있는 소비 아이템을 확인합니다.'),
   new SlashCommandBuilder()
-    .setName('스킬인벤토리')
-    .setDescription('보유 스킬과 현재 장착 스킬을 확인합니다.'),
+    .setName('스킬북')
+    .setDescription('장착 중인 스킬 3개와 현재 보유 스킬을 확인합니다.'),
+  new SlashCommandBuilder()
+    .setName('스킬도감')
+    .setDescription('전체 스킬을 보유 중인 스킬과 미보유 스킬로 나누어 확인합니다.'),
+  new SlashCommandBuilder()
+    .setName('적도감')
+    .setDescription('던전에 등장하는 적의 서식 층수와 상세 정보를 확인합니다.')
+    .addStringOption((option) =>
+      option
+        .setName('적이름')
+        .setDescription('상세 정보를 확인할 적을 선택하세요.')
+        .setAutocomplete(true),
+    ),
   new SlashCommandBuilder()
     .setName('스킬장착')
     .setDescription('보유 스킬을 최대 3개의 슬롯 중 하나에 장착합니다.')
@@ -81,7 +97,7 @@ export const commands = [
         ),
     ),
   new SlashCommandBuilder()
-    .setName('스킬해제')
+    .setName('스킬장착해제')
     .setDescription('장착 중인 스킬 슬롯을 비웁니다.')
     .addIntegerOption((option) =>
       option
@@ -206,7 +222,7 @@ export const commands = [
     .addStringOption((option) =>
       option
         .setName('아이템')
-        .setDescription('지급할 포션, 장비, 골드 또는 마석')
+        .setDescription('지급할 포션, 장비, 스킬, 골드 또는 마석')
         .setRequired(true)
         .setAutocomplete(true),
     )

@@ -28,9 +28,120 @@ export const DUNGEON_REGIONS = [
   boss: { name: bossName, skillName: bossSkill, image: bossImage },
 }));
 
+const LIFE_STEAL_REGION_IDS = new Set([3, 4, 15, 18, 19, 20]);
+
 export function getDungeonRegion(floor) {
   const normalizedFloor = Math.min(100, Math.max(1, Math.floor(floor)));
   return DUNGEON_REGIONS[Math.floor((normalizedFloor - 1) / 5)];
+}
+
+export function createMonsterSkillSet(region, { isBoss = false, isMimic = false } = {}) {
+  if (isMimic) {
+    return [
+      {
+        id: 'mimic_greedy_bite',
+        name: '탐욕의 이빨',
+        type: 'SINGLE_ATTACK',
+        powerCoefficient: 1.1,
+        weight: 70,
+      },
+      {
+        id: 'mimic_golden_devour',
+        name: '황금 포식',
+        type: 'SINGLE_ATTACK',
+        powerCoefficient: 1.4,
+        weight: 30,
+      },
+    ];
+  }
+
+  const hasLifeSteal = LIFE_STEAL_REGION_IDS.has(region.id);
+  if (isBoss) {
+    return [
+      {
+        id: `boss_${region.id}_signature`,
+        name: region.boss.skillName,
+        type: 'PARTY_ATTACK',
+        powerCoefficient: 0.65,
+        weight: hasLifeSteal ? 25 : 30,
+      },
+      {
+        id: `boss_${region.id}_execution`,
+        name: `${region.boss.name}의 처형`,
+        type: 'SINGLE_ATTACK',
+        powerCoefficient: 1.45,
+        weight: hasLifeSteal ? 25 : 30,
+      },
+      {
+        id: `boss_${region.id}_calamity`,
+        name: `${region.regionName}의 재앙`,
+        type: 'SINGLE_ATTACK',
+        powerCoefficient: 1.15,
+        criticalChanceBonus: 20,
+        weight: 15,
+      },
+      {
+        id: `boss_${region.id}_ailment`,
+        name: region.id % 2 === 1 ? `${region.regionName}의 속박` : `${region.regionName}의 저주`,
+        type: 'SINGLE_ATTACK',
+        powerCoefficient: 0.9,
+        weight: 15,
+        statusEffect: region.id % 2 === 1
+          ? { type: 'SLOW', name: '둔화', duration: 3, speedReductionPercent: 5 }
+          : { type: 'DOT', name: '저주', duration: 3, damageCoefficient: 0.3 },
+      },
+      {
+        id: `boss_${region.id}_restoration`,
+        name: '불멸의 권능',
+        type: 'SELF_HEAL',
+        maxHealthCoefficient: 0.08,
+        weight: 10,
+      },
+      ...(hasLifeSteal ? [{
+        id: `boss_${region.id}_life_steal`,
+        name: region.id === 4 ? '진홍의 만찬' : `${region.boss.name}의 생명 포식`,
+        type: 'DRAIN_ATTACK',
+        powerCoefficient: 1.05,
+        lifeStealRatio: 0.4,
+        weight: 10,
+      }] : []),
+    ];
+  }
+
+  return [
+    {
+      id: `normal_${region.id}_signature`,
+      name: region.normal.skillName,
+      type: 'SINGLE_ATTACK',
+      powerCoefficient: 1,
+      weight: hasLifeSteal ? 50 : 65,
+    },
+    {
+      id: `normal_${region.id}_heavy`,
+      name: `${region.normal.name}의 강습`,
+      type: 'SINGLE_ATTACK',
+      powerCoefficient: 1.25,
+      weight: 20,
+    },
+    {
+      id: `normal_${region.id}_ailment`,
+      name: region.id % 2 === 1 ? `${region.normal.name}의 끈적한 속박` : `${region.normal.name}의 부식`,
+      type: 'SINGLE_ATTACK',
+      powerCoefficient: 0.85,
+      weight: 15,
+      statusEffect: region.id % 2 === 1
+        ? { type: 'SLOW', name: '둔화', duration: 3, speedReductionPercent: 5 }
+        : { type: 'DOT', name: '부식', duration: 3, damageCoefficient: 0.2 },
+    },
+    ...(hasLifeSteal ? [{
+      id: `normal_${region.id}_life_steal`,
+      name: region.id === 4 ? '피의 흡수' : `${region.normal.name}의 생명 흡수`,
+      type: 'DRAIN_ATTACK',
+      powerCoefficient: 1,
+      lifeStealRatio: 0.35,
+      weight: 15,
+    }] : []),
+  ];
 }
 
 export function isImplementedFloor(floor) {

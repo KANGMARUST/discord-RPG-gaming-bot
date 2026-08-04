@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, MessageFlags, PermissionFlagsBits } from 'discord.js';
 import { calculateTotalStats } from './equipment.js';
-import { calculateSkillHealing, getSkill } from './skills.js';
+import { calculateSkillAttackPower, calculateSkillHealing, getSkill } from './skills.js';
 
 const PVP_CATEGORY_NAME = 'PVP';
 const PLAZA_CATEGORY_NAME = '탑';
@@ -76,7 +76,7 @@ class PvpManager {
       return [
         `<@${userId}> · Lv.${stats.playerLevel}`,
         `❤️ 체력 ${this.createResourceBar(battle.health[userId], stats.health)} ${battle.health[userId]}/${stats.health}`,
-        `🔷 마나 ${battle.mana[userId]}/${stats.mana} ${this.createResourceBar(battle.mana[userId], stats.mana, '🟦')}`,
+        `🔷 마나 ${this.createResourceBar(battle.mana[userId], stats.mana, '🟦')} ${battle.mana[userId]}/${stats.mana}`,
         `⚔️ 공격력 ${stats.attack}\t✨ 마법 공격력 ${stats.magicAttack}`,
         `🎯 치명타 확률 ${stats.criticalChance}%\t💥 치명타 피해 ${stats.criticalDamage}%`,
       ].join('\n');
@@ -200,7 +200,10 @@ class PvpManager {
       return interaction.reply({
         content: '이번 턴에 시전할 스킬을 선택하세요.',
         components: [new ActionRowBuilder().addComponents(skills.map((skill) =>
-          new ButtonBuilder().setCustomId(`pvp:skill_select:${session.id}:${token}:${skill.id}`).setLabel(`${skill.name} · 마나 ${skill.manaCost}`).setStyle(ButtonStyle.Primary),
+          new ButtonBuilder()
+            .setCustomId(`pvp:skill_select:${session.id}:${token}:${skill.id}`)
+            .setLabel(`${skill.name} · 마나 ${skill.manaCost}`)
+            .setStyle(skill.type === 'ATTACK' ? ButtonStyle.Danger : ButtonStyle.Success),
         ))],
         flags: MessageFlags.Ephemeral,
       });
@@ -210,17 +213,43 @@ class PvpManager {
       const skill = getSkill(skillId);
       if (!skill || !session.battle.equippedSkills[actorId].includes(skillId)) return interaction.reply({ content: '장착하지 않은 스킬입니다.', flags: MessageFlags.Ephemeral });
       if (session.battle.mana[actorId] < skill.manaCost) return interaction.reply({ content: '스킬 시전에 필요한 마나가 부족합니다.', flags: MessageFlags.Ephemeral });
-      if (session.battle.health[actorId] >= session.battle.stats[actorId].health) return interaction.reply({ content: '체력이 이미 최대입니다.', flags: MessageFlags.Ephemeral });
-      const before = session.battle.health[actorId];
-      const healing = calculateSkillHealing(skill, session.battle.stats[actorId].magicAttack);
-      session.battle.health[actorId] = roundHealth(
-        Math.min(session.battle.stats[actorId].health, before + healing),
+      const actorStats = session.battle.stats[actorId];
+
+      if (skill.type === 'HEAL') {
+        if (session.battle.health[actorId] >= actorStats.health) return interaction.reply({ content: '체력이 이미 최대입니다.', flags: MessageFlags.Ephemeral });
+        const before = session.battle.health[actorId];
+        const healing = calculateSkillHealing(skill, actorStats.magicAttack);
+        session.battle.health[actorId] = roundHealth(
+          Math.min(actorStats.health, before + healing),
+        );
+        session.battle.mana[actorId] = roundMana(session.battle.mana[actorId] - skill.manaCost);
+        session.battle.token = null;
+        await interaction.update({ content: `${skill.name} 시전을 완료했습니다.`, components: [] });
+        await session.battle.message.edit({ content: [TURN_SEPARATOR, `## 🟢 <@${actorId}>님의 턴`, `### ✨ 「${skill.name}」 시전`, `# 💚 ${roundHealth(session.battle.health[actorId] - before)} 회복`, `남은 마나: **${session.battle.mana[actorId]}**`, TURN_SEPARATOR].join('\n'), components: [] });
+        await waitAfterAction();
+        session.battle.actionCount += 1;
+        await this.nextTurn(interaction.guild, session);
+        return;
+      }
+
+      if (skill.type !== 'ATTACK') return interaction.reply({ content: '아직 사용할 수 없는 스킬 유형입니다.', flags: MessageFlags.Ephemeral });
+      const defenderId = session.memberIds.find((id) => id !== actorId);
+      const defender = session.battle.stats[defenderId];
+      const attackPower = calculateSkillAttackPower(skill, actorStats.magicAttack);
+      const levelDefenseBase = 200 + 10 * Math.max(1, actorStats.playerLevel);
+      const defenseMultiplier = levelDefenseBase / (Math.max(0, defender.defense) + levelDefenseBase);
+      const critical = Math.random() * 100 < actorStats.criticalChance;
+      const variance = 0.9 + Math.random() * 0.2;
+      const damage = Math.max(1, Math.round(attackPower * defenseMultiplier * variance * (critical ? actorStats.criticalDamage / 100 : 1)));
+      session.battle.health[defenderId] = roundHealth(
+        Math.max(0, session.battle.health[defenderId] - damage),
       );
       session.battle.mana[actorId] = roundMana(session.battle.mana[actorId] - skill.manaCost);
       session.battle.token = null;
       await interaction.update({ content: `${skill.name} 시전을 완료했습니다.`, components: [] });
-      await session.battle.message.edit({ content: [TURN_SEPARATOR, `## 🟢 <@${actorId}>님의 턴`, `### ✨ 「${skill.name}」 시전`, `# 💚 ${session.battle.health[actorId] - before} 회복`, `남은 마나: **${session.battle.mana[actorId]}**`, TURN_SEPARATOR].join('\n'), components: [] });
+      await session.battle.message.edit({ content: [TURN_SEPARATOR, `## 🟢 <@${actorId}>님의 턴`, `### ✨ 「${skill.name}」 시전`, `# 💥 ${damage} 마법 피해${critical ? ' · 치명타!' : ''}`, `<@${defenderId}>의 남은 체력: **${session.battle.health[defenderId]}/${defender.health}**`, `남은 마나: **${session.battle.mana[actorId]}**`, TURN_SEPARATOR].join('\n'), components: [] });
       await waitAfterAction();
+      if (session.battle.health[defenderId] === 0) { await channel.send(`# 🏆 결투 종료\n<@${actorId}>님의 승리!`); setTimeout(() => this.end(interaction.client, session.id, '결투 종료').catch(() => {}), 10_000); return; }
       session.battle.actionCount += 1;
       await this.nextTurn(interaction.guild, session);
       return;
