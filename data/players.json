@@ -182,7 +182,7 @@
       }
     },
     "createdAt": "2026-08-03T07:18:39.718Z",
-    "gold": 6559,
+    "gold": 6584,
     "equipmentInventory": {
       "equipment": [
         {
@@ -258,19 +258,19 @@
         "quantity": 1
       }
     ],
-    "experience": 11,
+    "experience": 41,
     "skillInventory": [
       "basic_heal",
       "magic_bolt"
     ],
     "equippedSkills": [
       "basic_heal",
-      "magic_bolt",
+      null,
       null
     ],
     "balanceVersion": 1,
     "checkpointFloor": 11,
-    "maxReachedFloor": 13,
+    "maxReachedFloor": 11,
     "skillFragments": {
       "일반": 0,
       "고급": 0,
@@ -3701,5 +3701,151 @@
     "checkpointFloor": 1,
     "maxReachedFloor": 26,
     "createdAt": "2026-08-04T12:44:50.833Z"
+  },
+  "639111715602169879": {
+    "userId": "639111715602169879",
+    "stats": {
+      "playerLevel": 1,
+      "health": 70,
+      "defense": 5,
+      "attack": 10,
+      "magicAttack": 10,
+      "mana": 50,
+      "speed": 10,
+      "criticalChance": 5,
+      "criticalDamage": 150
+    },
+    "equipment": {
+      "머리": null,
+      "상의": null,
+      "하의": null,
+      "신발": null,
+      "무기": null
+    },
+    "equipmentInventory": {
+      "equipment": [
+        {
+          "id": "8b3dca2d-a716-4770-9472-f6085c075abf",
+          "name": "낡은 가죽 모자",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "머리",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "mana",
+              "label": "마나",
+              "baseValue": 20,
+              "value": 20
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        {
+          "id": "67ba74b5-da3b-4c53-b5dd-96e760d94e86",
+          "name": "낡은 가죽 상의",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "상의",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "defense",
+              "label": "방어력",
+              "baseValue": 5,
+              "value": 5
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        {
+          "id": "86de75ee-d38c-41cb-aa54-0482987a5270",
+          "name": "낡은 가죽 하의",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "하의",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "health",
+              "label": "체력",
+              "baseValue": 50,
+              "value": 50
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        {
+          "id": "c0990c7a-8f99-451c-8b7a-3c7384f22efe",
+          "name": "낡은 가죽 장화",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "신발",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "speed",
+              "label": "속도",
+              "baseValue": 5,
+              "value": 5
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        },
+        {
+          "id": "e17f64a9-6775-4528-b70f-02f52b9bf009",
+          "name": "낡은 철검",
+          "itemLevel": 1,
+          "rarity": "일반",
+          "slot": "무기",
+          "enhancement": 0,
+          "mainOptions": [
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "baseValue": 10,
+              "value": 10
+            },
+            {
+              "stat": "magicAttack",
+              "label": "마법 공격력",
+              "baseValue": 10,
+              "value": 10
+            }
+          ],
+          "subOptions": [],
+          "locked": false
+        }
+      ],
+      "materials": {
+        "마석": 0
+      }
+    },
+    "itemInventory": [],
+    "gold": 25,
+    "experience": 60,
+    "skillInventory": [
+      "magic_bolt",
+      "basic_heal"
+    ],
+    "skillFragments": {
+      "일반": 1,
+      "고급": 0,
+      "레어": 0,
+      "전설": 0
+    },
+    "equippedSkills": [
+      "magic_bolt",
+      "basic_heal",
+      null
+    ],
+    "balanceVersion": 1,
+    "checkpointFloor": 1,
+    "maxReachedFloor": 2,
+    "createdAt": "2026-08-10T16:15:46.239Z"
   }
 }
