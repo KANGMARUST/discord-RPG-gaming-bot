@@ -386,11 +386,13 @@ class AdventureSystem {
 
   async startBattle(adventure, isMimic = false, isBoss = false) {
     const playerStats = {};
+    const equippedSkillsByUser = {};
     adventure.manaByUser ??= {};
     const manaByUser = adventure.manaByUser;
     for (const userId of adventure.memberIds) {
       const player = await this.playerStore.getOrCreate(userId);
       playerStats[userId] = calculateTotalStats(player);
+      equippedSkillsByUser[userId] = [...player.equippedSkills];
       manaByUser[userId] = roundMana(
         Math.min(playerStats[userId].mana, Math.max(0, manaByUser[userId] ?? playerStats[userId].mana)),
       );
@@ -421,6 +423,7 @@ class AdventureSystem {
       adventureId: adventure.id,
       monster,
       playerStats,
+      equippedSkillsByUser,
       manaByUser,
       statusEffectsByUser: Object.fromEntries(adventure.memberIds.map((userId) => [userId, []])),
       playerBuffsByUser: Object.fromEntries(adventure.memberIds.map((userId) => [userId, []])),
@@ -804,6 +807,7 @@ class AdventureSystem {
 
   async applyDamageToPlayer(adventure, battle, userId, rawDamage) {
     const healthBefore = adventure.healthByUser[userId] ?? 0;
+    const maxHealth = adventure.maxHealthByUser[userId] ?? healthBefore;
     const damageReductionPercent = this.getPlayerDamageReduction(battle, userId);
     let remainingDamage = Math.max(0, Math.round(rawDamage * (1 - damageReductionPercent / 100)));
     let shieldAbsorbed = 0;
@@ -839,7 +843,7 @@ class AdventureSystem {
       lethalGuardTriggered,
       healthBefore,
       healthAfter,
-      maxHealth: adventure.maxHealthByUser[userId],
+      maxHealth,
       lostRewards,
     };
   }
@@ -1292,8 +1296,7 @@ class AdventureSystem {
       return;
     }
     if (action === 'battle_skill') {
-      const player = await this.playerStore.getOrCreate(actor.userId);
-      const equippedSkills = player.equippedSkills
+      const equippedSkills = (battle.equippedSkillsByUser?.[actor.userId] ?? [])
         .map((skillId) => getSkill(skillId))
         .filter(Boolean);
       if (equippedSkills.length === 0) {
@@ -1307,8 +1310,6 @@ class AdventureSystem {
         equippedSkills.map((skill) => {
           const cooldown = this.getSkillCooldown(battle, actor.userId, skill.id);
           const used = skill.oncePerBattle && this.isOncePerBattleSkillUsed(battle, actor.userId, skill.id);
-          const insufficientMana = battle.manaByUser[actor.userId] < getSkillManaCost(skill);
-          const soloLocked = skill.requiresSolo && adventure.memberIds.length > 1;
           const stateText = used
             ? '사용 완료'
             : cooldown > 0
@@ -1325,8 +1326,7 @@ class AdventureSystem {
                   : skill.type === 'TAUNT'
                     ? ButtonStyle.Secondary
                     : ButtonStyle.Primary,
-            )
-            .setDisabled(used || cooldown > 0 || insufficientMana || soloLocked);
+            );
         }),
       );
       await interaction.reply({
@@ -1496,6 +1496,9 @@ class AdventureSystem {
       return true;
     }
 
+    // 로그 저장·메시지 편집이 느려도 Discord의 3초 상호작용 제한을 넘기지 않도록 먼저 승인합니다.
+    await interaction.deferUpdate();
+
     const effectMultiplier = this.getSkillEffectMultiplier(adventure, skill);
     const casterStats = this.getEffectivePlayerStats(battle, ownerId);
     const manaBefore = battle.manaByUser[ownerId];
@@ -1591,7 +1594,7 @@ class AdventureSystem {
         logTargets.push({ targetId, healing: recovered, healthBefore, healthAfter, removedEffects: removed, shield: shield?.remainingAmount ?? 0 });
       }
       if (!appliedAnything) {
-        await interaction.reply({ content: '회복·정화·보호막 효과를 적용할 대상이 없습니다.', flags: MessageFlags.Ephemeral });
+        await interaction.editReply({ content: '회복·정화·보호막 효과를 적용할 대상이 없습니다. 다른 행동을 선택해 주세요.', components: [] });
         return true;
       }
     } else if (skill.type === 'REGEN') {
@@ -1648,7 +1651,7 @@ class AdventureSystem {
       const restored = roundMana(maxMana * skill.restoreManaRatio * effectMultiplier);
       const after = roundMana(Math.min(maxMana, before + restored));
       if (after === before) {
-        await interaction.reply({ content: '마나가 이미 최대입니다.', flags: MessageFlags.Ephemeral });
+        await interaction.editReply({ content: '마나가 이미 최대입니다. 다른 행동을 선택해 주세요.', components: [] });
         return true;
       }
       battle.manaByUser[targetId] = after;
@@ -1668,10 +1671,18 @@ class AdventureSystem {
       else battle.monsterDebuffs.push(taunt);
       effectLines.push(`🛡️ ${battle.monster.name}을(를) **${skill.duration} 적 턴** 동안 도발했습니다.`);
       if (skill.damageReductionPercent) {
+        const defensiveBuff = this.createSupportBuff(
+          skill,
+          ownerId,
+          ownerId,
+          casterStats,
+          effectMultiplier,
+        );
+        defensiveBuff.type = 'DAMAGE_REDUCTION_BUFF';
         const buff = this.applyPlayerBuff(
           battle,
           ownerId,
-          this.createSupportBuff(skill, ownerId, ownerId, casterStats, effectMultiplier),
+          defensiveBuff,
         );
         effectLines.push(`🧱 자신에게 **${this.formatPlayerBuff(buff)}** 부여`);
       }
@@ -1681,7 +1692,7 @@ class AdventureSystem {
       effectLines.push(`⬇️ ${battle.monster.name}에게 **${this.formatMonsterDebuff(debuff)}** 부여`);
       logTargets.push({ targetId: 'ENEMY', debuff: { ...debuff } });
     } else {
-      await interaction.reply({ content: '아직 사용할 수 없는 스킬 유형입니다.', flags: MessageFlags.Ephemeral });
+      await interaction.editReply({ content: '아직 사용할 수 없는 스킬 유형입니다.', components: [] });
       return true;
     }
 
@@ -1730,7 +1741,7 @@ class AdventureSystem {
       ].filter(Boolean).join('\n'),
       components: [],
     });
-    await interaction.update({ content: `${skill.name} 시전을 완료했습니다.`, components: [] });
+    await interaction.editReply({ content: `${skill.name} 시전을 완료했습니다.`, components: [] });
 
     await this.waitAfterBattleAction();
     if (!this.adventureManager.adventures.has(adventure.id) || this.battles.get(adventure.id) !== battle) return true;
@@ -1757,14 +1768,13 @@ class AdventureSystem {
     const adventure = this.adventureManager.getByUser(ownerId);
     const battle = adventure && this.battles.get(adventure.id);
     const actor = battle && this.getCurrentActor(adventure, battle);
-    const player = await this.playerStore.getOrCreate(ownerId);
+    const equippedSkillIds = battle?.equippedSkillsByUser?.[ownerId];
     if (
       !adventure ||
       !battle ||
-      interaction.channelId !== adventure.textChannelId ||
       token !== adventure.currentActionToken ||
       actor?.userId !== ownerId ||
-      !player.equippedSkills.includes(skillId)
+      (equippedSkillIds && !equippedSkillIds.includes(skillId))
     ) {
       await interaction.reply({ content: '이미 지나간 턴이거나 장착하지 않은 스킬입니다.', flags: MessageFlags.Ephemeral });
       return true;
@@ -1997,16 +2007,15 @@ class AdventureSystem {
     const adventure = this.adventureManager.getByUser(ownerId);
     const battle = adventure && this.battles.get(adventure.id);
     const actor = battle && this.getCurrentActor(adventure, battle);
-    const player = await this.playerStore.getOrCreate(ownerId);
     const skill = getSkill(skillId);
+    const equippedSkillIds = battle?.equippedSkillsByUser?.[ownerId];
     if (
       !adventure ||
       !battle ||
-      interaction.channelId !== adventure.textChannelId ||
       token !== adventure.currentActionToken ||
       actor?.userId !== ownerId ||
       !adventure.memberIds.includes(targetId) ||
-      !player.equippedSkills.includes(skillId) ||
+      (equippedSkillIds && !equippedSkillIds.includes(skillId)) ||
       !skill ||
       skill.targetType !== 'ALLY'
     ) {

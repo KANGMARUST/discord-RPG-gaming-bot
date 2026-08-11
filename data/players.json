@@ -265,12 +265,18 @@
     ],
     "equippedSkills": [
       "basic_heal",
-      null,
+      "magic_bolt",
       null
     ],
     "balanceVersion": 1,
     "checkpointFloor": 11,
-    "maxReachedFloor": 11
+    "maxReachedFloor": 13,
+    "skillFragments": {
+      "일반": 0,
+      "고급": 0,
+      "레어": 0,
+      "전설": 0
+    }
   },
   "788944111096430602": {
     "userId": "788944111096430602",

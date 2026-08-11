@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -23,6 +23,48 @@ const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const dataDirectory = path.join(currentDirectory, '..', 'data');
 const playersFile = path.join(dataDirectory, 'players.json');
 const equipmentRarityPriority = { 일반: 1, 고급: 2, 레어: 3, 전설: 4 };
+const saveRetryDelaysMs = [50, 150, 400, 800, 1_500];
+let saveSequence = 0;
+
+const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+function isRetryableSaveError(error) {
+  return ['UNKNOWN', 'EBUSY', 'EPERM', 'EACCES'].includes(error?.code);
+}
+
+async function writePlayersAtomically(contents) {
+  const temporaryFile = `${playersFile}.${process.pid}.${Date.now()}.${++saveSequence}.tmp`;
+  let lastError;
+
+  try {
+    for (const delay of [0, ...saveRetryDelaysMs]) {
+      if (delay > 0) await wait(delay);
+      try {
+        await writeFile(temporaryFile, contents, 'utf8');
+        lastError = null;
+        break;
+      } catch (error) {
+        lastError = error;
+        if (!isRetryableSaveError(error)) throw error;
+      }
+    }
+    if (lastError) throw lastError;
+
+    for (const delay of [0, ...saveRetryDelaysMs]) {
+      if (delay > 0) await wait(delay);
+      try {
+        await rename(temporaryFile, playersFile);
+        return;
+      } catch (error) {
+        lastError = error;
+        if (!isRetryableSaveError(error)) throw error;
+      }
+    }
+    throw lastError;
+  } finally {
+    await rm(temporaryFile, { force: true }).catch(() => {});
+  }
+}
 
 export function compareAutoEquipPriority(left, right) {
   return (
@@ -153,20 +195,22 @@ class PlayerStore {
   async getOrCreate(userId) {
     await this.ready;
 
+    const wasCreated = !this.players[userId];
     if (!this.players[userId]) {
       this.players[userId] = createPlayer(userId);
-      await this.save();
     }
 
+    const beforeMigration = JSON.stringify(this.players[userId]);
     const player = this.migratePlayer(this.players[userId]);
-    await this.save();
+    if (wasCreated || beforeMigration !== JSON.stringify(player)) await this.save();
     return player;
   }
 
   async getAllPlayers() {
     await this.ready;
+    const beforeMigration = JSON.stringify(this.players);
     const players = Object.values(this.players).map((player) => this.migratePlayer(player));
-    await this.save();
+    if (beforeMigration !== JSON.stringify(this.players)) await this.save();
     return players;
   }
 
@@ -636,9 +680,12 @@ class PlayerStore {
   }
 
   async save() {
-    this.saveQueue = this.saveQueue.then(() =>
-      writeFile(playersFile, `${JSON.stringify(this.players, null, 2)}\n`, 'utf8'),
-    );
+    const contents = `${JSON.stringify(this.players, null, 2)}\n`;
+    this.saveQueue = this.saveQueue
+      .catch((error) => {
+        console.error('이전 플레이어 데이터 저장 작업이 실패했습니다. 저장을 다시 시도합니다.', error);
+      })
+      .then(() => writePlayersAtomically(contents));
 
     return this.saveQueue;
   }

@@ -419,9 +419,14 @@ export function getRecommendedStats(skill) {
   };
   const roles = new Set(skill.roleTags ?? []);
   const scalingStat = getSkillScalingStat(skill);
-  if (scalingStat === 'attack') add('공격력');
-  if (scalingStat === 'magicAttack') add('마법 공격력');
-  if (scalingStat === 'defense') add('방어력', '체력');
+  const hasScalingCoefficient = [
+    skill.attackCoefficient,
+    skill.magicAttackCoefficient,
+    skill.defenseCoefficient,
+  ].some((value) => value !== undefined);
+  if (hasScalingCoefficient && scalingStat === 'attack') add('공격력');
+  if (hasScalingCoefficient && scalingStat === 'magicAttack') add('마법 공격력');
+  if (hasScalingCoefficient && scalingStat === 'defense') add('방어력', '체력');
   if (roles.has('탱커')) add('방어력', '체력');
   if (roles.has('힐러')) add('마법 공격력', '마나');
   if (roles.has('버퍼')) add('마법 공격력', '마나', '속도');
@@ -444,9 +449,7 @@ export function formatSkill(skill) {
     : null;
   const recommendedStats = getRecommendedStats(skill);
   const recommendation = recommendedStats.length > 0
-    ? `${recommendedStats.length === 1
-        ? recommendedStats[0]
-        : `${recommendedStats.slice(0, -1).join('·')}과 ${recommendedStats.at(-1)}`}을 올리는 것을 추천합니다.`
+    ? `${recommendedStats.join('·')} 중심으로 올리는 것을 추천합니다.`
     : null;
   return [
     `[${skill.rarity}] ${skill.name}`,
