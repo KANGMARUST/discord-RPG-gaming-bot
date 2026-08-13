@@ -143,7 +143,11 @@ class AdventureSystem {
     const embed = new EmbedBuilder()
       .setColor(monster.isBoss ? 0x9b111e : 0xe67e22)
       .setTitle(`🟢 ${member?.displayName ?? '플레이어'}님의 턴`)
-      .setDescription(`👾 **Lv.${monster.level} ${monster.name}** · ❤️ ${monster.health}/${monster.maxHealth}\n📍 ${monster.regionName}`)
+      .setDescription([
+        `👾 **Lv.${monster.level} ${monster.name}**`,
+        `❤️ 체력 ${this.formatMonsterHealth(monster)}`,
+        `📍 ${monster.regionName}`,
+      ].join('\n'))
       .setThumbnail(`attachment://${attachmentName}`);
     if (member) {
       embed.setAuthor({
@@ -1011,7 +1015,7 @@ class AdventureSystem {
             `## 🔴 ${battle.monster.name}의 턴`,
             `### 👹 「${skill.name}」 시전`,
             `# 💚 체력 ${recovered} 회복`,
-            `적의 체력: **${battle.monster.health}/${battle.monster.maxHealth}**`,
+            `❤️ 적 체력 ${this.formatMonsterHealth(battle.monster)}`,
             tauntStatusAfterTurn,
             TURN_SEPARATOR,
           ].filter(Boolean).join('\n'),
@@ -1178,7 +1182,8 @@ class AdventureSystem {
     const monsterBuffs = battle.monsterBuffs ?? [];
     const monsterDebuffs = battle.monsterDebuffs ?? [];
     const monsterStatus = [
-      `👹 Lv.${battle.monster.level} ${battle.monster.name} · 체력 ${battle.monster.health}/${battle.monster.maxHealth}`,
+      `👹 Lv.${battle.monster.level} ${battle.monster.name}`,
+      `❤️ 체력 ${this.formatMonsterHealth(battle.monster)}`,
       `⬆️ 버프: ${monsterBuffs.length > 0 ? monsterBuffs.map((buff) => `${buff.name}(${buff.remainingTurns}턴)`).join(', ') : '없음'}`,
       `⬇️ 디버프: ${monsterDebuffs.length > 0 ? monsterDebuffs.map((debuff) => this.formatMonsterDebuff(debuff)).join(', ') : '없음'}`,
     ].join('\n');
@@ -1209,6 +1214,10 @@ class AdventureSystem {
     const filledSegments = Math.round(ratio * RESOURCE_BAR_SEGMENTS);
     return filledBox.repeat(filledSegments) +
       RESOURCE_BAR_EMPTY.repeat(RESOURCE_BAR_SEGMENTS - filledSegments);
+  }
+
+  formatMonsterHealth(monster) {
+    return `${this.createResourceBar(monster.health, monster.maxHealth, HEALTH_BAR_FILLED)} ${monster.health}/${monster.maxHealth}`;
   }
 
   async sendBattleState(adventure, battle) {
@@ -1373,7 +1382,7 @@ class AdventureSystem {
         '### 🗡️ 「일반 공격」 시전',
         `# 💥 ${result.damage} 피해${result.critical ? ' · 치명타!' : ''}`,
         `${battle.monster.name} 공격받음`,
-        `적의 남은 체력: **${battle.monster.health}/${battle.monster.maxHealth}**`,
+        `❤️ 적 체력 ${this.formatMonsterHealth(battle.monster)}`,
         TURN_SEPARATOR,
       ].join('\n'),
       components: [],
@@ -1552,7 +1561,7 @@ class AdventureSystem {
         const debuff = this.applyMonsterDebuff(battle, skill, ownerId, effectMultiplier);
         effectLines.push(`⬇️ ${battle.monster.name}에게 **${this.formatMonsterDebuff(debuff)}** 부여`);
       }
-      effectLines.push(`적의 남은 체력: **${battle.monster.health}/${battle.monster.maxHealth}**`);
+      effectLines.push(`❤️ 적 체력 ${this.formatMonsterHealth(battle.monster)}`);
       logTargets.push({
         targetId: 'ENEMY',
         attackPower,
@@ -1854,7 +1863,7 @@ class AdventureSystem {
         `### ✨ 「${skill.name}」 시전`,
         `# 💥 ${result.damage} 마법 피해${result.critical ? ' · 치명타!' : ''}`,
         `${battle.monster.name} 공격받음`,
-        `적의 남은 체력: **${battle.monster.health}/${battle.monster.maxHealth}**`,
+        `❤️ 적 체력 ${this.formatMonsterHealth(battle.monster)}`,
         `소모 마나: **${skill.manaCost}** · 남은 마나: **${battle.manaByUser[ownerId]}**`,
         TURN_SEPARATOR,
       ].join('\n'),
