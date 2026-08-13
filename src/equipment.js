@@ -104,6 +104,15 @@ export function normalizeEquipmentMainOptions(item) {
   if (!rules) return item;
   item.itemLevel = Math.max(1, Math.floor(item.itemLevel ?? 1));
   item.locked ??= false;
+  // 운영자 지급 장비는 일반 장비 성장 공식으로 다시 계산하지 않습니다.
+  // 그렇지 않으면 데이터를 다시 불러올 때 전용 능력치가 일반 수치로 덮어써집니다.
+  if (item.isAdminItem) {
+    item.locked = true;
+    item.enhancement = Math.max(0, Math.floor(item.enhancement ?? 0));
+    item.mainOptions ??= [];
+    item.subOptions ??= [];
+    return item;
+  }
   item.enhancement = Math.max(0, Math.min(item.enhancement ?? 0, getMaxEnhancement(item)));
   item.mainOptions = rules.map((rule) => {
     const baseValue = getScaledMainOptionBase(rule.baseValue, item.itemLevel);

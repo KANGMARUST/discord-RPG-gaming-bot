@@ -186,6 +186,56 @@
     "equipmentInventory": {
       "equipment": [
         {
+          "id": "admin-rafaels-judgement-500285768783101963",
+          "name": "운영자 전용 · 라파엘의 심판",
+          "itemLevel": 11,
+          "rarity": "전설",
+          "slot": "무기",
+          "enhancement": 4,
+          "locked": true,
+          "isAdminItem": true,
+          "mainOptions": [
+            {
+              "stat": "attack",
+              "label": "공격력",
+              "baseValue": 99999,
+              "value": 99999
+            },
+            {
+              "stat": "magicAttack",
+              "label": "마법 공격력",
+              "baseValue": 99999,
+              "value": 99999
+            }
+          ],
+          "subOptions": [
+            {
+              "stat": "criticalChance",
+              "label": "치명타 확률",
+              "value": 100,
+              "operation": "PERCENT_POINT"
+            },
+            {
+              "stat": "criticalDamage",
+              "label": "치명타 피해",
+              "value": 1000,
+              "operation": "PERCENT_POINT"
+            },
+            {
+              "stat": "speed",
+              "label": "속도",
+              "value": 999,
+              "operation": "FLAT"
+            },
+            {
+              "stat": "health",
+              "label": "체력",
+              "value": 500,
+              "operation": "MULTIPLIER"
+            }
+          ]
+        },
+        {
           "id": "1076ab92-aab1-4e4d-9dcd-6f51e1494a1d",
           "name": "낡은 가죽 하의",
           "itemLevel": 9,
