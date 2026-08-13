@@ -624,47 +624,75 @@ function createSkillInventoryEmbeds(user, player) {
   return embeds;
 }
 
-function createSkillCatalogEmbeds(user, player) {
+const skillCatalogRolePages = [
+  { role: '탱커', emoji: '🛡️', summary: '도발·보호막·피해 경감으로 파티의 공격을 대신 견디는 역할입니다.', stats: '체력 · 방어력' },
+  { role: '물리 딜러', emoji: '⚔️', summary: '공격력 기반 검술로 적을 빠르게 처치하는 역할입니다.', stats: '공격력 · 치명타 확률 · 치명타 피해' },
+  { role: '마법 딜러', emoji: '✨', summary: '마법공격력과 마나를 사용해 강한 마법 피해를 주는 역할입니다.', stats: '마법공격력 · 마나 · 치명타 확률 · 치명타 피해' },
+  { role: '힐러', emoji: '💚', summary: '회복과 정화로 파티의 생존을 돕는 역할입니다.', stats: '마법공격력 · 마나 · 속도' },
+  { role: '버퍼', emoji: '⬆️', summary: '아군의 공격과 방어를 강화해 파티 전체의 전투력을 높이는 역할입니다.', stats: '마법공격력 · 마나 · 속도' },
+  { role: '디버퍼', emoji: '⬇️', summary: '적의 능력치를 낮추고 행동을 방해하는 역할입니다.', stats: '마법공격력 · 마나 · 속도' },
+  { role: '하이브리드 딜러', emoji: '⚜️', summary: '공격력과 마법공격력을 함께 활용하는 유연한 공격 역할입니다.', stats: '공격력 · 마법공격력 · 치명타 확률 · 치명타 피해' },
+  { role: '솔로', emoji: '🐺', summary: '혼자 모험할 때 성능이 강해지는 생존형 역할입니다.', stats: '체력 · 방어력 · 공격력 또는 마법공격력' },
+];
+
+function normalizeCatalogPage(pageIndex) {
+  const length = skillCatalogRolePages.length;
+  const parsed = Number.parseInt(pageIndex, 10);
+  return Number.isInteger(parsed) ? ((parsed % length) + length) % length : 0;
+}
+
+function createSkillCatalogPage(user, player, pageIndex = 0) {
   const rarityOrder = { 일반: 1, 고급: 2, 레어: 3, 전설: 4 };
+  const page = normalizeCatalogPage(pageIndex);
+  const rolePage = skillCatalogRolePages[page];
   const ownedIds = new Set(player.skillInventory);
-  const skills = Object.values(skillCatalog).sort((left, right) =>
+  const skills = Object.values(skillCatalog)
+    .filter((skill) => skill.roleTags?.includes(rolePage.role))
+    .sort((left, right) =>
     rarityOrder[left.rarity] - rarityOrder[right.rarity] || left.name.localeCompare(right.name, 'ko-KR'));
   const ownedSkills = skills.filter((skill) => ownedIds.has(skill.id));
-  const unownedSkills = skills.filter((skill) => !ownedIds.has(skill.id));
-  const embeds = [new EmbedBuilder()
+  const unownedSkills = skills.length - ownedSkills.length;
+  const embed = new EmbedBuilder()
     .setColor(0x6c5ce7)
-    .setTitle(`📚 ${user.displayName}님의 스킬도감`)
+    .setTitle(`📚 ${user.displayName}님의 스킬도감 · ${rolePage.emoji} ${rolePage.role}`)
     .setDescription([
-      `전체 **${skills.length}개** · 보유 **${ownedSkills.length}개** · 미보유 **${unownedSkills.length}개**`,
-      '스킬 3개 조합이 플레이 역할을 결정합니다. 역할과 추천 스탯을 보고 장비 성장 방향을 선택하세요.',
-      '솔로 스킬은 혼자일 때 100% 성능이며 파티에서는 50%로 감소합니다. `고독한 늑대`는 혼자일 때만 사용할 수 있습니다.',
+      rolePage.summary,
+      `추천 스탯: **${rolePage.stats}**`,
+      `이 역할 스킬 **${skills.length}개** · 보유 **${ownedSkills.length}개** · 미보유 **${unownedSkills}개**`,
+      rolePage.role === '솔로' ? '솔로 스킬은 혼자일 때 100% 성능이며 파티에서는 50%로 감소합니다. `고독한 늑대`는 혼자일 때만 사용할 수 있습니다.' : '스킬 3개 조합을 통해 원하는 역할을 만들어 보세요.',
     ].join('\n'))
-    .setFooter({ text: '스킬을 획득하면 미보유 목록에서 보유 목록으로 자동 이동합니다.' })];
-  for (const rarity of skillRarities) {
-    const raritySkills = skills.filter((skill) => skill.rarity === rarity);
-    const embed = new EmbedBuilder()
-      .setColor(0x6c5ce7)
-      .setTitle(`📚 ${rarity} 스킬 · ${raritySkills.length}개`);
-    for (const [owned, label, marker] of [
-      [true, '✅ 가지고 있는 스킬', '✅'],
-      [false, '🔒 가지고 있지 않은 스킬', '🔒'],
-    ]) {
-      const lines = raritySkills
-        .filter((skill) => ownedIds.has(skill.id) === owned)
-        .map((skill) => formatSkillCatalogLine(skill, marker));
+    .setFooter({ text: `${page + 1}/${skillCatalogRolePages.length} 페이지 · 이전/다음 버튼으로 역할을 바꿀 수 있습니다.` });
+  if (skills.length === 0) {
+    embed.addFields({ name: '스킬 목록', value: '이 역할에 등록된 스킬이 아직 없습니다.' });
+  } else {
+    for (const rarity of skillRarities) {
+      const lines = skills
+        .filter((skill) => skill.rarity === rarity)
+        .map((skill) => formatSkillCatalogLine(skill, ownedIds.has(skill.id) ? '✅' : '🔒'));
       const chunks = splitSkillLines(lines);
       if (chunks.length === 0) {
-        embed.addFields({ name: label, value: owned ? '이 등급의 보유 스킬이 없습니다.' : '이 등급의 모든 스킬을 보유했습니다!' });
-      } else {
-        embed.addFields(chunks.map((value, index) => ({
-          name: chunks.length > 1 ? `${label} ${index + 1}/${chunks.length}` : label,
-          value,
-        })));
+        embed.addFields({ name: `${rarity} 스킬`, value: `이 역할의 ${rarity} 스킬은 아직 없습니다.` });
+        continue;
       }
+      embed.addFields(chunks.map((value, index) => ({
+        name: chunks.length > 1 ? `${rarity} 스킬 ${index + 1}/${chunks.length}` : `${rarity} 스킬`,
+        value,
+      })));
     }
-    embeds.push(embed);
   }
-  return embeds;
+  const previousPage = normalizeCatalogPage(page - 1);
+  const nextPage = normalizeCatalogPage(page + 1);
+  const controls = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`skill_catalog:${user.id}:${previousPage}`)
+      .setLabel('◀ 이전 역할')
+      .setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder()
+      .setCustomId(`skill_catalog:${user.id}:${nextPage}`)
+      .setLabel('다음 역할 ▶')
+      .setStyle(ButtonStyle.Primary),
+  );
+  return { embeds: [embed], components: [controls] };
 }
 
 function createShopPayload(user, player) {
@@ -762,7 +790,7 @@ function createHelpEmbed() {
         name: '✨ 스킬',
         value: [
           '`/스킬북` — 장착 슬롯 1~3과 현재 보유한 스킬 확인',
-          '`/스킬도감` — 전체 스킬을 보유·미보유 목록으로 나누어 확인',
+          '`/스킬도감` — 역할별 페이지에서 전체 스킬과 추천 스탯 확인',
           '`/스킬제작 등급` — 해당 등급의 스킬 조각 10개로 새로운 스킬 제작',
           '`/스킬장착 스킬 슬롯` — 보유 스킬을 지정한 1~3번 슬롯에 장착',
           '`/스킬장착해제 슬롯` — 지정 슬롯을 비움(스킬은 스킬북에 유지)',
@@ -835,7 +863,7 @@ function createGuidebookEmbed() {
         value: [
           '`/장비장착 아이템이름`으로 장비를 착용합니다. 장비 고유 레벨이 내 레벨보다 높으면 착용할 수 없습니다.',
           '`/자동장착`은 착용 가능한 장비 중 좋은 장비를 자동으로 골라 줍니다.',
-          '`/스킬도감`에서 전체 스킬을 보고, `/스킬북`에서 보유 스킬과 장착 상태를 확인하세요.',
+          '`/스킬도감`에서 역할별 페이지로 전체 스킬을 보고, `/스킬북`에서 보유 스킬과 장착 상태를 확인하세요.',
           '`/스킬장착 스킬 슬롯`으로 최대 3개 스킬을 준비하세요.',
           '도감의 **추천 역할**과 **추천 스탯**을 참고하세요. 탱커는 방어력·체력, 물리 딜러는 공격력·치명타, 힐러·버퍼는 마법 공격력·마나가 핵심입니다.',
           '솔로 스킬은 혼자일 때 강하지만 파티에서는 효과가 절반이므로, 파티에서는 도발·광역힐·보호막·버프를 나눠 장착하는 편이 강합니다.',
@@ -1707,7 +1735,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       if (interaction.commandName === '스킬도감') {
         const player = await playerStore.getOrCreate(interaction.user.id);
         await interaction.reply({
-          embeds: createSkillCatalogEmbeds(interaction.user, player),
+          ...createSkillCatalogPage(interaction.user, player),
           flags: MessageFlags.Ephemeral,
         });
         return;
@@ -2303,6 +2331,20 @@ client.on(Events.InteractionCreate, async (interaction) => {
         content: `✅ ${result.potion.name} 1개를 구매했습니다. 보유 수량: **${result.quantity}개** · 남은 골드: **${result.gold}**`,
         flags: MessageFlags.Ephemeral,
       });
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith('skill_catalog:')) {
+      const [, ownerId, pageIndex] = interaction.customId.split(':');
+      if (interaction.user.id !== ownerId) {
+        await interaction.reply({
+          content: '이 스킬도감은 명령어를 실행한 사용자만 넘길 수 있습니다.',
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
+      const player = await playerStore.getOrCreate(ownerId);
+      await interaction.update(createSkillCatalogPage(interaction.user, player, pageIndex));
       return;
     }
 
