@@ -237,7 +237,7 @@ export const commands = [
     .addStringOption((option) =>
       option
         .setName('아이템')
-        .setDescription('지급할 포션, 장비, 스킬, 골드 또는 마석')
+        .setDescription('지급할 포션, 장비, 스킬, 재화 또는 스킬 조각')
         .setRequired(true)
         .setAutocomplete(true),
     )

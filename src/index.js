@@ -71,6 +71,10 @@ const pendingDuels = new Map();
 const debugGiveOptions = [
   { name: '[재화] 골드', value: 'currency:gold' },
   { name: '[재료] 마석', value: 'material:magic_stone' },
+  ...skillRarities.map((rarity) => ({
+    name: `[스킬 조각] [${rarity}] 스킬 조각`,
+    value: `material:skill_fragment:${rarity}`,
+  })),
   ...Object.values(potionCatalog).map((potion) => ({
     name: `[포션] [${potion.rarity}] ${potion.name}`,
     value: `potion:${potion.id}`,
@@ -1477,8 +1481,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
           await playerStore.addDebugResources(target.id, { gold: quantity });
           itemText = `골드 ${quantity.toLocaleString('ko-KR')}`;
         } else if (type === 'material') {
-          await playerStore.addDebugResources(target.id, { magicStones: quantity });
-          itemText = `마석 ${quantity.toLocaleString('ko-KR')}개`;
+          if (first === 'skill_fragment' && skillRarities.includes(second)) {
+            const result = await playerStore.addSkillFragment(target.id, second, quantity);
+            itemText = `${result.rarity} 스킬 조각 ${result.added.toLocaleString('ko-KR')}개 (보유 ${result.total.toLocaleString('ko-KR')}개)`;
+          } else {
+            await playerStore.addDebugResources(target.id, { magicStones: quantity });
+            itemText = `마석 ${quantity.toLocaleString('ko-KR')}개`;
+          }
         } else {
           if (quantity > 100) {
             await interaction.reply({
