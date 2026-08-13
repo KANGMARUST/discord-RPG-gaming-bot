@@ -2076,9 +2076,12 @@ class AdventureSystem {
       return true;
     }
 
+    // 저장 작업이 길어져도 Discord의 상호작용 응답 제한을 넘기지 않도록 먼저 승인합니다.
+    await interaction.deferUpdate();
+
     const consumed = await this.playerStore.consumeItem(ownerId, itemId);
     if (!consumed.ok) {
-      await interaction.reply({ content: '보유한 포션이 없습니다.', flags: MessageFlags.Ephemeral });
+      await interaction.editReply({ content: '보유한 포션이 없습니다.', components: [] });
       return true;
     }
     if (potion.type === 'HEALTH') adventure.healthByUser[ownerId] = after;
@@ -2110,7 +2113,7 @@ class AdventureSystem {
       ].join('\n'),
       components: [],
     });
-    await interaction.update({
+    await interaction.editReply({
       content: `${potion.name}을(를) 사용했습니다. 남은 수량: ${consumed.remaining}개`,
       components: [],
     });
